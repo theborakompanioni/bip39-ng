@@ -1,0 +1,40 @@
+@import "mixins";
+
+
+.container {
+  margin: 0 1rem;
+}
+
+.container h1 {
+  text-align: center;
+}
+
+.i-am-feeling-lucky-button {
+  padding: 1.3rem 2rem;
+  font-size: 2rem;
+  margin: 1rem 1rem 3rem 1rem;
+}
+
+.word-input-container {
+  margin-left: 2rem;
+  margin-right: 2rem;
+}
+
+.container .mat-input-element:disabled {
+  color: inherit;
+}
+
+.mat-form-field-wrapper {
+  margin-left: 1rem !important;
+  margin-right: 1rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.clear {
+  clear: both;
+}
+
+.full-width {
+  width: 100%;
+}

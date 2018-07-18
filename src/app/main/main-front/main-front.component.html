@@ -1,0 +1,82 @@
+<div class="container mat-typography">
+  <h1>Generate random Bitcoin address and see if you are a winner</h1>
+
+  <div>
+    <div [hidden]="!result">
+      <div class="word-input-container">
+        <table class="full-width">
+          <tr>
+            <td *ngFor="let i of [0,1,2,3,4,5]">
+              <mat-form-field class="example-form-field-{{i}} full-width" appearance="fill">
+                <mat-label>Word {{i+1}}</mat-label>
+                <input matInput type="text" placeholder="Word {{i+1}}" [(ngModel)]="mnemonicArray[i]" (change)="onChangeMnemonic()" disabled/>
+              </mat-form-field>
+            </td>
+          </tr>
+          <tr>
+            <td *ngFor="let i of [6,7,8,9,10,11]">
+              <mat-form-field class="example-form-field-{{i}} full-width" appearance="fill">
+                <mat-label>Word {{i+1}}</mat-label>
+                <input matInput type="text" placeholder="Word {{i+1}}" [(ngModel)]="mnemonicArray[i]" (change)="onChangeMnemonic()" disabled/>
+              </mat-form-field>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <div *ngIf="result">
+      <mat-form-field class="full-width" appearance="fill" style="text-align: center;">
+        <mat-label>Address</mat-label>
+        <input style="font-size: 150%" matInput type="text" placeholder="" [value]="result.address" disabled/>
+      </mat-form-field>
+
+      <div *ngIf="result.error">
+        <p style="background-color: red; padding: 1em;">{{ result.error.message }}</p>
+      </div>
+
+      <p style="text-align: center; font-size: 1.5em; margin: 1em;">
+        <span *ngIf="result.received === 0">Address never received anything.</span>
+        <span *ngIf="result.received > 0">Found address with
+          <code>received > 0</code>
+        </span>
+      </p>
+
+      <p style="text-align: center; font-size: 3em; margin: 1em;">
+        <span *ngIf="result.balance === 0">Balance is 0 :(</span>
+        <span *ngIf="result.balance > 0">Found address with
+          <code>balance > 0</code>
+        </span>
+      </p>
+    </div>
+
+    <mat-spinner *ngIf="loading" style="margin: auto"></mat-spinner>
+
+    <div style="text-align: center" [hidden]="loading || tryCounter >= 3">
+      <button mat-raised-button color="primary" (click)="buttonIamFeelingLuckyClicked()" class="i-am-feeling-lucky-button" [disabled]="tryCounter >= 10">
+        <span *ngIf="tryCounter === 0">I'm feeling lucky!</span>
+        <span *ngIf="tryCounter === 1">Try again!</span>
+        <span *ngIf="tryCounter === 2">And again!</span>
+        <span *ngIf="tryCounter === 3">And again ...</span>
+        <span *ngIf="tryCounter === 4">Again?</span>
+        <span *ngIf="tryCounter === 5">Try again!</span>
+        <span *ngIf="tryCounter === 6">I'm feeling lucky!</span>
+        <span *ngIf="tryCounter > 6">Try again!</span>
+      </button>
+    </div>
+
+    <div *ngIf="tryCounter >= 3">
+      <mat-card style="margin: 1em;">
+        <p style="font-size: 1.2em;">
+          You have had your fair chance today.
+          <a routerLink="/faq" fragment="faq-1">It won't get any better</a>. Do not get blinded by trying to get rich quick. Learn how Bitcoin works and try your
+          best to integrate it in the real world. Bitcoin needs adoption. Maybe you are able to use it in you next project?
+          Talk and share your knowledge with others. Spread the word.
+        </p>
+      </mat-card>
+    </div>
+
+  </div>
+
+</div>
+<div class="clear"></div>

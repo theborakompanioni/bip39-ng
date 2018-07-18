@@ -1,0 +1,154 @@
+<div class="container mat-typography">
+  <h1>FAQ</h1>
+
+  <mat-nav-list class="faq-nav-list">
+    <a mat-list-item [routerLink]="" fragment="faq-1">What is my chance of winning?</a>
+    <a mat-list-item [routerLink]="" fragment="faq-2">Why is my chance practically zero?</a>
+    <a mat-list-item [routerLink]="" fragment="faq-8">Is this site legit?</a>
+    <a mat-list-item [routerLink]="" fragment="faq-9">Should I use seeds generated here?</a>
+    <a mat-list-item [routerLink]="" fragment="faq-3">Why does this site exist?</a>
+    <a mat-list-item [routerLink]="" fragment="faq-4">What is a mnemonic phrase?</a>
+    <a mat-list-item [routerLink]="" fragment="faq-5">What is a deterministic wallet?</a>
+    <a mat-list-item [routerLink]="" fragment="faq-6">What is BIP39?</a>
+    <a mat-list-item [routerLink]="" fragment="faq-7">How do mnemonic seeds work?</a>
+  </mat-nav-list>
+
+  <mat-card class="faq-card" id="faq-1">
+
+    <mat-card-title>
+      <h2>What is my chance of winning?</h2>
+    </mat-card-title>
+
+    <mat-card-content>
+      Low. Very Low. In fact it is so low that it is very unlikely that there will ever be a visitor finding an address with a
+      balance on it.
+      <a href="https://www.youtube.com/watch?v=zMRrNY0pxfM">It is practically zero.</a>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="faq-card" id="faq-2">
+    <mat-card-title>
+      <h2>Why is my chance practically zero?</h2>
+    </mat-card-title>
+    <mat-card-content>
+      <p>
+        <a href="https://www.reddit.com/r/Bitcoin/comments/6twuj1/are_12word_seeds_for_bitcoin_private_keys_secure/" rel="noopener">Because of statistics.</a>
+      </p>
+
+      <p>The total address space is 2^160. 2^160 is 1,461,501,637,330,902,918,203,684,832,716,283,019,655,932,542,976.</p>
+
+      <p>
+        To put that in perspective, there are only 2^63 grains of sand on all of the beaches of the Earth.
+      </p>
+      <p>It is more than there are atoms in the whole universe.</p>
+
+      <p>
+        If you had a billion computers, each of which could try a billion keys a second, and they tried for a billion years, they'd
+        have much, much less than a one in a billion chance of finding a used seed.
+      </p>
+
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="faq-card" id="faq-8">
+    <mat-card-title>
+      <h2>Is this site legit?</h2>
+    </mat-card-title>
+    <mat-card-content>
+      <a [href]="appConfig.repositoryURL" rel="noopener">Yes</a> and
+      <a [routerLink]="" fragment="faq-9">no (see 'Should I use seeds generated here?')</a>.
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="faq-card" id="faq-9">
+    <mat-card-title>
+      <h2>Should I use seeds generated here?</h2>
+    </mat-card-title>
+    <mat-card-content>
+      <p>
+        NO! Do NOT use seeds generated online! You should always genreate the seed yourself on a secure device without access to
+        the internet or any other network.
+      </p>
+      <p>
+        <strong>YOU SHOULD GENERATE THE SEED YOURSELF. ON A SECURE DEVICE. YOURSELF!</strong>
+      </p>
+      <p>
+        The page generates the seed on your computer and does not ever send any information of the seed to any other site or service.
+        You can review the code and verify this. Nonetheless, as the source is free to use for anybody, how would you know
+        that you are not on a complete look-a-like copycat private-key-stealing clone site? You don't. So stick to the principle
+        of generating seeds yourself. Friends do not let friends generate seeds online.
+      </p>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="faq-card" id="faq-3">
+    <mat-card-title>
+      <h2>Why does this site exist?</h2>
+    </mat-card-title>
+    <mat-card-content>
+      This sites solely exists to spark interest and enthusiasm for the inner workings of bitcoin. It should guide visitors to additional
+      information and act as an entry point for further study.
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="faq-card" id="faq-4">
+    <mat-card-title>
+      <h2>What is a mnemonic phrase?</h2>
+    </mat-card-title>
+    <mat-card-content>
+      <p>
+        A mnemonic code or sentence is a group of words taken from a predefined list of words. It can be used as a seed to generate
+        deterministic bitcoin wallets.
+      </p>
+
+      Most of the time the words are taken from a dictionary, e.g. from the
+      <a href="https://github.com/bitcoin/bips/blob/master/bip-0039/bip-0039-wordlists.md" rel="noopener">
+        BIP39 wordlists
+      </a>
+      .
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="faq-card" id="faq-5">
+    <mat-card-title>
+      <h2>What is a deterministic wallet?</h2>
+    </mat-card-title>
+    <mat-card-content>
+      <p>
+        A deterministic wallet is a system of deriving keys from a single starting point known as a seed. The seed allows a user
+        to easily back up and restore a wallet without needing any other information and can in some cases allow the creation
+        of public addresses without the knowledge of the private key.
+      </p>
+
+      <a href="https://en.bitcoin.it/wiki/Deterministic_wallet" rel="noopener">Read Bitcoin wiki page of "Deterministic wallet" article.</a>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="faq-card" id="faq-6">
+    <mat-card-title>
+      <h2>What is BIP39?</h2>
+    </mat-card-title>
+    <mat-card-content>
+      <p>
+        BIP39 is a Bitcoin Improvement Proposal describing the implementation of a mnemonic sentence for the generation of deterministic
+        wallets.
+      </p>
+      <p>Popular wallets that use BIP39 for the mnemonic scheme include Trezor, Ledger, Electrum, Mycelium, Bither, Coinomy,
+        and MyEtherWallet..
+      </p>
+
+      <a href="https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki" rel="noopener">Read the full BIP39</a>
+
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="faq-card" id="faq-7">
+    <mat-card-title>
+      <h2>How do mnemonic seeds work?</h2>
+    </mat-card-title>
+    <mat-card-content>
+      <iframe width="420" height="315" src="https://www.youtube.com/embed/wWCIQFNf_8g"></iframe>
+    </mat-card-content>
+  </mat-card>
+</div>
+<div class="clear"></div>
