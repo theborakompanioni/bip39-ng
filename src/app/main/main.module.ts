@@ -6,7 +6,7 @@ import {MainRoutingModule} from './main-routing.module';
 import {SharedModule} from '../shared/modules/shared.module';
 
 import {MainFrontComponent} from './main-front/main-front.component';
-import {MainFaqComponent} from './main-faq/main-faq.component';
+import {MainFaqComponent, ScrollToTopButtonComponent} from './main-faq/main-faq.component';
 import {MainComponent} from './main.component';
 
 @NgModule({
@@ -21,6 +21,7 @@ import {MainComponent} from './main.component';
     MainComponent,
     MainFrontComponent,
     MainFaqComponent,
+    ScrollToTopButtonComponent,
   ],
   entryComponents: [
   ],

@@ -1,5 +1,13 @@
 @import "mixins";
 
+#faq-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 0;
+  width: 100%;
+}
 
 .container {
   margin: 0 1rem;
@@ -12,4 +20,19 @@
 .faq-card {
   margin-top: 1rem;
   margin-bottom: 1rem;
+}
+
+.faq-card .mat-card-title h2 {
+  display: inline;
+  padding-left: 4px;
+}
+.faq-card app-scroll-to-top-button {
+  opacity: 0.8;
+}
+.faq-card app-scroll-to-top-button:hover {
+  cursor: pointer;
+}
+
+.faq-card p {
+  word-break: break-word;
 }

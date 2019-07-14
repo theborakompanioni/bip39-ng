@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject, AfterViewInit } from '@angular/core';
+import { Component, OnInit, Inject, AfterViewInit, Input } from '@angular/core';
 import { APP_CONFIG, AppConfig } from '../../config/app.config';
 import { IAppConfig } from '../../config/iapp.config';
 import { FormBuilder } from '@angular/forms';
@@ -23,16 +23,61 @@ export class MainFaqComponent implements OnInit, AfterViewInit {
     this.route.fragment.subscribe(fragment => { this.fragment = fragment; });
   }
 
-  ngAfterViewInit(): void {
-    try {
-      document.querySelector('#' + this.fragment).scrollIntoView({ behavior: 'smooth' });
-    } catch (e) { }
-
+  ngAfterViewInit() {
     this.route.fragment.subscribe(fragment => {
-      try {
-        document.querySelector('#' + fragment).scrollIntoView({ behavior: 'smooth' });
-      } catch (e) { }
+        this.scrollToElement(fragment);
     });
+
+    if (this.fragment) {
+      this.scrollToElement(this.fragment);
+    }
+  }
+
+  private scrollToElement(elementClass) {
+    console.log('[DEBUG] scroll to #' + elementClass);
+    try {
+      document.querySelector('#' + elementClass).scrollIntoView({ behavior: 'smooth' });
+    } catch (e) {
+      console.log('[DEBUG] cannot scroll to #' + elementClass);
+    }
+  }
+}
+
+
+@Component({
+  selector: 'app-scroll-to-top-button',
+  template: `
+  <a class="app-scroll-to-top-button"
+     (click)="scroll()"
+     aria-label="Scroll To Top"
+     matTooltip="Scroll To Top"
+     matTooltipPosition="above">
+    <mat-icon aria-hidden="false" aria-label="Scroll To Top icon">arrow_upward</mat-icon>
+  </a>
+    `
+})
+export class ScrollToTopButtonComponent implements OnInit, AfterViewInit {
+
+  @Input() elementClass: string;
+
+  ngOnInit() {
+  }
+
+  ngAfterViewInit() {
+  }
+
+  scroll() {
+    this.scrollToElement(this.elementClass);
+  }
+
+  private scrollToElement(elementClass) {
+    console.log('[DEBUG] scroll to #' + elementClass);
+    try {
+      document.querySelector('#' + elementClass).scrollIntoView({ behavior: 'smooth' });
+    } catch (e) {
+      console.log('[DEBUG] cannot scroll to #' + elementClass);
+    }
   }
 
 }
+
