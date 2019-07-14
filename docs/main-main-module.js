@@ -10,6 +10,8 @@
 "use strict";
 /* WEBPACK VAR INJECTION */(function(global) {
 
+var objectAssign = __webpack_require__(/*! object-assign */ "./node_modules/object-assign/index.js");
+
 // compare and isBuffer taken from https://github.com/feross/buffer/blob/680e9e5e488f22aac27599a57dc844a6315928dd/index.js
 // original notice:
 
@@ -51,6 +53,8 @@ function isBuffer(b) {
 }
 
 // based on node assert, original notice:
+// NB: The URL to the CommonJS spec is kept just for tradition.
+//     node-assert has evolved a lot since then, both in API and behavior.
 
 // http://wiki.commonjs.org/wiki/Unit_Testing/1.0
 //
@@ -490,6 +494,18 @@ assert.doesNotThrow = function(block, /*optional*/error, /*optional*/message) {
 };
 
 assert.ifError = function(err) { if (err) throw err; };
+
+// Expose a strict only variant of assert
+function strict(value, message) {
+  if (!value) fail(value, true, message, '==', strict);
+}
+assert.strict = objectAssign(strict, assert, {
+  equal: assert.strictEqual,
+  deepEqual: assert.deepStrictEqual,
+  notEqual: assert.notStrictEqual,
+  notDeepEqual: assert.notDeepStrictEqual
+});
+assert.strict.strict = assert.strict;
 
 var objectKeys = Object.keys || function (obj) {
   var keys = [];
@@ -2571,10 +2587,10 @@ module.exports = BigInteger
 /*!****************************************!*\
   !*** ./node_modules/bigi/package.json ***!
   \****************************************/
-/*! exports provided: _from, _id, _inBundle, _integrity, _location, _phantomChildren, _requested, _requiredBy, _resolved, _shasum, _spec, _where, bugs, bundleDependencies, dependencies, deprecated, description, devDependencies, homepage, keywords, main, name, repository, scripts, testling, version, default */
+/*! exports provided: _args, _from, _id, _inBundle, _integrity, _location, _phantomChildren, _requested, _requiredBy, _resolved, _spec, _where, bugs, dependencies, description, devDependencies, homepage, keywords, main, name, repository, scripts, testling, version, default */
 /***/ (function(module) {
 
-module.exports = {"_from":"bigi@^1.4.0","_id":"bigi@1.4.2","_inBundle":false,"_integrity":"sha1-nGZalfiLiwj8Bc/XMfVhhZ1yWCU=","_location":"/bigi","_phantomChildren":{},"_requested":{"type":"range","registry":true,"raw":"bigi@^1.4.0","name":"bigi","escapedName":"bigi","rawSpec":"^1.4.0","saveSpec":null,"fetchSpec":"^1.4.0"},"_requiredBy":["/bitcoinjs-lib","/ecurve"],"_resolved":"https://registry.npmjs.org/bigi/-/bigi-1.4.2.tgz","_shasum":"9c665a95f88b8b08fc05cfd731f561859d725825","_spec":"bigi@^1.4.0","_where":"C:\\workspace-playground\\bip39-ng\\node_modules\\bitcoinjs-lib","bugs":{"url":"https://github.com/cryptocoinjs/bigi/issues"},"bundleDependencies":false,"dependencies":{},"deprecated":false,"description":"Big integers.","devDependencies":{"coveralls":"^2.11.2","istanbul":"^0.3.5","jshint":"^2.5.1","mocha":"^2.1.0","mochify":"^2.1.0"},"homepage":"https://github.com/cryptocoinjs/bigi#readme","keywords":["cryptography","math","bitcoin","arbitrary","precision","arithmetic","big","integer","int","number","biginteger","bigint","bignumber","decimal","float"],"main":"./lib/index.js","name":"bigi","repository":{"url":"git+https://github.com/cryptocoinjs/bigi.git","type":"git"},"scripts":{"browser-test":"mochify --wd -R spec","coverage":"istanbul cover ./node_modules/.bin/_mocha -- --reporter list test/*.js","coveralls":"npm run-script coverage && node ./node_modules/.bin/coveralls < coverage/lcov.info","jshint":"jshint --config jshint.json lib/*.js ; true","test":"_mocha -- test/*.js","unit":"mocha"},"testling":{"files":"test/*.js","harness":"mocha","browsers":["ie/9..latest","firefox/latest","chrome/latest","safari/6.0..latest","iphone/6.0..latest","android-browser/4.2..latest"]},"version":"1.4.2"};
+module.exports = {"_args":[["bigi@1.4.2","/home/void/workspace/theborakompanioni/bip39-ng"]],"_from":"bigi@1.4.2","_id":"bigi@1.4.2","_inBundle":false,"_integrity":"sha1-nGZalfiLiwj8Bc/XMfVhhZ1yWCU=","_location":"/bigi","_phantomChildren":{},"_requested":{"type":"version","registry":true,"raw":"bigi@1.4.2","name":"bigi","escapedName":"bigi","rawSpec":"1.4.2","saveSpec":null,"fetchSpec":"1.4.2"},"_requiredBy":["/bitcoinjs-lib","/ecurve"],"_resolved":"https://registry.npmjs.org/bigi/-/bigi-1.4.2.tgz","_spec":"1.4.2","_where":"/home/void/workspace/theborakompanioni/bip39-ng","bugs":{"url":"https://github.com/cryptocoinjs/bigi/issues"},"dependencies":{},"description":"Big integers.","devDependencies":{"coveralls":"^2.11.2","istanbul":"^0.3.5","jshint":"^2.5.1","mocha":"^2.1.0","mochify":"^2.1.0"},"homepage":"https://github.com/cryptocoinjs/bigi#readme","keywords":["cryptography","math","bitcoin","arbitrary","precision","arithmetic","big","integer","int","number","biginteger","bigint","bignumber","decimal","float"],"main":"./lib/index.js","name":"bigi","repository":{"url":"git+https://github.com/cryptocoinjs/bigi.git","type":"git"},"scripts":{"browser-test":"mochify --wd -R spec","coverage":"istanbul cover ./node_modules/.bin/_mocha -- --reporter list test/*.js","coveralls":"npm run-script coverage && node ./node_modules/.bin/coveralls < coverage/lcov.info","jshint":"jshint --config jshint.json lib/*.js ; true","test":"_mocha -- test/*.js","unit":"mocha"},"testling":{"files":"test/*.js","harness":"mocha","browsers":["ie/9..latest","firefox/latest","chrome/latest","safari/6.0..latest","iphone/6.0..latest","android-browser/4.2..latest"]},"version":"1.4.2"};
 
 /***/ }),
 
@@ -9898,8 +9914,9 @@ module.exports = Point
   !*** ./node_modules/events/events.js ***!
   \***************************************/
 /*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
 
+"use strict";
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -9921,9 +9938,39 @@ module.exports = Point
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+
+
+var R = typeof Reflect === 'object' ? Reflect : null
+var ReflectApply = R && typeof R.apply === 'function'
+  ? R.apply
+  : function ReflectApply(target, receiver, args) {
+    return Function.prototype.apply.call(target, receiver, args);
+  }
+
+var ReflectOwnKeys
+if (R && typeof R.ownKeys === 'function') {
+  ReflectOwnKeys = R.ownKeys
+} else if (Object.getOwnPropertySymbols) {
+  ReflectOwnKeys = function ReflectOwnKeys(target) {
+    return Object.getOwnPropertyNames(target)
+      .concat(Object.getOwnPropertySymbols(target));
+  };
+} else {
+  ReflectOwnKeys = function ReflectOwnKeys(target) {
+    return Object.getOwnPropertyNames(target);
+  };
+}
+
+function ProcessEmitWarning(warning) {
+  if (console && console.warn) console.warn(warning);
+}
+
+var NumberIsNaN = Number.isNaN || function NumberIsNaN(value) {
+  return value !== value;
+}
+
 function EventEmitter() {
-  this._events = this._events || {};
-  this._maxListeners = this._maxListeners || undefined;
+  EventEmitter.init.call(this);
 }
 module.exports = EventEmitter;
 
@@ -9931,276 +9978,392 @@ module.exports = EventEmitter;
 EventEmitter.EventEmitter = EventEmitter;
 
 EventEmitter.prototype._events = undefined;
+EventEmitter.prototype._eventsCount = 0;
 EventEmitter.prototype._maxListeners = undefined;
 
 // By default EventEmitters will print a warning if more than 10 listeners are
 // added to it. This is a useful default which helps finding memory leaks.
-EventEmitter.defaultMaxListeners = 10;
+var defaultMaxListeners = 10;
+
+Object.defineProperty(EventEmitter, 'defaultMaxListeners', {
+  enumerable: true,
+  get: function() {
+    return defaultMaxListeners;
+  },
+  set: function(arg) {
+    if (typeof arg !== 'number' || arg < 0 || NumberIsNaN(arg)) {
+      throw new RangeError('The value of "defaultMaxListeners" is out of range. It must be a non-negative number. Received ' + arg + '.');
+    }
+    defaultMaxListeners = arg;
+  }
+});
+
+EventEmitter.init = function() {
+
+  if (this._events === undefined ||
+      this._events === Object.getPrototypeOf(this)._events) {
+    this._events = Object.create(null);
+    this._eventsCount = 0;
+  }
+
+  this._maxListeners = this._maxListeners || undefined;
+};
 
 // Obviously not all Emitters should be limited to 10. This function allows
 // that to be increased. Set to zero for unlimited.
-EventEmitter.prototype.setMaxListeners = function(n) {
-  if (!isNumber(n) || n < 0 || isNaN(n))
-    throw TypeError('n must be a positive number');
+EventEmitter.prototype.setMaxListeners = function setMaxListeners(n) {
+  if (typeof n !== 'number' || n < 0 || NumberIsNaN(n)) {
+    throw new RangeError('The value of "n" is out of range. It must be a non-negative number. Received ' + n + '.');
+  }
   this._maxListeners = n;
   return this;
 };
 
-EventEmitter.prototype.emit = function(type) {
-  var er, handler, len, args, i, listeners;
+function $getMaxListeners(that) {
+  if (that._maxListeners === undefined)
+    return EventEmitter.defaultMaxListeners;
+  return that._maxListeners;
+}
 
-  if (!this._events)
-    this._events = {};
+EventEmitter.prototype.getMaxListeners = function getMaxListeners() {
+  return $getMaxListeners(this);
+};
 
-  // If there is no 'error' event listener then throw.
-  if (type === 'error') {
-    if (!this._events.error ||
-        (isObject(this._events.error) && !this._events.error.length)) {
-      er = arguments[1];
-      if (er instanceof Error) {
-        throw er; // Unhandled 'error' event
-      } else {
-        // At least give some kind of context to the user
-        var err = new Error('Uncaught, unspecified "error" event. (' + er + ')');
-        err.context = er;
-        throw err;
-      }
-    }
-  }
+EventEmitter.prototype.emit = function emit(type) {
+  var args = [];
+  for (var i = 1; i < arguments.length; i++) args.push(arguments[i]);
+  var doError = (type === 'error');
 
-  handler = this._events[type];
-
-  if (isUndefined(handler))
+  var events = this._events;
+  if (events !== undefined)
+    doError = (doError && events.error === undefined);
+  else if (!doError)
     return false;
 
-  if (isFunction(handler)) {
-    switch (arguments.length) {
-      // fast cases
-      case 1:
-        handler.call(this);
-        break;
-      case 2:
-        handler.call(this, arguments[1]);
-        break;
-      case 3:
-        handler.call(this, arguments[1], arguments[2]);
-        break;
-      // slower
-      default:
-        args = Array.prototype.slice.call(arguments, 1);
-        handler.apply(this, args);
+  // If there is no 'error' event listener then throw.
+  if (doError) {
+    var er;
+    if (args.length > 0)
+      er = args[0];
+    if (er instanceof Error) {
+      // Note: The comments on the `throw` lines are intentional, they show
+      // up in Node's output if this results in an unhandled exception.
+      throw er; // Unhandled 'error' event
     }
-  } else if (isObject(handler)) {
-    args = Array.prototype.slice.call(arguments, 1);
-    listeners = handler.slice();
-    len = listeners.length;
-    for (i = 0; i < len; i++)
-      listeners[i].apply(this, args);
+    // At least give some kind of context to the user
+    var err = new Error('Unhandled error.' + (er ? ' (' + er.message + ')' : ''));
+    err.context = er;
+    throw err; // Unhandled 'error' event
+  }
+
+  var handler = events[type];
+
+  if (handler === undefined)
+    return false;
+
+  if (typeof handler === 'function') {
+    ReflectApply(handler, this, args);
+  } else {
+    var len = handler.length;
+    var listeners = arrayClone(handler, len);
+    for (var i = 0; i < len; ++i)
+      ReflectApply(listeners[i], this, args);
   }
 
   return true;
 };
 
-EventEmitter.prototype.addListener = function(type, listener) {
+function _addListener(target, type, listener, prepend) {
   var m;
+  var events;
+  var existing;
 
-  if (!isFunction(listener))
-    throw TypeError('listener must be a function');
+  if (typeof listener !== 'function') {
+    throw new TypeError('The "listener" argument must be of type Function. Received type ' + typeof listener);
+  }
 
-  if (!this._events)
-    this._events = {};
+  events = target._events;
+  if (events === undefined) {
+    events = target._events = Object.create(null);
+    target._eventsCount = 0;
+  } else {
+    // To avoid recursion in the case that type === "newListener"! Before
+    // adding it to the listeners, first emit "newListener".
+    if (events.newListener !== undefined) {
+      target.emit('newListener', type,
+                  listener.listener ? listener.listener : listener);
 
-  // To avoid recursion in the case that type === "newListener"! Before
-  // adding it to the listeners, first emit "newListener".
-  if (this._events.newListener)
-    this.emit('newListener', type,
-              isFunction(listener.listener) ?
-              listener.listener : listener);
+      // Re-assign `events` because a newListener handler could have caused the
+      // this._events to be assigned to a new object
+      events = target._events;
+    }
+    existing = events[type];
+  }
 
-  if (!this._events[type])
+  if (existing === undefined) {
     // Optimize the case of one listener. Don't need the extra array object.
-    this._events[type] = listener;
-  else if (isObject(this._events[type]))
-    // If we've already got an array, just append.
-    this._events[type].push(listener);
-  else
-    // Adding the second element, need to change to array.
-    this._events[type] = [this._events[type], listener];
-
-  // Check for listener leak
-  if (isObject(this._events[type]) && !this._events[type].warned) {
-    if (!isUndefined(this._maxListeners)) {
-      m = this._maxListeners;
+    existing = events[type] = listener;
+    ++target._eventsCount;
+  } else {
+    if (typeof existing === 'function') {
+      // Adding the second element, need to change to array.
+      existing = events[type] =
+        prepend ? [listener, existing] : [existing, listener];
+      // If we've already got an array, just append.
+    } else if (prepend) {
+      existing.unshift(listener);
     } else {
-      m = EventEmitter.defaultMaxListeners;
+      existing.push(listener);
     }
 
-    if (m && m > 0 && this._events[type].length > m) {
-      this._events[type].warned = true;
-      console.error('(node) warning: possible EventEmitter memory ' +
-                    'leak detected. %d listeners added. ' +
-                    'Use emitter.setMaxListeners() to increase limit.',
-                    this._events[type].length);
-      if (typeof console.trace === 'function') {
-        // not supported in IE 10
-        console.trace();
-      }
+    // Check for listener leak
+    m = $getMaxListeners(target);
+    if (m > 0 && existing.length > m && !existing.warned) {
+      existing.warned = true;
+      // No error code for this since it is a Warning
+      // eslint-disable-next-line no-restricted-syntax
+      var w = new Error('Possible EventEmitter memory leak detected. ' +
+                          existing.length + ' ' + String(type) + ' listeners ' +
+                          'added. Use emitter.setMaxListeners() to ' +
+                          'increase limit');
+      w.name = 'MaxListenersExceededWarning';
+      w.emitter = target;
+      w.type = type;
+      w.count = existing.length;
+      ProcessEmitWarning(w);
     }
   }
 
-  return this;
+  return target;
+}
+
+EventEmitter.prototype.addListener = function addListener(type, listener) {
+  return _addListener(this, type, listener, false);
 };
 
 EventEmitter.prototype.on = EventEmitter.prototype.addListener;
 
-EventEmitter.prototype.once = function(type, listener) {
-  if (!isFunction(listener))
-    throw TypeError('listener must be a function');
+EventEmitter.prototype.prependListener =
+    function prependListener(type, listener) {
+      return _addListener(this, type, listener, true);
+    };
 
-  var fired = false;
-
-  function g() {
-    this.removeListener(type, g);
-
-    if (!fired) {
-      fired = true;
-      listener.apply(this, arguments);
-    }
+function onceWrapper() {
+  var args = [];
+  for (var i = 0; i < arguments.length; i++) args.push(arguments[i]);
+  if (!this.fired) {
+    this.target.removeListener(this.type, this.wrapFn);
+    this.fired = true;
+    ReflectApply(this.listener, this.target, args);
   }
+}
 
-  g.listener = listener;
-  this.on(type, g);
+function _onceWrap(target, type, listener) {
+  var state = { fired: false, wrapFn: undefined, target: target, type: type, listener: listener };
+  var wrapped = onceWrapper.bind(state);
+  wrapped.listener = listener;
+  state.wrapFn = wrapped;
+  return wrapped;
+}
 
+EventEmitter.prototype.once = function once(type, listener) {
+  if (typeof listener !== 'function') {
+    throw new TypeError('The "listener" argument must be of type Function. Received type ' + typeof listener);
+  }
+  this.on(type, _onceWrap(this, type, listener));
   return this;
 };
 
-// emits a 'removeListener' event iff the listener was removed
-EventEmitter.prototype.removeListener = function(type, listener) {
-  var list, position, length, i;
-
-  if (!isFunction(listener))
-    throw TypeError('listener must be a function');
-
-  if (!this._events || !this._events[type])
-    return this;
-
-  list = this._events[type];
-  length = list.length;
-  position = -1;
-
-  if (list === listener ||
-      (isFunction(list.listener) && list.listener === listener)) {
-    delete this._events[type];
-    if (this._events.removeListener)
-      this.emit('removeListener', type, listener);
-
-  } else if (isObject(list)) {
-    for (i = length; i-- > 0;) {
-      if (list[i] === listener ||
-          (list[i].listener && list[i].listener === listener)) {
-        position = i;
-        break;
+EventEmitter.prototype.prependOnceListener =
+    function prependOnceListener(type, listener) {
+      if (typeof listener !== 'function') {
+        throw new TypeError('The "listener" argument must be of type Function. Received type ' + typeof listener);
       }
-    }
-
-    if (position < 0)
+      this.prependListener(type, _onceWrap(this, type, listener));
       return this;
+    };
 
-    if (list.length === 1) {
-      list.length = 0;
-      delete this._events[type];
-    } else {
-      list.splice(position, 1);
-    }
+// Emits a 'removeListener' event if and only if the listener was removed.
+EventEmitter.prototype.removeListener =
+    function removeListener(type, listener) {
+      var list, events, position, i, originalListener;
 
-    if (this._events.removeListener)
-      this.emit('removeListener', type, listener);
-  }
+      if (typeof listener !== 'function') {
+        throw new TypeError('The "listener" argument must be of type Function. Received type ' + typeof listener);
+      }
 
-  return this;
+      events = this._events;
+      if (events === undefined)
+        return this;
+
+      list = events[type];
+      if (list === undefined)
+        return this;
+
+      if (list === listener || list.listener === listener) {
+        if (--this._eventsCount === 0)
+          this._events = Object.create(null);
+        else {
+          delete events[type];
+          if (events.removeListener)
+            this.emit('removeListener', type, list.listener || listener);
+        }
+      } else if (typeof list !== 'function') {
+        position = -1;
+
+        for (i = list.length - 1; i >= 0; i--) {
+          if (list[i] === listener || list[i].listener === listener) {
+            originalListener = list[i].listener;
+            position = i;
+            break;
+          }
+        }
+
+        if (position < 0)
+          return this;
+
+        if (position === 0)
+          list.shift();
+        else {
+          spliceOne(list, position);
+        }
+
+        if (list.length === 1)
+          events[type] = list[0];
+
+        if (events.removeListener !== undefined)
+          this.emit('removeListener', type, originalListener || listener);
+      }
+
+      return this;
+    };
+
+EventEmitter.prototype.off = EventEmitter.prototype.removeListener;
+
+EventEmitter.prototype.removeAllListeners =
+    function removeAllListeners(type) {
+      var listeners, events, i;
+
+      events = this._events;
+      if (events === undefined)
+        return this;
+
+      // not listening for removeListener, no need to emit
+      if (events.removeListener === undefined) {
+        if (arguments.length === 0) {
+          this._events = Object.create(null);
+          this._eventsCount = 0;
+        } else if (events[type] !== undefined) {
+          if (--this._eventsCount === 0)
+            this._events = Object.create(null);
+          else
+            delete events[type];
+        }
+        return this;
+      }
+
+      // emit removeListener for all listeners on all events
+      if (arguments.length === 0) {
+        var keys = Object.keys(events);
+        var key;
+        for (i = 0; i < keys.length; ++i) {
+          key = keys[i];
+          if (key === 'removeListener') continue;
+          this.removeAllListeners(key);
+        }
+        this.removeAllListeners('removeListener');
+        this._events = Object.create(null);
+        this._eventsCount = 0;
+        return this;
+      }
+
+      listeners = events[type];
+
+      if (typeof listeners === 'function') {
+        this.removeListener(type, listeners);
+      } else if (listeners !== undefined) {
+        // LIFO order
+        for (i = listeners.length - 1; i >= 0; i--) {
+          this.removeListener(type, listeners[i]);
+        }
+      }
+
+      return this;
+    };
+
+function _listeners(target, type, unwrap) {
+  var events = target._events;
+
+  if (events === undefined)
+    return [];
+
+  var evlistener = events[type];
+  if (evlistener === undefined)
+    return [];
+
+  if (typeof evlistener === 'function')
+    return unwrap ? [evlistener.listener || evlistener] : [evlistener];
+
+  return unwrap ?
+    unwrapListeners(evlistener) : arrayClone(evlistener, evlistener.length);
+}
+
+EventEmitter.prototype.listeners = function listeners(type) {
+  return _listeners(this, type, true);
 };
 
-EventEmitter.prototype.removeAllListeners = function(type) {
-  var key, listeners;
-
-  if (!this._events)
-    return this;
-
-  // not listening for removeListener, no need to emit
-  if (!this._events.removeListener) {
-    if (arguments.length === 0)
-      this._events = {};
-    else if (this._events[type])
-      delete this._events[type];
-    return this;
-  }
-
-  // emit removeListener for all listeners on all events
-  if (arguments.length === 0) {
-    for (key in this._events) {
-      if (key === 'removeListener') continue;
-      this.removeAllListeners(key);
-    }
-    this.removeAllListeners('removeListener');
-    this._events = {};
-    return this;
-  }
-
-  listeners = this._events[type];
-
-  if (isFunction(listeners)) {
-    this.removeListener(type, listeners);
-  } else if (listeners) {
-    // LIFO order
-    while (listeners.length)
-      this.removeListener(type, listeners[listeners.length - 1]);
-  }
-  delete this._events[type];
-
-  return this;
-};
-
-EventEmitter.prototype.listeners = function(type) {
-  var ret;
-  if (!this._events || !this._events[type])
-    ret = [];
-  else if (isFunction(this._events[type]))
-    ret = [this._events[type]];
-  else
-    ret = this._events[type].slice();
-  return ret;
-};
-
-EventEmitter.prototype.listenerCount = function(type) {
-  if (this._events) {
-    var evlistener = this._events[type];
-
-    if (isFunction(evlistener))
-      return 1;
-    else if (evlistener)
-      return evlistener.length;
-  }
-  return 0;
+EventEmitter.prototype.rawListeners = function rawListeners(type) {
+  return _listeners(this, type, false);
 };
 
 EventEmitter.listenerCount = function(emitter, type) {
-  return emitter.listenerCount(type);
+  if (typeof emitter.listenerCount === 'function') {
+    return emitter.listenerCount(type);
+  } else {
+    return listenerCount.call(emitter, type);
+  }
 };
 
-function isFunction(arg) {
-  return typeof arg === 'function';
+EventEmitter.prototype.listenerCount = listenerCount;
+function listenerCount(type) {
+  var events = this._events;
+
+  if (events !== undefined) {
+    var evlistener = events[type];
+
+    if (typeof evlistener === 'function') {
+      return 1;
+    } else if (evlistener !== undefined) {
+      return evlistener.length;
+    }
+  }
+
+  return 0;
 }
 
-function isNumber(arg) {
-  return typeof arg === 'number';
+EventEmitter.prototype.eventNames = function eventNames() {
+  return this._eventsCount > 0 ? ReflectOwnKeys(this._events) : [];
+};
+
+function arrayClone(arr, n) {
+  var copy = new Array(n);
+  for (var i = 0; i < n; ++i)
+    copy[i] = arr[i];
+  return copy;
 }
 
-function isObject(arg) {
-  return typeof arg === 'object' && arg !== null;
+function spliceOne(list, index) {
+  for (; index + 1 < list.length; index++)
+    list[index] = list[index + 1];
+  list.pop();
 }
 
-function isUndefined(arg) {
-  return arg === void 0;
+function unwrapListeners(arr) {
+  var ret = new Array(arr.length);
+  for (var i = 0; i < ret.length; ++i) {
+    ret[i] = arr[i].listener || arr[i];
+  }
+  return ret;
 }
 
 
@@ -10652,6 +10815,108 @@ module.exports = function fastRoot (values, digestFn) {
 
 /***/ }),
 
+/***/ "./node_modules/object-assign/index.js":
+/*!*********************************************!*\
+  !*** ./node_modules/object-assign/index.js ***!
+  \*********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/*
+object-assign
+(c) Sindre Sorhus
+@license MIT
+*/
+
+
+/* eslint-disable no-unused-vars */
+var getOwnPropertySymbols = Object.getOwnPropertySymbols;
+var hasOwnProperty = Object.prototype.hasOwnProperty;
+var propIsEnumerable = Object.prototype.propertyIsEnumerable;
+
+function toObject(val) {
+	if (val === null || val === undefined) {
+		throw new TypeError('Object.assign cannot be called with null or undefined');
+	}
+
+	return Object(val);
+}
+
+function shouldUseNative() {
+	try {
+		if (!Object.assign) {
+			return false;
+		}
+
+		// Detect buggy property enumeration order in older V8 versions.
+
+		// https://bugs.chromium.org/p/v8/issues/detail?id=4118
+		var test1 = new String('abc');  // eslint-disable-line no-new-wrappers
+		test1[5] = 'de';
+		if (Object.getOwnPropertyNames(test1)[0] === '5') {
+			return false;
+		}
+
+		// https://bugs.chromium.org/p/v8/issues/detail?id=3056
+		var test2 = {};
+		for (var i = 0; i < 10; i++) {
+			test2['_' + String.fromCharCode(i)] = i;
+		}
+		var order2 = Object.getOwnPropertyNames(test2).map(function (n) {
+			return test2[n];
+		});
+		if (order2.join('') !== '0123456789') {
+			return false;
+		}
+
+		// https://bugs.chromium.org/p/v8/issues/detail?id=3056
+		var test3 = {};
+		'abcdefghijklmnopqrst'.split('').forEach(function (letter) {
+			test3[letter] = letter;
+		});
+		if (Object.keys(Object.assign({}, test3)).join('') !==
+				'abcdefghijklmnopqrst') {
+			return false;
+		}
+
+		return true;
+	} catch (err) {
+		// We don't expect any of the above to throw, but better to be safe.
+		return false;
+	}
+}
+
+module.exports = shouldUseNative() ? Object.assign : function (target, source) {
+	var from;
+	var to = toObject(target);
+	var symbols;
+
+	for (var s = 1; s < arguments.length; s++) {
+		from = Object(arguments[s]);
+
+		for (var key in from) {
+			if (hasOwnProperty.call(from, key)) {
+				to[key] = from[key];
+			}
+		}
+
+		if (getOwnPropertySymbols) {
+			symbols = getOwnPropertySymbols(from);
+			for (var i = 0; i < symbols.length; i++) {
+				if (propIsEnumerable.call(from, symbols[i])) {
+					to[symbols[i]] = from[symbols[i]];
+				}
+			}
+		}
+	}
+
+	return to;
+};
+
+
+/***/ }),
+
 /***/ "./node_modules/pbkdf2/browser.js":
 /*!****************************************!*\
   !*** ./node_modules/pbkdf2/browser.js ***!
@@ -11008,201 +11273,6 @@ function nextTick(fn, arg1, arg2, arg3) {
 
 /***/ }),
 
-/***/ "./node_modules/process/browser.js":
-/*!*****************************************!*\
-  !*** ./node_modules/process/browser.js ***!
-  \*****************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-// shim for using process in browser
-var process = module.exports = {};
-
-// cached from whatever global is present so that test runners that stub it
-// don't break things.  But we need to wrap it in a try catch in case it is
-// wrapped in strict mode code which doesn't define any globals.  It's inside a
-// function because try/catches deoptimize in certain engines.
-
-var cachedSetTimeout;
-var cachedClearTimeout;
-
-function defaultSetTimout() {
-    throw new Error('setTimeout has not been defined');
-}
-function defaultClearTimeout () {
-    throw new Error('clearTimeout has not been defined');
-}
-(function () {
-    try {
-        if (typeof setTimeout === 'function') {
-            cachedSetTimeout = setTimeout;
-        } else {
-            cachedSetTimeout = defaultSetTimout;
-        }
-    } catch (e) {
-        cachedSetTimeout = defaultSetTimout;
-    }
-    try {
-        if (typeof clearTimeout === 'function') {
-            cachedClearTimeout = clearTimeout;
-        } else {
-            cachedClearTimeout = defaultClearTimeout;
-        }
-    } catch (e) {
-        cachedClearTimeout = defaultClearTimeout;
-    }
-} ())
-function runTimeout(fun) {
-    if (cachedSetTimeout === setTimeout) {
-        //normal enviroments in sane situations
-        return setTimeout(fun, 0);
-    }
-    // if setTimeout wasn't available but was latter defined
-    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
-        cachedSetTimeout = setTimeout;
-        return setTimeout(fun, 0);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedSetTimeout(fun, 0);
-    } catch(e){
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
-            return cachedSetTimeout.call(null, fun, 0);
-        } catch(e){
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
-            return cachedSetTimeout.call(this, fun, 0);
-        }
-    }
-
-
-}
-function runClearTimeout(marker) {
-    if (cachedClearTimeout === clearTimeout) {
-        //normal enviroments in sane situations
-        return clearTimeout(marker);
-    }
-    // if clearTimeout wasn't available but was latter defined
-    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
-        cachedClearTimeout = clearTimeout;
-        return clearTimeout(marker);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedClearTimeout(marker);
-    } catch (e){
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
-            return cachedClearTimeout.call(null, marker);
-        } catch (e){
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
-            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
-            return cachedClearTimeout.call(this, marker);
-        }
-    }
-
-
-
-}
-var queue = [];
-var draining = false;
-var currentQueue;
-var queueIndex = -1;
-
-function cleanUpNextTick() {
-    if (!draining || !currentQueue) {
-        return;
-    }
-    draining = false;
-    if (currentQueue.length) {
-        queue = currentQueue.concat(queue);
-    } else {
-        queueIndex = -1;
-    }
-    if (queue.length) {
-        drainQueue();
-    }
-}
-
-function drainQueue() {
-    if (draining) {
-        return;
-    }
-    var timeout = runTimeout(cleanUpNextTick);
-    draining = true;
-
-    var len = queue.length;
-    while(len) {
-        currentQueue = queue;
-        queue = [];
-        while (++queueIndex < len) {
-            if (currentQueue) {
-                currentQueue[queueIndex].run();
-            }
-        }
-        queueIndex = -1;
-        len = queue.length;
-    }
-    currentQueue = null;
-    draining = false;
-    runClearTimeout(timeout);
-}
-
-process.nextTick = function (fun) {
-    var args = new Array(arguments.length - 1);
-    if (arguments.length > 1) {
-        for (var i = 1; i < arguments.length; i++) {
-            args[i - 1] = arguments[i];
-        }
-    }
-    queue.push(new Item(fun, args));
-    if (queue.length === 1 && !draining) {
-        runTimeout(drainQueue);
-    }
-};
-
-// v8 likes predictible objects
-function Item(fun, array) {
-    this.fun = fun;
-    this.array = array;
-}
-Item.prototype.run = function () {
-    this.fun.apply(null, this.array);
-};
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
-process.version = ''; // empty string to avoid regexp issues
-process.versions = {};
-
-function noop() {}
-
-process.on = noop;
-process.addListener = noop;
-process.once = noop;
-process.off = noop;
-process.removeListener = noop;
-process.removeAllListeners = noop;
-process.emit = noop;
-process.prependListener = noop;
-process.prependOnceListener = noop;
-
-process.listeners = function (name) { return [] }
-
-process.binding = function (name) {
-    throw new Error('process.binding is not supported');
-};
-
-process.cwd = function () { return '/' };
-process.chdir = function (dir) {
-    throw new Error('process.chdir is not supported');
-};
-process.umask = function() { return 0; };
-
-
-/***/ }),
-
 /***/ "./node_modules/pushdata-bitcoin/index.js":
 /*!************************************************!*\
   !*** ./node_modules/pushdata-bitcoin/index.js ***!
@@ -11339,6 +11409,39 @@ function randomBytes (size, cb) {
 }
 
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js"), __webpack_require__(/*! ./../process/browser.js */ "./node_modules/process/browser.js")))
+
+/***/ }),
+
+/***/ "./node_modules/raw-loader/index.js!./src/app/main/main-faq/main-faq.component.html":
+/*!*********************************************************************************!*\
+  !*** ./node_modules/raw-loader!./src/app/main/main-faq/main-faq.component.html ***!
+  \*********************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = "<div id=\"faq-top\"></div>\n\n<div class=\"container mat-typography\">\n  <h1>FAQ</h1>\n\n  <mat-nav-list class=\"faq-nav-list\">\n    <a mat-list-item [routerLink]=\"\" fragment=\"faq-1\">What is my chance of winning?</a>\n    <a mat-list-item [routerLink]=\"\" fragment=\"faq-2\">Why is my chance practically zero?</a>\n    <a mat-list-item [routerLink]=\"\" fragment=\"faq-8\">Is this site legit?</a>\n    <a mat-list-item [routerLink]=\"\" fragment=\"faq-9\">Should I use seeds generated here?</a>\n    <a mat-list-item [routerLink]=\"\" fragment=\"faq-3\">Why does this site exist?</a>\n    <a mat-list-item [routerLink]=\"\" fragment=\"faq-4\">What is a mnemonic phrase?</a>\n    <a mat-list-item [routerLink]=\"\" fragment=\"faq-5\">What is a deterministic wallet?</a>\n    <a mat-list-item [routerLink]=\"\" fragment=\"faq-6\">What is BIP39?</a>\n    <a mat-list-item [routerLink]=\"\" fragment=\"faq-7\">How do mnemonic seeds work?</a>\n  </mat-nav-list>\n\n  <mat-card class=\"faq-card\" id=\"faq-1\">\n\n    <mat-card-title>\n      <app-scroll-to-top-button elementClass=\"faq-top\"></app-scroll-to-top-button>\n      <h2>What is my chance of winning?</h2>\n    </mat-card-title>\n\n    <mat-card-content>\n      Low. Very Low. In fact it is so low that it is very unlikely that there will ever be a visitor finding an address with a\n      balance on it.\n      <a href=\"https://www.youtube.com/watch?v=zMRrNY0pxfM\">It is practically zero.</a>\n    </mat-card-content>\n  </mat-card>\n\n  <mat-card class=\"faq-card\" id=\"faq-2\">\n    <mat-card-title>\n      <app-scroll-to-top-button elementClass=\"faq-top\"></app-scroll-to-top-button>\n      <h2>Why is my chance practically zero?</h2>\n    </mat-card-title>\n    <mat-card-content>\n      <p>\n        <a href=\"https://www.reddit.com/r/Bitcoin/comments/6twuj1/are_12word_seeds_for_bitcoin_private_keys_secure/\" rel=\"noopener\">Because of statistics.</a>\n      </p>\n\n      <p>The total address space is 2^160. 2^160 is 1,461,501,637,330,902,918,203,684,832,716,283,019,655,932,542,976.</p>\n\n      <p>\n        To put that in perspective, there are only 2^63 grains of sand on all of the beaches of the Earth.\n      </p>\n      <p>It is more than there are atoms in the whole universe.</p>\n\n      <p>\n        If you had a billion computers, each of which could try a billion keys a second, and they tried for a billion years, they'd\n        have much, much less than a one in a billion chance of finding a used seed.\n      </p>\n\n    </mat-card-content>\n  </mat-card>\n\n  <mat-card class=\"faq-card\" id=\"faq-8\">\n    <mat-card-title>\n      <app-scroll-to-top-button elementClass=\"faq-top\"></app-scroll-to-top-button>\n      <h2>Is this site legit?</h2>\n    </mat-card-title>\n    <mat-card-content>\n      <a [href]=\"appConfig.repositoryURL\" rel=\"noopener\">Yes</a> and\n      <a [routerLink]=\"\" fragment=\"faq-9\">no (see 'Should I use seeds generated here?')</a>.\n    </mat-card-content>\n  </mat-card>\n\n  <mat-card class=\"faq-card\" id=\"faq-9\">\n    <mat-card-title>\n      <app-scroll-to-top-button elementClass=\"faq-top\"></app-scroll-to-top-button>\n      <h2>Should I use seeds generated here?</h2>\n    </mat-card-title>\n    <mat-card-content>\n      <p>\n        NO! Do NOT use seeds generated online! You should always genreate the seed yourself on a secure device without access to\n        the internet or any other network.\n      </p>\n      <p>\n        <strong>YOU SHOULD GENERATE THE SEED YOURSELF. ON A SECURE DEVICE. YOURSELF!</strong>\n      </p>\n      <p>\n        The page generates the seed on your computer and does not ever send any information of the seed to any other site or service.\n        You can review the code and verify this. Nonetheless, as the source is free to use for anybody, how would you know\n        that you are not on a complete look-a-like copycat private-key-stealing clone site? You don't. So stick to the principle\n        of generating seeds yourself. Friends do not let friends generate seeds online.\n      </p>\n    </mat-card-content>\n  </mat-card>\n\n  <mat-card class=\"faq-card\" id=\"faq-3\">\n    <mat-card-title>\n      <app-scroll-to-top-button elementClass=\"faq-top\"></app-scroll-to-top-button>\n      <h2>Why does this site exist?</h2>\n    </mat-card-title>\n    <mat-card-content>\n      This sites solely exists to spark interest and enthusiasm for the inner workings of bitcoin. It should guide visitors to additional\n      information and act as an entry point for further study.\n    </mat-card-content>\n  </mat-card>\n\n  <mat-card class=\"faq-card\" id=\"faq-4\">\n    <mat-card-title>\n      <app-scroll-to-top-button elementClass=\"faq-top\"></app-scroll-to-top-button>\n      <h2>What is a mnemonic phrase?</h2>\n    </mat-card-title>\n    <mat-card-content>\n      <p>\n        A mnemonic code or sentence is a group of words taken from a predefined list of words. It can be used as a seed to generate\n        deterministic bitcoin wallets.\n      </p>\n\n      Most of the time the words are taken from a dictionary, e.g. from the\n      <a href=\"https://github.com/bitcoin/bips/blob/master/bip-0039/bip-0039-wordlists.md\" rel=\"noopener\">\n        BIP39 wordlists\n      </a>\n      .\n    </mat-card-content>\n  </mat-card>\n\n  <mat-card class=\"faq-card\" id=\"faq-5\">\n    <mat-card-title>\n      <app-scroll-to-top-button elementClass=\"faq-top\"></app-scroll-to-top-button>\n      <h2>What is a deterministic wallet?</h2>\n    </mat-card-title>\n    <mat-card-content>\n      <p>\n        A deterministic wallet is a system of deriving keys from a single starting point known as a seed. The seed allows a user\n        to easily back up and restore a wallet without needing any other information and can in some cases allow the creation\n        of public addresses without the knowledge of the private key.\n      </p>\n\n      <a href=\"https://en.bitcoin.it/wiki/Deterministic_wallet\" rel=\"noopener\">Read Bitcoin wiki page of \"Deterministic wallet\" article.</a>\n    </mat-card-content>\n  </mat-card>\n\n  <mat-card class=\"faq-card\" id=\"faq-6\">\n    <mat-card-title>\n      <app-scroll-to-top-button elementClass=\"faq-top\"></app-scroll-to-top-button>\n      <h2>What is BIP39?</h2>\n    </mat-card-title>\n    <mat-card-content>\n      <p>\n        BIP39 is a Bitcoin Improvement Proposal describing the implementation of a mnemonic sentence for the generation of deterministic\n        wallets.\n      </p>\n      <p>Popular wallets that use BIP39 for the mnemonic scheme include Trezor, Ledger, Electrum, Mycelium, Bither, Coinomy,\n        and MyEtherWallet..\n      </p>\n\n      <a href=\"https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki\" rel=\"noopener\">Read the full BIP39</a>\n\n    </mat-card-content>\n  </mat-card>\n\n  <mat-card class=\"faq-card\" id=\"faq-7\">\n    <mat-card-title>\n      <app-scroll-to-top-button elementClass=\"faq-top\"></app-scroll-to-top-button>\n      <h2>How do mnemonic seeds work?</h2>\n    </mat-card-title>\n    <mat-card-content>\n      <iframe width=\"420\" height=\"315\" src=\"https://www.youtube.com/embed/wWCIQFNf_8g\"></iframe>\n    </mat-card-content>\n  </mat-card>\n</div>\n<div class=\"clear\"></div>"
+
+/***/ }),
+
+/***/ "./node_modules/raw-loader/index.js!./src/app/main/main-front/main-front.component.html":
+/*!*************************************************************************************!*\
+  !*** ./node_modules/raw-loader!./src/app/main/main-front/main-front.component.html ***!
+  \*************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = "<div class=\"container mat-typography\">\n  <h1>Generate random Bitcoin address and see if you are a winner</h1>\n\n  <div>\n    <div *ngIf=\"tryCounter >= 3\">\n      <mat-card style=\"margin: 1em;\">\n        <p style=\"font-size: 1.2em; line-height: normal;\">\n          You have had your fair chance today.\n          <a routerLink=\"/faq\" fragment=\"faq-1\">It won't get any better</a>. Do not get blinded by trying to get rich quick. Learn how Bitcoin works and try your\n          best to integrate it in the real world. Bitcoin needs adoption. Maybe you are able to use it in you next project?\n          Talk and share your knowledge with others. Spread the word.\n        </p>\n      </mat-card>\n    </div>\n    \n    <div style=\"text-align: center\" [hidden]=\"tryCounter >= 9000\">\n      <button mat-raised-button color=\"primary\" (click)=\"buttonIamFeelingLuckyClicked()\" class=\"i-am-feeling-lucky-button\" [disabled]=\"loading\">\n        <span *ngIf=\"tryCounter === 0\">I'm feeling lucky!</span>\n        <span *ngIf=\"tryCounter === 1\">Try again!</span>\n        <span *ngIf=\"tryCounter === 2\">And again!</span>\n        <span *ngIf=\"tryCounter === 3\">And again ...</span>\n        <span *ngIf=\"tryCounter === 4\">Again?</span>\n        <span *ngIf=\"tryCounter === 5\">Try again!</span>\n        <span *ngIf=\"tryCounter === 6\">I'm feeling lucky!</span>\n        <span *ngIf=\"tryCounter > 6\">Try again!</span>\n\n        <mat-spinner *ngIf=\"loading\" style=\"margin: auto;\" diameter=\"15\"></mat-spinner>\n      </button>\n    </div>\n    \n    <div *ngIf=\"result\">\n      <mat-form-field class=\"full-width\" appearance=\"fill\" style=\"text-align: center;\">\n        <mat-label>Address</mat-label>\n        <input style=\"font-size: 150%\" matInput type=\"text\" placeholder=\"\" [value]=\"result.address\" disabled/>\n      </mat-form-field>\n\n      <div *ngIf=\"result.error\">\n        <p style=\"background-color: red; padding: 1em;\">{{ result.error.message }}</p>\n      </div>\n\n      <p style=\"text-align: center; font-size: 1.5em; margin: 1em; line-height: normal;\">\n        <span *ngIf=\"result.received === 0\">Address never received anything.</span>\n        <span *ngIf=\"result.received > 0\">Found address with\n          <code>received > 0</code>\n        </span>\n      </p>\n\n      <p style=\"text-align: center; font-size: 3em; margin: 1em; line-height: normal;\">\n        <span *ngIf=\"result.balance === 0\">Balance is 0 :(</span>\n        <span *ngIf=\"result.balance > 0\">Found address with\n          <code>balance > 0</code>\n        </span>\n      </p>\n    </div>\n\n    <mat-progress-bar *ngIf=\"loading\" mode=\"indeterminate\"></mat-progress-bar>\n    \n    <div [hidden]=\"!result\">\n      <mat-card style=\"margin: 1em;\" [hidden]=\"!result\">\n        <h3>Private Key Mnemonic</h3>\n        <div class=\"word-input-container\" fxLayout=\"row wrap\">\n          <div fxFlex=\"100%\" fxFlex.gt-sm=\"32%\" fxFlex.gt-md=\"24%\" fxFlex.gt-md=\"16.5%\" *ngFor=\"let i of [0,1,2,3,4,5,6,7,8,9,10,11]\">\n            <span>\n              <mat-form-field class=\"example-form-field-{{i}}\" appearance=\"fill\">\n                <mat-label>Word {{i+1}}</mat-label>\n                <input matInput type=\"text\" placeholder=\"Word {{i+1}}\" [(ngModel)]=\"mnemonicArray[i]\" (change)=\"onChangeMnemonic()\" disabled/>\n              </mat-form-field>\n            </span>\n          </div>\n        </div>\n      </mat-card>\n    </div>\n  </div>\n\n</div>\n<div class=\"clear\"></div>"
+
+/***/ }),
+
+/***/ "./node_modules/raw-loader/index.js!./src/app/main/main.component.html":
+/*!********************************************************************!*\
+  !*** ./node_modules/raw-loader!./src/app/main/main.component.html ***!
+  \********************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = "<router-outlet></router-outlet>"
 
 /***/ }),
 
@@ -11621,7 +11724,7 @@ util.inherits = __webpack_require__(/*! inherits */ "./node_modules/inherits/inh
 /*</replacement>*/
 
 /*<replacement>*/
-var debugUtil = __webpack_require__(/*! util */ 1);
+var debugUtil = __webpack_require__(/*! util */ 4);
 var debug = void 0;
 if (debugUtil && debugUtil.debuglog) {
   debug = debugUtil.debuglog('stream');
@@ -13510,7 +13613,7 @@ Writable.prototype._destroy = function (err, cb) {
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Buffer = __webpack_require__(/*! safe-buffer */ "./node_modules/safe-buffer/index.js").Buffer;
-var util = __webpack_require__(/*! util */ 2);
+var util = __webpack_require__(/*! util */ 5);
 
 function copyBuffer(src, target, offset) {
   src.copy(target, offset);
@@ -16416,40 +16519,6 @@ function config (name) {
 
 /***/ }),
 
-/***/ "./node_modules/util/node_modules/inherits/inherits_browser.js":
-/*!*********************************************************************!*\
-  !*** ./node_modules/util/node_modules/inherits/inherits_browser.js ***!
-  \*********************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-if (typeof Object.create === 'function') {
-  // implementation from standard node.js 'util' module
-  module.exports = function inherits(ctor, superCtor) {
-    ctor.super_ = superCtor
-    ctor.prototype = Object.create(superCtor.prototype, {
-      constructor: {
-        value: ctor,
-        enumerable: false,
-        writable: true,
-        configurable: true
-      }
-    });
-  };
-} else {
-  // old school shim for old browsers
-  module.exports = function inherits(ctor, superCtor) {
-    ctor.super_ = superCtor
-    var TempCtor = function () {}
-    TempCtor.prototype = superCtor.prototype
-    ctor.prototype = new TempCtor()
-    ctor.prototype.constructor = ctor
-  }
-}
-
-
-/***/ }),
-
 /***/ "./node_modules/util/support/isBufferBrowser.js":
 /*!******************************************************!*\
   !*** ./node_modules/util/support/isBufferBrowser.js ***!
@@ -16473,7 +16542,7 @@ module.exports = function isBuffer(arg) {
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(global, process) {// Copyright Joyent, Inc. and other Node contributors.
+/* WEBPACK VAR INJECTION */(function(process) {// Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the
@@ -16493,6 +16562,16 @@ module.exports = function isBuffer(arg) {
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+var getOwnPropertyDescriptors = Object.getOwnPropertyDescriptors ||
+  function getOwnPropertyDescriptors(obj) {
+    var keys = Object.keys(obj);
+    var descriptors = {};
+    for (var i = 0; i < keys.length; i++) {
+      descriptors[keys[i]] = Object.getOwnPropertyDescriptor(obj, keys[i]);
+    }
+    return descriptors;
+  };
 
 var formatRegExp = /%[sdj%]/g;
 exports.format = function(f) {
@@ -16538,15 +16617,15 @@ exports.format = function(f) {
 // Returns a modified function which warns once by default.
 // If --no-deprecation is set, then it is a no-op.
 exports.deprecate = function(fn, msg) {
+  if (typeof process !== 'undefined' && process.noDeprecation === true) {
+    return fn;
+  }
+
   // Allow for deprecating things in the process of starting up.
-  if (isUndefined(global.process)) {
+  if (typeof process === 'undefined') {
     return function() {
       return exports.deprecate(fn, msg).apply(this, arguments);
     };
-  }
-
-  if (process.noDeprecation === true) {
-    return fn;
   }
 
   var warned = false;
@@ -17042,7 +17121,7 @@ exports.log = function() {
  *     prototype.
  * @param {function} superCtor Constructor function to inherit prototype from.
  */
-exports.inherits = __webpack_require__(/*! inherits */ "./node_modules/util/node_modules/inherits/inherits_browser.js");
+exports.inherits = __webpack_require__(/*! inherits */ "./node_modules/inherits/inherits_browser.js");
 
 exports._extend = function(origin, add) {
   // Don't do anything if add isn't an object
@@ -17060,7 +17139,114 @@ function hasOwnProperty(obj, prop) {
   return Object.prototype.hasOwnProperty.call(obj, prop);
 }
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js"), __webpack_require__(/*! ./../process/browser.js */ "./node_modules/process/browser.js")))
+var kCustomPromisifiedSymbol = typeof Symbol !== 'undefined' ? Symbol('util.promisify.custom') : undefined;
+
+exports.promisify = function promisify(original) {
+  if (typeof original !== 'function')
+    throw new TypeError('The "original" argument must be of type Function');
+
+  if (kCustomPromisifiedSymbol && original[kCustomPromisifiedSymbol]) {
+    var fn = original[kCustomPromisifiedSymbol];
+    if (typeof fn !== 'function') {
+      throw new TypeError('The "util.promisify.custom" argument must be of type Function');
+    }
+    Object.defineProperty(fn, kCustomPromisifiedSymbol, {
+      value: fn, enumerable: false, writable: false, configurable: true
+    });
+    return fn;
+  }
+
+  function fn() {
+    var promiseResolve, promiseReject;
+    var promise = new Promise(function (resolve, reject) {
+      promiseResolve = resolve;
+      promiseReject = reject;
+    });
+
+    var args = [];
+    for (var i = 0; i < arguments.length; i++) {
+      args.push(arguments[i]);
+    }
+    args.push(function (err, value) {
+      if (err) {
+        promiseReject(err);
+      } else {
+        promiseResolve(value);
+      }
+    });
+
+    try {
+      original.apply(this, args);
+    } catch (err) {
+      promiseReject(err);
+    }
+
+    return promise;
+  }
+
+  Object.setPrototypeOf(fn, Object.getPrototypeOf(original));
+
+  if (kCustomPromisifiedSymbol) Object.defineProperty(fn, kCustomPromisifiedSymbol, {
+    value: fn, enumerable: false, writable: false, configurable: true
+  });
+  return Object.defineProperties(
+    fn,
+    getOwnPropertyDescriptors(original)
+  );
+}
+
+exports.promisify.custom = kCustomPromisifiedSymbol
+
+function callbackifyOnRejected(reason, cb) {
+  // `!reason` guard inspired by bluebird (Ref: https://goo.gl/t5IS6M).
+  // Because `null` is a special error value in callbacks which means "no error
+  // occurred", we error-wrap so the callback consumer can distinguish between
+  // "the promise rejected with null" or "the promise fulfilled with undefined".
+  if (!reason) {
+    var newReason = new Error('Promise was rejected with a falsy value');
+    newReason.reason = reason;
+    reason = newReason;
+  }
+  return cb(reason);
+}
+
+function callbackify(original) {
+  if (typeof original !== 'function') {
+    throw new TypeError('The "original" argument must be of type Function');
+  }
+
+  // We DO NOT return the promise as it gives the user a false sense that
+  // the promise is actually somehow related to the callback's execution
+  // and that the callback throwing will reject the promise.
+  function callbackified() {
+    var args = [];
+    for (var i = 0; i < arguments.length; i++) {
+      args.push(arguments[i]);
+    }
+
+    var maybeCb = args.pop();
+    if (typeof maybeCb !== 'function') {
+      throw new TypeError('The last argument must be of type Function');
+    }
+    var self = this;
+    var cb = function() {
+      return maybeCb.apply(self, arguments);
+    };
+    // In true node style we process the callback on `nextTick` with all the
+    // implications (stack, `uncaughtException`, `async_hooks`)
+    original.apply(this, args)
+      .then(function(ret) { process.nextTick(cb, null, ret) },
+            function(rej) { process.nextTick(callbackifyOnRejected, rej, cb) });
+  }
+
+  Object.setPrototypeOf(callbackified, Object.getPrototypeOf(original));
+  Object.defineProperties(callbackified,
+                          getOwnPropertyDescriptors(original));
+  return callbackified;
+}
+exports.callbackify = callbackify;
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../process/browser.js */ "./node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -17241,17 +17427,6 @@ module.exports = {
 
 /***/ }),
 
-/***/ "./src/app/main/main-faq/main-faq.component.html":
-/*!*******************************************************!*\
-  !*** ./src/app/main/main-faq/main-faq.component.html ***!
-  \*******************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = "<div class=\"container mat-typography\">\r\n  <h1>FAQ</h1>\r\n\r\n  <mat-nav-list class=\"faq-nav-list\">\r\n    <a mat-list-item [routerLink]=\"\" fragment=\"faq-1\">What is my chance of winning?</a>\r\n    <a mat-list-item [routerLink]=\"\" fragment=\"faq-2\">Why is my chance practically zero?</a>\r\n    <a mat-list-item [routerLink]=\"\" fragment=\"faq-8\">Is this site legit?</a>\r\n    <a mat-list-item [routerLink]=\"\" fragment=\"faq-9\">Should I use seeds generated here?</a>\r\n    <a mat-list-item [routerLink]=\"\" fragment=\"faq-3\">Why does this site exist?</a>\r\n    <a mat-list-item [routerLink]=\"\" fragment=\"faq-4\">What is a mnemonic phrase?</a>\r\n    <a mat-list-item [routerLink]=\"\" fragment=\"faq-5\">What is a deterministic wallet?</a>\r\n    <a mat-list-item [routerLink]=\"\" fragment=\"faq-6\">What is BIP39?</a>\r\n    <a mat-list-item [routerLink]=\"\" fragment=\"faq-7\">How do mnemonic seeds work?</a>\r\n  </mat-nav-list>\r\n\r\n  <mat-card class=\"faq-card\" id=\"faq-1\">\r\n\r\n    <mat-card-title>\r\n      <h2>What is my chance of winning?</h2>\r\n    </mat-card-title>\r\n\r\n    <mat-card-content>\r\n      Low. Very Low. In fact it is so low that it is very unlikely that there will ever be a visitor finding an address with a\r\n      balance on it.\r\n      <a href=\"https://www.youtube.com/watch?v=zMRrNY0pxfM\">It is practically zero.</a>\r\n    </mat-card-content>\r\n  </mat-card>\r\n\r\n  <mat-card class=\"faq-card\" id=\"faq-2\">\r\n    <mat-card-title>\r\n      <h2>Why is my chance practically zero?</h2>\r\n    </mat-card-title>\r\n    <mat-card-content>\r\n      <p>\r\n        <a href=\"https://www.reddit.com/r/Bitcoin/comments/6twuj1/are_12word_seeds_for_bitcoin_private_keys_secure/\" rel=\"noopener\">Because of statistics.</a>\r\n      </p>\r\n\r\n      <p>The total address space is 2^160. 2^160 is 1,461,501,637,330,902,918,203,684,832,716,283,019,655,932,542,976.</p>\r\n\r\n      <p>\r\n        To put that in perspective, there are only 2^63 grains of sand on all of the beaches of the Earth.\r\n      </p>\r\n      <p>It is more than there are atoms in the whole universe.</p>\r\n\r\n      <p>\r\n        If you had a billion computers, each of which could try a billion keys a second, and they tried for a billion years, they'd\r\n        have much, much less than a one in a billion chance of finding a used seed.\r\n      </p>\r\n\r\n    </mat-card-content>\r\n  </mat-card>\r\n\r\n  <mat-card class=\"faq-card\" id=\"faq-8\">\r\n    <mat-card-title>\r\n      <h2>Is this site legit?</h2>\r\n    </mat-card-title>\r\n    <mat-card-content>\r\n      <a [href]=\"appConfig.repositoryURL\" rel=\"noopener\">Yes</a> and\r\n      <a [routerLink]=\"\" fragment=\"faq-9\">no (see 'Should I use seeds generated here?')</a>.\r\n    </mat-card-content>\r\n  </mat-card>\r\n\r\n  <mat-card class=\"faq-card\" id=\"faq-9\">\r\n    <mat-card-title>\r\n      <h2>Should I use seeds generated here?</h2>\r\n    </mat-card-title>\r\n    <mat-card-content>\r\n      <p>\r\n        NO! Do NOT use seeds generated online! You should always genreate the seed yourself on a secure device without access to\r\n        the internet or any other network.\r\n      </p>\r\n      <p>\r\n        <strong>YOU SHOULD GENERATE THE SEED YOURSELF. ON A SECURE DEVICE. YOURSELF!</strong>\r\n      </p>\r\n      <p>\r\n        The page generates the seed on your computer and does not ever send any information of the seed to any other site or service.\r\n        You can review the code and verify this. Nonetheless, as the source is free to use for anybody, how would you know\r\n        that you are not on a complete look-a-like copycat private-key-stealing clone site? You don't. So stick to the principle\r\n        of generating seeds yourself. Friends do not let friends generate seeds online.\r\n      </p>\r\n    </mat-card-content>\r\n  </mat-card>\r\n\r\n  <mat-card class=\"faq-card\" id=\"faq-3\">\r\n    <mat-card-title>\r\n      <h2>Why does this site exist?</h2>\r\n    </mat-card-title>\r\n    <mat-card-content>\r\n      This sites solely exists to spark interest and enthusiasm for the inner workings of bitcoin. It should guide visitors to additional\r\n      information and act as an entry point for further study.\r\n    </mat-card-content>\r\n  </mat-card>\r\n\r\n  <mat-card class=\"faq-card\" id=\"faq-4\">\r\n    <mat-card-title>\r\n      <h2>What is a mnemonic phrase?</h2>\r\n    </mat-card-title>\r\n    <mat-card-content>\r\n      <p>\r\n        A mnemonic code or sentence is a group of words taken from a predefined list of words. It can be used as a seed to generate\r\n        deterministic bitcoin wallets.\r\n      </p>\r\n\r\n      Most of the time the words are taken from a dictionary, e.g. from the\r\n      <a href=\"https://github.com/bitcoin/bips/blob/master/bip-0039/bip-0039-wordlists.md\" rel=\"noopener\">\r\n        BIP39 wordlists\r\n      </a>\r\n      .\r\n    </mat-card-content>\r\n  </mat-card>\r\n\r\n  <mat-card class=\"faq-card\" id=\"faq-5\">\r\n    <mat-card-title>\r\n      <h2>What is a deterministic wallet?</h2>\r\n    </mat-card-title>\r\n    <mat-card-content>\r\n      <p>\r\n        A deterministic wallet is a system of deriving keys from a single starting point known as a seed. The seed allows a user\r\n        to easily back up and restore a wallet without needing any other information and can in some cases allow the creation\r\n        of public addresses without the knowledge of the private key.\r\n      </p>\r\n\r\n      <a href=\"https://en.bitcoin.it/wiki/Deterministic_wallet\" rel=\"noopener\">Read Bitcoin wiki page of \"Deterministic wallet\" article.</a>\r\n    </mat-card-content>\r\n  </mat-card>\r\n\r\n  <mat-card class=\"faq-card\" id=\"faq-6\">\r\n    <mat-card-title>\r\n      <h2>What is BIP39?</h2>\r\n    </mat-card-title>\r\n    <mat-card-content>\r\n      <p>\r\n        BIP39 is a Bitcoin Improvement Proposal describing the implementation of a mnemonic sentence for the generation of deterministic\r\n        wallets.\r\n      </p>\r\n      <p>Popular wallets that use BIP39 for the mnemonic scheme include Trezor, Ledger, Electrum, Mycelium, Bither, Coinomy,\r\n        and MyEtherWallet..\r\n      </p>\r\n\r\n      <a href=\"https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki\" rel=\"noopener\">Read the full BIP39</a>\r\n\r\n    </mat-card-content>\r\n  </mat-card>\r\n\r\n  <mat-card class=\"faq-card\" id=\"faq-7\">\r\n    <mat-card-title>\r\n      <h2>How do mnemonic seeds work?</h2>\r\n    </mat-card-title>\r\n    <mat-card-content>\r\n      <iframe width=\"420\" height=\"315\" src=\"https://www.youtube.com/embed/wWCIQFNf_8g\"></iframe>\r\n    </mat-card-content>\r\n  </mat-card>\r\n</div>\r\n<div class=\"clear\"></div>"
-
-/***/ }),
-
 /***/ "./src/app/main/main-faq/main-faq.component.scss":
 /*!*******************************************************!*\
   !*** ./src/app/main/main-faq/main-faq.component.scss ***!
@@ -17259,7 +17434,7 @@ module.exports = "<div class=\"container mat-typography\">\r\n  <h1>FAQ</h1>\r\n
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = ".container {\n  margin: 0 1rem; }\n\n.faq-nav-list {\n  margin-bottom: 5rem; }\n\n.faq-card {\n  margin-top: 1rem;\n  margin-bottom: 1rem; }\n"
+module.exports = "#faq-top {\n  position: absolute;\n  top: 0;\n  left: 0;\n  right: 0;\n  height: 0;\n  width: 100%;\n}\n\n.container {\n  margin: 0 1rem;\n}\n\n.faq-nav-list {\n  margin-bottom: 5rem;\n}\n\n.faq-card {\n  margin-top: 1rem;\n  margin-bottom: 1rem;\n}\n\n.faq-card .mat-card-title h2 {\n  display: inline;\n  padding-left: 4px;\n}\n\n.faq-card app-scroll-to-top-button {\n  opacity: 0.8;\n}\n\n.faq-card app-scroll-to-top-button:hover {\n  cursor: pointer;\n}\n\n.faq-card p {\n  word-break: break-word;\n}\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi9ob21lL3ZvaWQvd29ya3NwYWNlL3RoZWJvcmFrb21wYW5pb25pL2JpcDM5LW5nL3NyYy9hcHAvbWFpbi9tYWluLWZhcS9tYWluLWZhcS5jb21wb25lbnQuc2NzcyIsInNyYy9hcHAvbWFpbi9tYWluLWZhcS9tYWluLWZhcS5jb21wb25lbnQuc2NzcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFFQTtFQUNFLGtCQUFBO0VBQ0EsTUFBQTtFQUNBLE9BQUE7RUFDQSxRQUFBO0VBQ0EsU0FBQTtFQUNBLFdBQUE7QUNERjs7QURJQTtFQUNFLGNBQUE7QUNERjs7QURJQTtFQUNFLG1CQUFBO0FDREY7O0FESUE7RUFDRSxnQkFBQTtFQUNBLG1CQUFBO0FDREY7O0FESUE7RUFDRSxlQUFBO0VBQ0EsaUJBQUE7QUNERjs7QURHQTtFQUNFLFlBQUE7QUNBRjs7QURFQTtFQUNFLGVBQUE7QUNDRjs7QURFQTtFQUNFLHNCQUFBO0FDQ0YiLCJmaWxlIjoic3JjL2FwcC9tYWluL21haW4tZmFxL21haW4tZmFxLmNvbXBvbmVudC5zY3NzIiwic291cmNlc0NvbnRlbnQiOlsiQGltcG9ydCBcIm1peGluc1wiO1xuXG4jZmFxLXRvcCB7XG4gIHBvc2l0aW9uOiBhYnNvbHV0ZTtcbiAgdG9wOiAwO1xuICBsZWZ0OiAwO1xuICByaWdodDogMDtcbiAgaGVpZ2h0OiAwO1xuICB3aWR0aDogMTAwJTtcbn1cblxuLmNvbnRhaW5lciB7XG4gIG1hcmdpbjogMCAxcmVtO1xufVxuXG4uZmFxLW5hdi1saXN0IHtcbiAgbWFyZ2luLWJvdHRvbTogNXJlbTtcbn1cblxuLmZhcS1jYXJkIHtcbiAgbWFyZ2luLXRvcDogMXJlbTtcbiAgbWFyZ2luLWJvdHRvbTogMXJlbTtcbn1cblxuLmZhcS1jYXJkIC5tYXQtY2FyZC10aXRsZSBoMiB7XG4gIGRpc3BsYXk6IGlubGluZTtcbiAgcGFkZGluZy1sZWZ0OiA0cHg7XG59XG4uZmFxLWNhcmQgYXBwLXNjcm9sbC10by10b3AtYnV0dG9uIHtcbiAgb3BhY2l0eTogMC44O1xufVxuLmZhcS1jYXJkIGFwcC1zY3JvbGwtdG8tdG9wLWJ1dHRvbjpob3ZlciB7XG4gIGN1cnNvcjogcG9pbnRlcjtcbn1cblxuLmZhcS1jYXJkIHAge1xuICB3b3JkLWJyZWFrOiBicmVhay13b3JkO1xufSIsIiNmYXEtdG9wIHtcbiAgcG9zaXRpb246IGFic29sdXRlO1xuICB0b3A6IDA7XG4gIGxlZnQ6IDA7XG4gIHJpZ2h0OiAwO1xuICBoZWlnaHQ6IDA7XG4gIHdpZHRoOiAxMDAlO1xufVxuXG4uY29udGFpbmVyIHtcbiAgbWFyZ2luOiAwIDFyZW07XG59XG5cbi5mYXEtbmF2LWxpc3Qge1xuICBtYXJnaW4tYm90dG9tOiA1cmVtO1xufVxuXG4uZmFxLWNhcmQge1xuICBtYXJnaW4tdG9wOiAxcmVtO1xuICBtYXJnaW4tYm90dG9tOiAxcmVtO1xufVxuXG4uZmFxLWNhcmQgLm1hdC1jYXJkLXRpdGxlIGgyIHtcbiAgZGlzcGxheTogaW5saW5lO1xuICBwYWRkaW5nLWxlZnQ6IDRweDtcbn1cblxuLmZhcS1jYXJkIGFwcC1zY3JvbGwtdG8tdG9wLWJ1dHRvbiB7XG4gIG9wYWNpdHk6IDAuODtcbn1cblxuLmZhcS1jYXJkIGFwcC1zY3JvbGwtdG8tdG9wLWJ1dHRvbjpob3ZlciB7XG4gIGN1cnNvcjogcG9pbnRlcjtcbn1cblxuLmZhcS1jYXJkIHAge1xuICB3b3JkLWJyZWFrOiBicmVhay13b3JkO1xufSJdfQ== */"
 
 /***/ }),
 
@@ -17267,12 +17442,13 @@ module.exports = ".container {\n  margin: 0 1rem; }\n\n.faq-nav-list {\n  margin
 /*!*****************************************************!*\
   !*** ./src/app/main/main-faq/main-faq.component.ts ***!
   \*****************************************************/
-/*! exports provided: MainFaqComponent */
+/*! exports provided: MainFaqComponent, ScrollToTopButtonComponent */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "MainFaqComponent", function() { return MainFaqComponent; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ScrollToTopButtonComponent", function() { return ScrollToTopButtonComponent; });
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
 /* harmony import */ var _config_app_config__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../config/app.config */ "./src/app/config/app.config.ts");
 /* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @angular/forms */ "./node_modules/@angular/forms/fesm5/forms.js");
@@ -17305,21 +17481,33 @@ var MainFaqComponent = /** @class */ (function () {
         this.route.fragment.subscribe(function (fragment) { _this.fragment = fragment; });
     };
     MainFaqComponent.prototype.ngAfterViewInit = function () {
-        try {
-            document.querySelector('#' + this.fragment).scrollIntoView({ behavior: 'smooth' });
-        }
-        catch (e) { }
+        var _this = this;
         this.route.fragment.subscribe(function (fragment) {
-            try {
-                document.querySelector('#' + fragment).scrollIntoView({ behavior: 'smooth' });
-            }
-            catch (e) { }
+            _this.scrollToElement(fragment);
         });
+        if (this.fragment) {
+            this.scrollToElement(this.fragment);
+        }
     };
+    MainFaqComponent.prototype.scrollToElement = function (elementClass) {
+        console.log('[DEBUG] scroll to #' + elementClass);
+        try {
+            document.querySelector('#' + elementClass).scrollIntoView({ behavior: 'smooth' });
+        }
+        catch (e) {
+            console.log('[DEBUG] cannot scroll to #' + elementClass);
+        }
+    };
+    MainFaqComponent.ctorParameters = function () { return [
+        { type: undefined, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"], args: [_config_app_config__WEBPACK_IMPORTED_MODULE_1__["APP_CONFIG"],] }] },
+        { type: _angular_router__WEBPACK_IMPORTED_MODULE_3__["Router"] },
+        { type: _angular_router__WEBPACK_IMPORTED_MODULE_3__["ActivatedRoute"] },
+        { type: _angular_forms__WEBPACK_IMPORTED_MODULE_2__["FormBuilder"] }
+    ]; };
     MainFaqComponent = __decorate([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["Component"])({
             selector: 'app-main-faq',
-            template: __webpack_require__(/*! ./main-faq.component.html */ "./src/app/main/main-faq/main-faq.component.html"),
+            template: __webpack_require__(/*! raw-loader!./main-faq.component.html */ "./node_modules/raw-loader/index.js!./src/app/main/main-faq/main-faq.component.html"),
             styles: [__webpack_require__(/*! ./main-faq.component.scss */ "./src/app/main/main-faq/main-faq.component.scss")]
         }),
         __param(0, Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"])(_config_app_config__WEBPACK_IMPORTED_MODULE_1__["APP_CONFIG"])),
@@ -17330,18 +17518,39 @@ var MainFaqComponent = /** @class */ (function () {
     return MainFaqComponent;
 }());
 
+var ScrollToTopButtonComponent = /** @class */ (function () {
+    function ScrollToTopButtonComponent() {
+    }
+    ScrollToTopButtonComponent.prototype.ngOnInit = function () {
+    };
+    ScrollToTopButtonComponent.prototype.ngAfterViewInit = function () {
+    };
+    ScrollToTopButtonComponent.prototype.scroll = function () {
+        this.scrollToElement(this.elementClass);
+    };
+    ScrollToTopButtonComponent.prototype.scrollToElement = function (elementClass) {
+        console.log('[DEBUG] scroll to #' + elementClass);
+        try {
+            document.querySelector('#' + elementClass).scrollIntoView({ behavior: 'smooth' });
+        }
+        catch (e) {
+            console.log('[DEBUG] cannot scroll to #' + elementClass);
+        }
+    };
+    __decorate([
+        Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["Input"])(),
+        __metadata("design:type", String)
+    ], ScrollToTopButtonComponent.prototype, "elementClass", void 0);
+    ScrollToTopButtonComponent = __decorate([
+        Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["Component"])({
+            selector: 'app-scroll-to-top-button',
+            template: "\n  <a class=\"app-scroll-to-top-button\"\n     (click)=\"scroll()\"\n     aria-label=\"Scroll To Top\"\n     matTooltip=\"Scroll To Top\"\n     matTooltipPosition=\"above\">\n    <mat-icon aria-hidden=\"false\" aria-label=\"Scroll To Top icon\">arrow_upward</mat-icon>\n  </a>\n    "
+        })
+    ], ScrollToTopButtonComponent);
+    return ScrollToTopButtonComponent;
+}());
 
 
-/***/ }),
-
-/***/ "./src/app/main/main-front/main-front.component.html":
-/*!***********************************************************!*\
-  !*** ./src/app/main/main-front/main-front.component.html ***!
-  \***********************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = "<div class=\"container mat-typography\">\r\n  <h1>Generate random Bitcoin address and see if you are a winner</h1>\r\n\r\n  <div>\r\n    <div [hidden]=\"!result\">\r\n      <div class=\"word-input-container\">\r\n        <table class=\"full-width\">\r\n          <tr>\r\n            <td *ngFor=\"let i of [0,1,2,3,4,5]\">\r\n              <mat-form-field class=\"example-form-field-{{i}} full-width\" appearance=\"fill\">\r\n                <mat-label>Word {{i+1}}</mat-label>\r\n                <input matInput type=\"text\" placeholder=\"Word {{i+1}}\" [(ngModel)]=\"mnemonicArray[i]\" (change)=\"onChangeMnemonic()\" disabled/>\r\n              </mat-form-field>\r\n            </td>\r\n          </tr>\r\n          <tr>\r\n            <td *ngFor=\"let i of [6,7,8,9,10,11]\">\r\n              <mat-form-field class=\"example-form-field-{{i}} full-width\" appearance=\"fill\">\r\n                <mat-label>Word {{i+1}}</mat-label>\r\n                <input matInput type=\"text\" placeholder=\"Word {{i+1}}\" [(ngModel)]=\"mnemonicArray[i]\" (change)=\"onChangeMnemonic()\" disabled/>\r\n              </mat-form-field>\r\n            </td>\r\n          </tr>\r\n        </table>\r\n      </div>\r\n    </div>\r\n\r\n    <div *ngIf=\"result\">\r\n      <mat-form-field class=\"full-width\" appearance=\"fill\" style=\"text-align: center;\">\r\n        <mat-label>Address</mat-label>\r\n        <input style=\"font-size: 150%\" matInput type=\"text\" placeholder=\"\" [value]=\"result.address\" disabled/>\r\n      </mat-form-field>\r\n\r\n      <div *ngIf=\"result.error\">\r\n        <p style=\"background-color: red; padding: 1em;\">{{ result.error.message }}</p>\r\n      </div>\r\n\r\n      <p style=\"text-align: center; font-size: 1.5em; margin: 1em;\">\r\n        <span *ngIf=\"result.received === 0\">Address never received anything.</span>\r\n        <span *ngIf=\"result.received > 0\">Found address with\r\n          <code>received > 0</code>\r\n        </span>\r\n      </p>\r\n\r\n      <p style=\"text-align: center; font-size: 3em; margin: 1em;\">\r\n        <span *ngIf=\"result.balance === 0\">Balance is 0 :(</span>\r\n        <span *ngIf=\"result.balance > 0\">Found address with\r\n          <code>balance > 0</code>\r\n        </span>\r\n      </p>\r\n    </div>\r\n\r\n    <mat-spinner *ngIf=\"loading\" style=\"margin: auto\"></mat-spinner>\r\n\r\n    <div style=\"text-align: center\" [hidden]=\"loading || tryCounter >= 3\">\r\n      <button mat-raised-button color=\"primary\" (click)=\"buttonIamFeelingLuckyClicked()\" class=\"i-am-feeling-lucky-button\" [disabled]=\"tryCounter >= 10\">\r\n        <span *ngIf=\"tryCounter === 0\">I'm feeling lucky!</span>\r\n        <span *ngIf=\"tryCounter === 1\">Try again!</span>\r\n        <span *ngIf=\"tryCounter === 2\">And again!</span>\r\n        <span *ngIf=\"tryCounter === 3\">And again ...</span>\r\n        <span *ngIf=\"tryCounter === 4\">Again?</span>\r\n        <span *ngIf=\"tryCounter === 5\">Try again!</span>\r\n        <span *ngIf=\"tryCounter === 6\">I'm feeling lucky!</span>\r\n        <span *ngIf=\"tryCounter > 6\">Try again!</span>\r\n      </button>\r\n    </div>\r\n\r\n    <div *ngIf=\"tryCounter >= 3\">\r\n      <mat-card style=\"margin: 1em;\">\r\n        <p style=\"font-size: 1.2em;\">\r\n          You have had your fair chance today.\r\n          <a routerLink=\"/faq\" fragment=\"faq-1\">It won't get any better</a>. Do not get blinded by trying to get rich quick. Learn how Bitcoin works and try your\r\n          best to integrate it in the real world. Bitcoin needs adoption. Maybe you are able to use it in you next project?\r\n          Talk and share your knowledge with others. Spread the word.\r\n        </p>\r\n      </mat-card>\r\n    </div>\r\n\r\n  </div>\r\n\r\n</div>\r\n<div class=\"clear\"></div>"
 
 /***/ }),
 
@@ -17352,7 +17561,7 @@ module.exports = "<div class=\"container mat-typography\">\r\n  <h1>Generate ran
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = ".container {\n  margin: 0 1rem; }\n\n.container h1 {\n  text-align: center; }\n\n.i-am-feeling-lucky-button {\n  padding: 1.3rem 2rem;\n  font-size: 2rem;\n  margin: 1rem 1rem 3rem 1rem; }\n\n.word-input-container {\n  margin-left: 2rem;\n  margin-right: 2rem; }\n\n.container .mat-input-element:disabled {\n  color: inherit; }\n\n.mat-form-field-wrapper {\n  margin-left: 1rem !important;\n  margin-right: 1rem;\n  padding-left: 1rem;\n  padding-right: 1rem; }\n\n.clear {\n  clear: both; }\n\n.full-width {\n  width: 100%; }\n"
+module.exports = ".container {\n  margin: 0 1rem;\n}\n\n.container h1 {\n  text-align: center;\n}\n\n.i-am-feeling-lucky-button {\n  padding: 1.3rem 2rem;\n  font-size: 2rem;\n  margin: 1rem 1rem 3rem 1rem;\n}\n\n.container .mat-input-element:disabled {\n  color: inherit;\n}\n\n.mat-form-field-wrapper {\n  margin-left: 1rem !important;\n  margin-right: 1rem;\n  padding-left: 1rem;\n  padding-right: 1rem;\n}\n\n.clear {\n  clear: both;\n}\n\n.full-width {\n  width: 100%;\n}\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi9ob21lL3ZvaWQvd29ya3NwYWNlL3RoZWJvcmFrb21wYW5pb25pL2JpcDM5LW5nL3NyYy9hcHAvbWFpbi9tYWluLWZyb250L21haW4tZnJvbnQuY29tcG9uZW50LnNjc3MiLCJzcmMvYXBwL21haW4vbWFpbi1mcm9udC9tYWluLWZyb250LmNvbXBvbmVudC5zY3NzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUdBO0VBQ0UsY0FBQTtBQ0ZGOztBREtBO0VBQ0Usa0JBQUE7QUNGRjs7QURLQTtFQUNFLG9CQUFBO0VBQ0EsZUFBQTtFQUNBLDJCQUFBO0FDRkY7O0FES0E7RUFDRSxjQUFBO0FDRkY7O0FES0E7RUFDRSw0QkFBQTtFQUNBLGtCQUFBO0VBQ0Esa0JBQUE7RUFDQSxtQkFBQTtBQ0ZGOztBREtBO0VBQ0UsV0FBQTtBQ0ZGOztBREtBO0VBQ0UsV0FBQTtBQ0ZGIiwiZmlsZSI6InNyYy9hcHAvbWFpbi9tYWluLWZyb250L21haW4tZnJvbnQuY29tcG9uZW50LnNjc3MiLCJzb3VyY2VzQ29udGVudCI6WyJAaW1wb3J0IFwibWl4aW5zXCI7XG5cblxuLmNvbnRhaW5lciB7XG4gIG1hcmdpbjogMCAxcmVtO1xufVxuXG4uY29udGFpbmVyIGgxIHtcbiAgdGV4dC1hbGlnbjogY2VudGVyO1xufVxuXG4uaS1hbS1mZWVsaW5nLWx1Y2t5LWJ1dHRvbiB7XG4gIHBhZGRpbmc6IDEuM3JlbSAycmVtO1xuICBmb250LXNpemU6IDJyZW07XG4gIG1hcmdpbjogMXJlbSAxcmVtIDNyZW0gMXJlbTtcbn1cblxuLmNvbnRhaW5lciAubWF0LWlucHV0LWVsZW1lbnQ6ZGlzYWJsZWQge1xuICBjb2xvcjogaW5oZXJpdDtcbn1cblxuLm1hdC1mb3JtLWZpZWxkLXdyYXBwZXIge1xuICBtYXJnaW4tbGVmdDogMXJlbSAhaW1wb3J0YW50O1xuICBtYXJnaW4tcmlnaHQ6IDFyZW07XG4gIHBhZGRpbmctbGVmdDogMXJlbTtcbiAgcGFkZGluZy1yaWdodDogMXJlbTtcbn1cblxuLmNsZWFyIHtcbiAgY2xlYXI6IGJvdGg7XG59XG5cbi5mdWxsLXdpZHRoIHtcbiAgd2lkdGg6IDEwMCU7XG59IiwiLmNvbnRhaW5lciB7XG4gIG1hcmdpbjogMCAxcmVtO1xufVxuXG4uY29udGFpbmVyIGgxIHtcbiAgdGV4dC1hbGlnbjogY2VudGVyO1xufVxuXG4uaS1hbS1mZWVsaW5nLWx1Y2t5LWJ1dHRvbiB7XG4gIHBhZGRpbmc6IDEuM3JlbSAycmVtO1xuICBmb250LXNpemU6IDJyZW07XG4gIG1hcmdpbjogMXJlbSAxcmVtIDNyZW0gMXJlbTtcbn1cblxuLmNvbnRhaW5lciAubWF0LWlucHV0LWVsZW1lbnQ6ZGlzYWJsZWQge1xuICBjb2xvcjogaW5oZXJpdDtcbn1cblxuLm1hdC1mb3JtLWZpZWxkLXdyYXBwZXIge1xuICBtYXJnaW4tbGVmdDogMXJlbSAhaW1wb3J0YW50O1xuICBtYXJnaW4tcmlnaHQ6IDFyZW07XG4gIHBhZGRpbmctbGVmdDogMXJlbTtcbiAgcGFkZGluZy1yaWdodDogMXJlbTtcbn1cblxuLmNsZWFyIHtcbiAgY2xlYXI6IGJvdGg7XG59XG5cbi5mdWxsLXdpZHRoIHtcbiAgd2lkdGg6IDEwMCU7XG59Il19 */"
 
 /***/ }),
 
@@ -17466,10 +17675,15 @@ var MainFrontComponent = /** @class */ (function () {
         var check_url = url_prefix + address;
         return this.httpClient.get(check_url);
     };
+    MainFrontComponent.ctorParameters = function () { return [
+        { type: _angular_router__WEBPACK_IMPORTED_MODULE_2__["Router"] },
+        { type: _angular_forms__WEBPACK_IMPORTED_MODULE_1__["FormBuilder"] },
+        { type: _angular_common_http__WEBPACK_IMPORTED_MODULE_3__["HttpClient"] }
+    ]; };
     MainFrontComponent = __decorate([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["Component"])({
             selector: 'app-main-front',
-            template: __webpack_require__(/*! ./main-front.component.html */ "./src/app/main/main-front/main-front.component.html"),
+            template: __webpack_require__(/*! raw-loader!./main-front.component.html */ "./node_modules/raw-loader/index.js!./src/app/main/main-front/main-front.component.html"),
             styles: [__webpack_require__(/*! ./main-front.component.scss */ "./src/app/main/main-front/main-front.component.scss")]
         }),
         __metadata("design:paramtypes", [_angular_router__WEBPACK_IMPORTED_MODULE_2__["Router"],
@@ -17539,17 +17753,6 @@ var MainRoutingModule = /** @class */ (function () {
 
 /***/ }),
 
-/***/ "./src/app/main/main.component.html":
-/*!******************************************!*\
-  !*** ./src/app/main/main.component.html ***!
-  \******************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = "<router-outlet></router-outlet>"
-
-/***/ }),
-
 /***/ "./src/app/main/main.component.ts":
 /*!****************************************!*\
   !*** ./src/app/main/main.component.ts ***!
@@ -17577,7 +17780,7 @@ var MainComponent = /** @class */ (function () {
     MainComponent = __decorate([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["Component"])({
             selector: 'app-main',
-            template: __webpack_require__(/*! ./main.component.html */ "./src/app/main/main.component.html")
+            template: __webpack_require__(/*! raw-loader!./main.component.html */ "./node_modules/raw-loader/index.js!./src/app/main/main.component.html")
         }),
         __metadata("design:paramtypes", [])
     ], MainComponent);
@@ -17636,6 +17839,7 @@ var MainModule = /** @class */ (function () {
                 _main_component__WEBPACK_IMPORTED_MODULE_7__["MainComponent"],
                 _main_front_main_front_component__WEBPACK_IMPORTED_MODULE_5__["MainFrontComponent"],
                 _main_faq_main_faq_component__WEBPACK_IMPORTED_MODULE_6__["MainFaqComponent"],
+                _main_faq_main_faq_component__WEBPACK_IMPORTED_MODULE_6__["ScrollToTopButtonComponent"],
             ],
             entryComponents: [],
             providers: []
@@ -17648,7 +17852,7 @@ var MainModule = /** @class */ (function () {
 
 /***/ }),
 
-/***/ 1:
+/***/ 4:
 /*!**********************!*\
   !*** util (ignored) ***!
   \**********************/
@@ -17659,7 +17863,7 @@ var MainModule = /** @class */ (function () {
 
 /***/ }),
 
-/***/ 2:
+/***/ 5:
 /*!**********************!*\
   !*** util (ignored) ***!
   \**********************/

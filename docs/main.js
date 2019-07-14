@@ -1,5 +1,49 @@
 (window["webpackJsonp"] = window["webpackJsonp"] || []).push([["main"],{
 
+/***/ "./node_modules/raw-loader/index.js!./src/app/app.component.html":
+/*!**************************************************************!*\
+  !*** ./node_modules/raw-loader!./src/app/app.component.html ***!
+  \**************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = "<div>\n    <app-nav></app-nav>\n    <router-outlet *ngIf=\"isOnline;else isOffline\"></router-outlet>\n    <ng-template #isOffline>\n        <div>\n            <p class=\"offline-error\">{{'offlineMessage' | translate}}&nbsp;&nbsp;&nbsp;<span>:&nbsp;)</span></p>\n        </div>\n    </ng-template>\n</div>\n<app-footer></app-footer>"
+
+/***/ }),
+
+/***/ "./node_modules/raw-loader/index.js!./src/app/core/error404/error-404.component.html":
+/*!**********************************************************************************!*\
+  !*** ./node_modules/raw-loader!./src/app/core/error404/error-404.component.html ***!
+  \**********************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = "<h1 class=\"header__title\">{{'error404' | translate}}</h1>\n<p class=\"explanation\">{{'mayTheForce' | translate}}</p>\n<img src=\"assets/images/404.gif\">"
+
+/***/ }),
+
+/***/ "./node_modules/raw-loader/index.js!./src/app/core/footer/footer.component.html":
+/*!*****************************************************************************!*\
+  !*** ./node_modules/raw-loader!./src/app/core/footer/footer.component.html ***!
+  \*****************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = "<footer>\n    <div fxFlex fxLayout=\"row\" fxLayout.xs=\"column\" fxLayoutAlign=\"center center\"\n         class.xs=\"footer-xs\">\n        <div fxFlex=\"33\">\n            <span>{{ 'applicationName' | translate }}</span>\n        </div>\n        <div fxFlex=\"33\" class=\"text--center\">\n        </div>\n        <div fxFlex class=\"text--right\" class.xs=\"footer-xs\">\n        </div>\n    </div>\n</footer>\n"
+
+/***/ }),
+
+/***/ "./node_modules/raw-loader/index.js!./src/app/core/nav/nav.component.html":
+/*!***********************************************************************!*\
+  !*** ./node_modules/raw-loader!./src/app/core/nav/nav.component.html ***!
+  \***********************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = "<header>\n    <nav>\n        <div fxFlex fxLayout=\"row\" fxLayout.xs=\"column\" fxLayoutAlign=\"center center\">\n            <div fxFlex>\n                <a mat-raised-button *ngFor=\"let item of menuItems\" routerLink=\"{{item.link}}\">\n                    {{item.name | uppercase}}\n                </a>\n            </div>\n            <div fxFlex class=\"text--right\">\n                <!--button mat-icon-button [matMenuTriggerFor]=\"matmenu\">\n                    <mat-icon>public</mat-icon>\n                </button>\n                <mat-menu #matmenu=\"matMenu\">\n                    <button mat-menu-item (click)=\"changeLanguage('zh')\">\n                        <mat-icon>flag</mat-icon>\n                        <span>\n                            Chinese\n                        </span>\n                    </button>\n                    <button mat-menu-item (click)=\"changeLanguage('en')\">\n                        <mat-icon>flag</mat-icon>\n                        <span>\n                            English\n                        </span>\n                    </button>\n                    <button mat-menu-item (click)=\"changeLanguage('es')\">\n                        <mat-icon>flag</mat-icon>\n                        <span>\n                            Español\n                        </span>\n                    </button>\n                    <button mat-menu-item (click)=\"changeLanguage('pt-br')\">\n                        <mat-icon>flag</mat-icon>\n                        <span>\n                            Português\n                        </span>\n                    </button>\n                </mat-menu-->\n                <a class=\"icon__image\" href=\"{{appConfig.repositoryURL}}\" rel=\"noopener\">\n                    <img src=\"assets/images/github-circle-white-transparent.svg\">\n                </a>\n            </div>\n        </div>\n    </nav>\n    <section class=\"progress-bar\">\n        <mat-progress-bar [color]=\"'primary'\" [mode]=\"progressBarMode\">\n        </mat-progress-bar>\n    </section>\n</header>"
+
+/***/ }),
+
 /***/ "./node_modules/webpack/buildin/global.js":
 /*!***********************************!*\
   !*** (webpack)/buildin/global.js ***!
@@ -16,7 +60,7 @@ g = (function() {
 
 try {
 	// This works if eval is allowed (see CSP)
-	g = g || Function("return this")() || (1, eval)("this");
+	g = g || new Function("return this")();
 } catch (e) {
 	// This works if the window reference is available
 	if (typeof window === "object") g = window;
@@ -45,17 +89,17 @@ var map = {
 	]
 };
 function webpackAsyncContext(req) {
-	var ids = map[req];
-	if(!ids) {
+	if(!__webpack_require__.o(map, req)) {
 		return Promise.resolve().then(function() {
-			var e = new Error('Cannot find module "' + req + '".');
+			var e = new Error("Cannot find module '" + req + "'");
 			e.code = 'MODULE_NOT_FOUND';
 			throw e;
 		});
 	}
+
+	var ids = map[req], id = ids[0];
 	return __webpack_require__.e(ids[1]).then(function() {
-		var module = __webpack_require__(ids[0]);
-		return module;
+		return __webpack_require__(id);
 	});
 }
 webpackAsyncContext.keys = function webpackAsyncContextKeys() {
@@ -114,17 +158,6 @@ var AppRoutingModule = /** @class */ (function () {
 }());
 
 
-
-/***/ }),
-
-/***/ "./src/app/app.component.html":
-/*!************************************!*\
-  !*** ./src/app/app.component.html ***!
-  \************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = "<div>\r\n    <app-nav></app-nav>\r\n    <router-outlet *ngIf=\"isOnline;else isOffline\"></router-outlet>\r\n    <ng-template #isOffline>\r\n        <div>\r\n            <p class=\"offline-error\">{{'offlineMessage' | translate}}&nbsp;&nbsp;&nbsp;<span>:&nbsp;)</span></p>\r\n        </div>\r\n    </ng-template>\r\n</div>\r\n<app-footer></app-footer>"
 
 /***/ }),
 
@@ -202,10 +235,17 @@ var AppComponent = /** @class */ (function () {
         }
         return supported;
     };
+    AppComponent.ctorParameters = function () { return [
+        { type: _ngx_translate_core__WEBPACK_IMPORTED_MODULE_1__["TranslateService"] },
+        { type: _angular_platform_browser__WEBPACK_IMPORTED_MODULE_2__["Title"] },
+        { type: _angular_platform_browser__WEBPACK_IMPORTED_MODULE_2__["Meta"] },
+        { type: _angular_material__WEBPACK_IMPORTED_MODULE_4__["MatSnackBar"] },
+        { type: _angular_router__WEBPACK_IMPORTED_MODULE_3__["Router"] }
+    ]; };
     AppComponent = __decorate([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["Component"])({
             selector: 'app-root',
-            template: __webpack_require__(/*! ./app.component.html */ "./src/app/app.component.html")
+            template: __webpack_require__(/*! raw-loader!./app.component.html */ "./node_modules/raw-loader/index.js!./src/app/app.component.html")
         }),
         __metadata("design:paramtypes", [_ngx_translate_core__WEBPACK_IMPORTED_MODULE_1__["TranslateService"],
             _angular_platform_browser__WEBPACK_IMPORTED_MODULE_2__["Title"],
@@ -404,6 +444,9 @@ var CoreModule = /** @class */ (function () {
     function CoreModule(parentModule) {
         Object(_module_import_guard__WEBPACK_IMPORTED_MODULE_3__["throwIfAlreadyLoaded"])(parentModule, 'CoreModule');
     }
+    CoreModule.ctorParameters = function () { return [
+        { type: CoreModule, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["SkipSelf"] }] }
+    ]; };
     CoreModule = __decorate([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["NgModule"])({
             imports: [
@@ -437,17 +480,6 @@ var CoreModule = /** @class */ (function () {
 
 /***/ }),
 
-/***/ "./src/app/core/error404/error-404.component.html":
-/*!********************************************************!*\
-  !*** ./src/app/core/error404/error-404.component.html ***!
-  \********************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = "<h1 class=\"header__title\">{{'error404' | translate}}</h1>\r\n<p class=\"explanation\">{{'mayTheForce' | translate}}</p>\r\n<img src=\"assets/images/404.gif\">"
-
-/***/ }),
-
 /***/ "./src/app/core/error404/error-404.component.scss":
 /*!********************************************************!*\
   !*** ./src/app/core/error404/error-404.component.scss ***!
@@ -455,7 +487,7 @@ module.exports = "<h1 class=\"header__title\">{{'error404' | translate}}</h1>\r\
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "img {\n  margin-left: auto;\n  margin-right: auto;\n  display: block; }\n\n.explanation {\n  margin: 1rem 0;\n  text-align: center;\n  font-size: 1.2rem;\n  font-weight: 300; }\n"
+module.exports = "img {\n  margin-left: auto;\n  margin-right: auto;\n  display: block;\n}\n\n.explanation {\n  margin: 1rem 0;\n  text-align: center;\n  font-size: 1.2rem;\n  font-weight: 300;\n}\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi9ob21lL3ZvaWQvd29ya3NwYWNlL3RoZWJvcmFrb21wYW5pb25pL2JpcDM5LW5nL3NyYy9hcHAvY29yZS9lcnJvcjQwNC9lcnJvci00MDQuY29tcG9uZW50LnNjc3MiLCIvaG9tZS92b2lkL3dvcmtzcGFjZS90aGVib3Jha29tcGFuaW9uaS9iaXAzOS1uZy9zcmMvc3R5bGVzL19taXhpbnMuc2NzcyIsInNyYy9hcHAvY29yZS9lcnJvcjQwNC9lcnJvci00MDQuY29tcG9uZW50LnNjc3MiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBRUE7RUNnQk0saUJBQUE7RUFDQSxrQkFBQTtFRGZKLGNBQUE7QUVBRjs7QUZHQTtFQUNFLGNBQUE7RUFDQSxrQkFBQTtFQUNBLGlCQUFBO0VBQ0EsZ0JBQUE7QUVBRiIsImZpbGUiOiJzcmMvYXBwL2NvcmUvZXJyb3I0MDQvZXJyb3ItNDA0LmNvbXBvbmVudC5zY3NzIiwic291cmNlc0NvbnRlbnQiOlsiQGltcG9ydCBcIm1peGluc1wiO1xuXG5pbWcge1xuICBAaW5jbHVkZSBwdXNoLS1hdXRvKCk7XG4gIGRpc3BsYXk6IGJsb2NrO1xufVxuXG4uZXhwbGFuYXRpb24ge1xuICBtYXJnaW46IDFyZW0gMDtcbiAgdGV4dC1hbGlnbjogY2VudGVyO1xuICBmb250LXNpemU6IDEuMnJlbTtcbiAgZm9udC13ZWlnaHQ6IDMwMDtcbn0iLCJAaW1wb3J0IFwiY29sb3JzXCI7XG5AaW1wb3J0IFwiZnVuY3Rpb25zXCI7XG5cbkBtaXhpbiBmb250LXNpemUoJHNpemUpIHtcbiAgZm9udC1zaXplOiAkc2l6ZTtcbiAgZm9udC1zaXplOiBjYWxjdWxhdGVSZW0oJHNpemUpO1xufVxuXG5AbWl4aW4gcHVzaC0tYXV0bygkdmVydGljYWxseTogZmFsc2UpIHtcbiAgQGlmICR2ZXJ0aWNhbGx5IHtcbiAgICBtYXJnaW46IHtcbiAgICAgIHRvcDogJHZlcnRpY2FsbHk7XG4gICAgICBib3R0b206ICR2ZXJ0aWNhbGx5O1xuICAgICAgbGVmdDogYXV0bztcbiAgICAgIHJpZ2h0OiBhdXRvO1xuICAgIH1cbiAgfSBAZWxzZSB7XG4gICAgbWFyZ2luOiB7XG4gICAgICBsZWZ0OiBhdXRvO1xuICAgICAgcmlnaHQ6IGF1dG87XG4gICAgfVxuICB9XG59XG5cbkBtaXhpbiBmb250LXJvYm90bygkc2l6ZTogZmFsc2UsICRjb2xvdXI6IGZhbHNlLCAkd2VpZ2h0OiBmYWxzZSwgICRsaDogZmFsc2UpIHtcbiAgZm9udC1mYW1pbHk6ICdSb2JvdG8nLCBIZWx2ZXRpY2EsIEFyaWFsLCBzYW5zLXNlcmlmO1xuICBAaWYgJHNpemUge1xuICAgIGZvbnQtc2l6ZTogJHNpemU7XG4gIH1cbiAgQGlmICRjb2xvdXIge1xuICAgIGNvbG9yOiAkY29sb3VyO1xuICB9XG4gIEBpZiAkd2VpZ2h0IHtcbiAgICBmb250LXdlaWdodDogJHdlaWdodDtcbiAgfVxuICBAaWYgJGxoIHtcbiAgICBsaW5lLWhlaWdodDogJGxoO1xuICB9XG59IiwiaW1nIHtcbiAgbWFyZ2luLWxlZnQ6IGF1dG87XG4gIG1hcmdpbi1yaWdodDogYXV0bztcbiAgZGlzcGxheTogYmxvY2s7XG59XG5cbi5leHBsYW5hdGlvbiB7XG4gIG1hcmdpbjogMXJlbSAwO1xuICB0ZXh0LWFsaWduOiBjZW50ZXI7XG4gIGZvbnQtc2l6ZTogMS4ycmVtO1xuICBmb250LXdlaWdodDogMzAwO1xufSJdfQ== */"
 
 /***/ }),
 
@@ -486,7 +518,7 @@ var Error404Component = /** @class */ (function () {
     Error404Component = __decorate([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["Component"])({
             selector: 'app-error-404',
-            template: __webpack_require__(/*! ./error-404.component.html */ "./src/app/core/error404/error-404.component.html"),
+            template: __webpack_require__(/*! raw-loader!./error-404.component.html */ "./node_modules/raw-loader/index.js!./src/app/core/error404/error-404.component.html"),
             styles: [__webpack_require__(/*! ./error-404.component.scss */ "./src/app/core/error404/error-404.component.scss")]
         }),
         __metadata("design:paramtypes", [])
@@ -498,17 +530,6 @@ var Error404Component = /** @class */ (function () {
 
 /***/ }),
 
-/***/ "./src/app/core/footer/footer.component.html":
-/*!***************************************************!*\
-  !*** ./src/app/core/footer/footer.component.html ***!
-  \***************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = "<footer>\r\n    <div fxFlex fxLayout=\"row\" fxLayout.xs=\"column\" fxLayoutAlign=\"center center\"\r\n         class.xs=\"footer-xs\">\r\n        <div fxFlex=\"33\">\r\n            <span>{{ 'applicationName' | translate }}</span>\r\n        </div>\r\n        <div fxFlex=\"33\" class=\"text--center\">\r\n        </div>\r\n        <div fxFlex class=\"text--right\" class.xs=\"footer-xs\">\r\n        </div>\r\n    </div>\r\n</footer>\r\n"
-
-/***/ }),
-
 /***/ "./src/app/core/footer/footer.component.scss":
 /*!***************************************************!*\
   !*** ./src/app/core/footer/footer.component.scss ***!
@@ -516,7 +537,7 @@ module.exports = "<footer>\r\n    <div fxFlex fxLayout=\"row\" fxLayout.xs=\"col
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "footer {\n  padding: 0.5rem 1rem;\n  color: #ffffff;\n  background: #3f51b5;\n  margin-top: 2rem;\n  position: -webkit-sticky;\n  position: sticky;\n  top: 100%; }\n  footer img {\n    width: 25%; }\n  .footer-xs {\n  text-align: center;\n  padding-top: 1rem; }\n"
+module.exports = "footer {\n  padding: 0.5rem 1rem;\n  color: #ffffff;\n  background: #3f51b5;\n  margin-top: 2rem;\n  position: -webkit-sticky;\n  position: sticky;\n  top: 100%;\n}\nfooter img {\n  width: 25%;\n}\n.footer-xs {\n  text-align: center;\n  padding-top: 1rem;\n}\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi9ob21lL3ZvaWQvd29ya3NwYWNlL3RoZWJvcmFrb21wYW5pb25pL2JpcDM5LW5nL3NyYy9hcHAvY29yZS9mb290ZXIvZm9vdGVyLmNvbXBvbmVudC5zY3NzIiwiL2hvbWUvdm9pZC93b3Jrc3BhY2UvdGhlYm9yYWtvbXBhbmlvbmkvYmlwMzktbmcvc3JjL3N0eWxlcy9fY29sb3JzLnNjc3MiLCJzcmMvYXBwL2NvcmUvZm9vdGVyL2Zvb3Rlci5jb21wb25lbnQuc2NzcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFFQTtFQUNFLG9CQUFBO0VBQ0EsY0NITTtFRElOLG1CQ0hLO0VESUwsZ0JBQUE7RUFDQSx3QkFBQTtFQUFBLGdCQUFBO0VBQ0EsU0FBQTtBRURGO0FGR0U7RUFDRSxVQUFBO0FFREo7QUZLQTtFQUNFLGtCQUFBO0VBQ0EsaUJBQUE7QUVGRiIsImZpbGUiOiJzcmMvYXBwL2NvcmUvZm9vdGVyL2Zvb3Rlci5jb21wb25lbnQuc2NzcyIsInNvdXJjZXNDb250ZW50IjpbIkBpbXBvcnQgXCJtaXhpbnNcIjtcblxuZm9vdGVyIHtcbiAgcGFkZGluZzogY2FsY3VsYXRlUmVtKDhweCkgY2FsY3VsYXRlUmVtKDE2cHgpO1xuICBjb2xvcjogJHNlY29uZGFyeS0tY29sb3I7XG4gIGJhY2tncm91bmQ6ICRwcmltYXJ5LS1jb2xvcjtcbiAgbWFyZ2luLXRvcDogMnJlbTtcbiAgcG9zaXRpb246IHN0aWNreTtcbiAgdG9wOiAxMDAlO1xuXG4gIGltZyB7XG4gICAgd2lkdGg6IDI1JTtcbiAgfVxufVxuXG4uZm9vdGVyLXhzIHtcbiAgdGV4dC1hbGlnbjogY2VudGVyO1xuICBwYWRkaW5nLXRvcDogMXJlbTtcbn1cbiIsIi8vIERlc2NyaXB0aXZlIENvbG9yc1xuJHdoaXRlOiAjZmZmZmZmO1xuJGJsdWU6ICMzZjUxYjU7XG4kcmVkOiAjZGMxNDNjO1xuJGdyZXk6ICNiYmJiYmI7XG4kbGlnaHQtZ3JleTogI2VlZWVlZTtcblxuLy8gRnVuY3Rpb25hbCBDb2xvcnNcbiRwcmltYXJ5LS1jb2xvcjogJGJsdWU7XG4kc2Vjb25kYXJ5LS1jb2xvcjogJHdoaXRlO1xuIiwiZm9vdGVyIHtcbiAgcGFkZGluZzogMC41cmVtIDFyZW07XG4gIGNvbG9yOiAjZmZmZmZmO1xuICBiYWNrZ3JvdW5kOiAjM2Y1MWI1O1xuICBtYXJnaW4tdG9wOiAycmVtO1xuICBwb3NpdGlvbjogc3RpY2t5O1xuICB0b3A6IDEwMCU7XG59XG5mb290ZXIgaW1nIHtcbiAgd2lkdGg6IDI1JTtcbn1cblxuLmZvb3Rlci14cyB7XG4gIHRleHQtYWxpZ246IGNlbnRlcjtcbiAgcGFkZGluZy10b3A6IDFyZW07XG59Il19 */"
 
 /***/ }),
 
@@ -550,10 +571,13 @@ var FooterComponent = /** @class */ (function () {
     FooterComponent.prototype.ngOnInit = function () {
         this.currentLang = this.translateService.currentLang;
     };
+    FooterComponent.ctorParameters = function () { return [
+        { type: _ngx_translate_core__WEBPACK_IMPORTED_MODULE_1__["TranslateService"] }
+    ]; };
     FooterComponent = __decorate([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["Component"])({
             selector: 'app-footer',
-            template: __webpack_require__(/*! ./footer.component.html */ "./src/app/core/footer/footer.component.html"),
+            template: __webpack_require__(/*! raw-loader!./footer.component.html */ "./node_modules/raw-loader/index.js!./src/app/core/footer/footer.component.html"),
             styles: [__webpack_require__(/*! ./footer.component.scss */ "./src/app/core/footer/footer.component.scss")]
         }),
         __metadata("design:paramtypes", [_ngx_translate_core__WEBPACK_IMPORTED_MODULE_1__["TranslateService"]])
@@ -584,17 +608,6 @@ function throwIfAlreadyLoaded(parentModule, moduleName) {
 
 /***/ }),
 
-/***/ "./src/app/core/nav/nav.component.html":
-/*!*********************************************!*\
-  !*** ./src/app/core/nav/nav.component.html ***!
-  \*********************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = "<header>\r\n    <nav>\r\n        <div fxFlex fxLayout=\"row\" fxLayout.xs=\"column\" fxLayoutAlign=\"center center\">\r\n            <div fxFlex>\r\n                <a mat-raised-button *ngFor=\"let item of menuItems\" routerLink=\"{{item.link}}\">\r\n                    {{item.name | uppercase}}\r\n                </a>\r\n            </div>\r\n            <div fxFlex class=\"text--right\">\r\n                <!--button mat-icon-button [matMenuTriggerFor]=\"matmenu\">\r\n                    <mat-icon>public</mat-icon>\r\n                </button>\r\n                <mat-menu #matmenu=\"matMenu\">\r\n                    <button mat-menu-item (click)=\"changeLanguage('zh')\">\r\n                        <mat-icon>flag</mat-icon>\r\n                        <span>\r\n                            Chinese\r\n                        </span>\r\n                    </button>\r\n                    <button mat-menu-item (click)=\"changeLanguage('en')\">\r\n                        <mat-icon>flag</mat-icon>\r\n                        <span>\r\n                            English\r\n                        </span>\r\n                    </button>\r\n                    <button mat-menu-item (click)=\"changeLanguage('es')\">\r\n                        <mat-icon>flag</mat-icon>\r\n                        <span>\r\n                            Español\r\n                        </span>\r\n                    </button>\r\n                    <button mat-menu-item (click)=\"changeLanguage('pt-br')\">\r\n                        <mat-icon>flag</mat-icon>\r\n                        <span>\r\n                            Português\r\n                        </span>\r\n                    </button>\r\n                </mat-menu-->\r\n                <a class=\"icon__image\" href=\"{{appConfig.repositoryURL}}\" rel=\"noopener\">\r\n                    <img src=\"assets/images/github-circle-white-transparent.svg\">\r\n                </a>\r\n            </div>\r\n        </div>\r\n    </nav>\r\n    <section class=\"progress-bar\">\r\n        <mat-progress-bar [color]=\"'primary'\" [mode]=\"progressBarMode\">\r\n        </mat-progress-bar>\r\n    </section>\r\n</header>"
-
-/***/ }),
-
 /***/ "./src/app/core/nav/nav.component.scss":
 /*!*********************************************!*\
   !*** ./src/app/core/nav/nav.component.scss ***!
@@ -602,7 +615,7 @@ module.exports = "<header>\r\n    <nav>\r\n        <div fxFlex fxLayout=\"row\" 
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = ":host(app-nav) {\n  padding-top: 0;\n  padding-bottom: 6.5rem;\n  display: -ms-grid;\n  display: grid; }\n  :host(app-nav) header {\n    position: fixed;\n    z-index: 999;\n    width: 100%; }\n  :host(app-nav) header nav {\n      display: -ms-flexbox;\n      display: flex;\n      -ms-flex-wrap: wrap;\n          flex-wrap: wrap;\n      -ms-flex-align: center;\n          align-items: center;\n      padding: 0.5rem 1rem;\n      color: #ffffff;\n      height: 4rem;\n      background: #3f51b5; }\n  :host(app-nav) header nav .mat-raised-button {\n        color: #3f51b5;\n        margin-right: 1rem; }\n  :host(app-nav) header nav .progress-bar {\n        display: -ms-flexbox;\n        display: flex;\n        -ms-flex-line-pack: center;\n            align-content: center;\n        -ms-flex-align: center;\n            align-items: center;\n        height: 0.3125rem; }\n  :host(app-nav) header nav .icon__image {\n        width: 1.25rem;\n        height: 1.25rem; }\n  :host(app-nav) header nav img {\n        vertical-align: middle; }\n  :host(app-nav) header nav #today {\n        font-size: 0.7rem; }\n  @media (max-width: 807px) {\n  #today {\n    width: 50%; } }\n  @media (max-width: 680px) {\n  :host(app-nav) {\n    padding-top: 0;\n    padding-bottom: 1rem; }\n    :host(app-nav) header {\n      position: relative; }\n      :host(app-nav) header nav {\n        height: 7rem;\n        display: -ms-flexbox;\n        display: flex;\n        padding: 1rem 2rem 0; }\n        :host(app-nav) header nav > div {\n          margin-top: 1rem; }\n        :host(app-nav) header nav #today {\n          margin-top: 1rem; } }\n  @media (max-width: 425px) {\n  :host(app-nav) {\n    padding-bottom: 0; }\n    :host(app-nav) header nav app-search-bar {\n      width: 75%; } }\n"
+module.exports = ":host(app-nav) {\n  padding-top: 0;\n  padding-bottom: 6.5rem;\n  display: grid;\n}\n:host(app-nav) header {\n  position: fixed;\n  z-index: 999;\n  width: 100%;\n}\n:host(app-nav) header nav {\n  display: -ms-flexbox;\n  display: flex;\n  -ms-flex-wrap: wrap;\n      flex-wrap: wrap;\n  -ms-flex-align: center;\n      align-items: center;\n  padding: 0.5rem 1rem;\n  color: #ffffff;\n  height: 4rem;\n  background: #3f51b5;\n}\n:host(app-nav) header nav .mat-raised-button {\n  color: #3f51b5;\n  margin-right: 1rem;\n}\n:host(app-nav) header nav .progress-bar {\n  display: -ms-flexbox;\n  display: flex;\n  -ms-flex-line-pack: center;\n      align-content: center;\n  -ms-flex-align: center;\n      align-items: center;\n  height: 0.3125rem;\n}\n:host(app-nav) header nav .icon__image {\n  width: 1.25rem;\n  height: 1.25rem;\n}\n:host(app-nav) header nav img {\n  vertical-align: middle;\n}\n:host(app-nav) header nav #today {\n  font-size: 0.7rem;\n}\n@media (max-width: 807px) {\n  #today {\n    width: 50%;\n  }\n}\n@media (max-width: 680px) {\n  :host(app-nav) {\n    padding-top: 0;\n    padding-bottom: 1rem;\n  }\n  :host(app-nav) header {\n    position: relative;\n  }\n  :host(app-nav) header nav {\n    height: 7rem;\n    display: -ms-flexbox;\n    display: flex;\n    padding: 1rem 2rem 0;\n  }\n  :host(app-nav) header nav > div {\n    margin-top: 1rem;\n  }\n  :host(app-nav) header nav #today {\n    margin-top: 1rem;\n  }\n}\n@media (max-width: 425px) {\n  :host(app-nav) {\n    padding-bottom: 0;\n  }\n  :host(app-nav) header nav app-search-bar {\n    width: 75%;\n  }\n}\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi9ob21lL3ZvaWQvd29ya3NwYWNlL3RoZWJvcmFrb21wYW5pb25pL2JpcDM5LW5nL3NyYy9hcHAvY29yZS9uYXYvbmF2LmNvbXBvbmVudC5zY3NzIiwic3JjL2FwcC9jb3JlL25hdi9uYXYuY29tcG9uZW50LnNjc3MiLCIvaG9tZS92b2lkL3dvcmtzcGFjZS90aGVib3Jha29tcGFuaW9uaS9iaXAzOS1uZy9zcmMvc3R5bGVzL19jb2xvcnMuc2NzcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFFQTtFQUNFLGNBQUE7RUFDQSxzQkFBQTtFQUNBLGFBQUE7QUNERjtBREdFO0VBQ0UsZUFBQTtFQUNBLFlBQUE7RUFDQSxXQUFBO0FDREo7QURHSTtFQUNFLG9CQUFBO0VBQUEsYUFBQTtFQUNBLG1CQUFBO01BQUEsZUFBQTtFQUNBLHNCQUFBO01BQUEsbUJBQUE7RUFDQSxvQkFBQTtFQUNBLGNFaEJFO0VGaUJGLFlBQUE7RUFDQSxtQkVqQkM7QURnQlA7QURHTTtFQUNFLGNFcEJEO0VGcUJDLGtCQUFBO0FDRFI7QURJTTtFQUNFLG9CQUFBO0VBQUEsYUFBQTtFQUNBLDBCQUFBO01BQUEscUJBQUE7RUFDQSxzQkFBQTtNQUFBLG1CQUFBO0VBQ0EsaUJBQUE7QUNGUjtBREtNO0VBQ0UsY0FBQTtFQUNBLGVBQUE7QUNIUjtBRE1NO0VBQ0Usc0JBQUE7QUNKUjtBRE9NO0VBQ0UsaUJBQUE7QUNMUjtBRFdBO0VBQ0U7SUFDRSxVQUFBO0VDUkY7QUFDRjtBRFdBO0VBQ0U7SUFDRSxjQUFBO0lBQ0Esb0JBQUE7RUNURjtFRFdFO0lBQ0Usa0JBQUE7RUNUSjtFRFdJO0lBQ0UsWUFBQTtJQUNBLG9CQUFBO0lBQUEsYUFBQTtJQUNBLG9CQUFBO0VDVE47RURXTTtJQUNFLGdCQUFBO0VDVFI7RURZTTtJQUNFLGdCQUFBO0VDVlI7QUFDRjtBRGdCQTtFQUNFO0lBQ0UsaUJBQUE7RUNkRjtFRGtCTTtJQUNFLFVBQUE7RUNoQlI7QUFDRiIsImZpbGUiOiJzcmMvYXBwL2NvcmUvbmF2L25hdi5jb21wb25lbnQuc2NzcyIsInNvdXJjZXNDb250ZW50IjpbIkBpbXBvcnQgXCJtaXhpbnNcIjtcblxuOmhvc3QoYXBwLW5hdikge1xuICBwYWRkaW5nLXRvcDogMDtcbiAgcGFkZGluZy1ib3R0b206IDYuNXJlbTtcbiAgZGlzcGxheTogZ3JpZDtcblxuICBoZWFkZXIge1xuICAgIHBvc2l0aW9uOiBmaXhlZDtcbiAgICB6LWluZGV4OiA5OTk7XG4gICAgd2lkdGg6IDEwMCU7XG5cbiAgICBuYXYge1xuICAgICAgZGlzcGxheTogZmxleDtcbiAgICAgIGZsZXgtd3JhcDogd3JhcDtcbiAgICAgIGFsaWduLWl0ZW1zOiBjZW50ZXI7XG4gICAgICBwYWRkaW5nOiBjYWxjdWxhdGVSZW0oOHB4KSBjYWxjdWxhdGVSZW0oMTZweCk7XG4gICAgICBjb2xvcjogJHNlY29uZGFyeS0tY29sb3I7XG4gICAgICBoZWlnaHQ6IDRyZW07XG4gICAgICBiYWNrZ3JvdW5kOiAkcHJpbWFyeS0tY29sb3I7XG5cbiAgICAgIC5tYXQtcmFpc2VkLWJ1dHRvbiB7XG4gICAgICAgIGNvbG9yOiAkcHJpbWFyeS0tY29sb3I7XG4gICAgICAgIG1hcmdpbi1yaWdodDogMXJlbTtcbiAgICAgIH1cblxuICAgICAgLnByb2dyZXNzLWJhciB7XG4gICAgICAgIGRpc3BsYXk6IGZsZXg7XG4gICAgICAgIGFsaWduLWNvbnRlbnQ6IGNlbnRlcjtcbiAgICAgICAgYWxpZ24taXRlbXM6IGNlbnRlcjtcbiAgICAgICAgaGVpZ2h0OiBjYWxjdWxhdGVSZW0oNXB4KTtcbiAgICAgIH1cblxuICAgICAgLmljb25fX2ltYWdlIHtcbiAgICAgICAgd2lkdGg6IGNhbGN1bGF0ZVJlbSgyMHB4KTtcbiAgICAgICAgaGVpZ2h0OiBjYWxjdWxhdGVSZW0oMjBweCk7XG4gICAgICB9XG5cbiAgICAgIGltZyB7XG4gICAgICAgIHZlcnRpY2FsLWFsaWduOiBtaWRkbGU7XG4gICAgICB9XG5cbiAgICAgICN0b2RheSB7XG4gICAgICAgIGZvbnQtc2l6ZTogMC43cmVtO1xuICAgICAgfVxuICAgIH1cbiAgfVxufVxuXG5AbWVkaWEgKG1heC13aWR0aDogODA3cHgpIHtcbiAgI3RvZGF5IHtcbiAgICB3aWR0aDogNTAlO1xuICB9XG59XG5cbkBtZWRpYSAobWF4LXdpZHRoOiA2ODBweCkge1xuICA6aG9zdChhcHAtbmF2KSB7XG4gICAgcGFkZGluZy10b3A6IDA7XG4gICAgcGFkZGluZy1ib3R0b206IDFyZW07XG5cbiAgICBoZWFkZXIge1xuICAgICAgcG9zaXRpb246IHJlbGF0aXZlO1xuXG4gICAgICBuYXYge1xuICAgICAgICBoZWlnaHQ6IDdyZW07XG4gICAgICAgIGRpc3BsYXk6IGZsZXg7XG4gICAgICAgIHBhZGRpbmc6IDFyZW0gMnJlbSAwO1xuXG4gICAgICAgID4gZGl2IHtcbiAgICAgICAgICBtYXJnaW4tdG9wOiAxcmVtO1xuICAgICAgICB9XG5cbiAgICAgICAgI3RvZGF5IHtcbiAgICAgICAgICBtYXJnaW4tdG9wOiAxcmVtO1xuICAgICAgICB9XG4gICAgICB9XG4gICAgfVxuICB9XG59XG5cbkBtZWRpYSAobWF4LXdpZHRoOiA0MjVweCkge1xuICA6aG9zdChhcHAtbmF2KSB7XG4gICAgcGFkZGluZy1ib3R0b206IDA7XG5cbiAgICBoZWFkZXIge1xuICAgICAgbmF2IHtcbiAgICAgICAgYXBwLXNlYXJjaC1iYXIge1xuICAgICAgICAgIHdpZHRoOiA3NSU7XG4gICAgICAgIH1cbiAgICAgIH1cbiAgICB9XG4gIH1cbn1cbiIsIjpob3N0KGFwcC1uYXYpIHtcbiAgcGFkZGluZy10b3A6IDA7XG4gIHBhZGRpbmctYm90dG9tOiA2LjVyZW07XG4gIGRpc3BsYXk6IGdyaWQ7XG59XG46aG9zdChhcHAtbmF2KSBoZWFkZXIge1xuICBwb3NpdGlvbjogZml4ZWQ7XG4gIHotaW5kZXg6IDk5OTtcbiAgd2lkdGg6IDEwMCU7XG59XG46aG9zdChhcHAtbmF2KSBoZWFkZXIgbmF2IHtcbiAgZGlzcGxheTogZmxleDtcbiAgZmxleC13cmFwOiB3cmFwO1xuICBhbGlnbi1pdGVtczogY2VudGVyO1xuICBwYWRkaW5nOiAwLjVyZW0gMXJlbTtcbiAgY29sb3I6ICNmZmZmZmY7XG4gIGhlaWdodDogNHJlbTtcbiAgYmFja2dyb3VuZDogIzNmNTFiNTtcbn1cbjpob3N0KGFwcC1uYXYpIGhlYWRlciBuYXYgLm1hdC1yYWlzZWQtYnV0dG9uIHtcbiAgY29sb3I6ICMzZjUxYjU7XG4gIG1hcmdpbi1yaWdodDogMXJlbTtcbn1cbjpob3N0KGFwcC1uYXYpIGhlYWRlciBuYXYgLnByb2dyZXNzLWJhciB7XG4gIGRpc3BsYXk6IGZsZXg7XG4gIGFsaWduLWNvbnRlbnQ6IGNlbnRlcjtcbiAgYWxpZ24taXRlbXM6IGNlbnRlcjtcbiAgaGVpZ2h0OiAwLjMxMjVyZW07XG59XG46aG9zdChhcHAtbmF2KSBoZWFkZXIgbmF2IC5pY29uX19pbWFnZSB7XG4gIHdpZHRoOiAxLjI1cmVtO1xuICBoZWlnaHQ6IDEuMjVyZW07XG59XG46aG9zdChhcHAtbmF2KSBoZWFkZXIgbmF2IGltZyB7XG4gIHZlcnRpY2FsLWFsaWduOiBtaWRkbGU7XG59XG46aG9zdChhcHAtbmF2KSBoZWFkZXIgbmF2ICN0b2RheSB7XG4gIGZvbnQtc2l6ZTogMC43cmVtO1xufVxuXG5AbWVkaWEgKG1heC13aWR0aDogODA3cHgpIHtcbiAgI3RvZGF5IHtcbiAgICB3aWR0aDogNTAlO1xuICB9XG59XG5AbWVkaWEgKG1heC13aWR0aDogNjgwcHgpIHtcbiAgOmhvc3QoYXBwLW5hdikge1xuICAgIHBhZGRpbmctdG9wOiAwO1xuICAgIHBhZGRpbmctYm90dG9tOiAxcmVtO1xuICB9XG4gIDpob3N0KGFwcC1uYXYpIGhlYWRlciB7XG4gICAgcG9zaXRpb246IHJlbGF0aXZlO1xuICB9XG4gIDpob3N0KGFwcC1uYXYpIGhlYWRlciBuYXYge1xuICAgIGhlaWdodDogN3JlbTtcbiAgICBkaXNwbGF5OiBmbGV4O1xuICAgIHBhZGRpbmc6IDFyZW0gMnJlbSAwO1xuICB9XG4gIDpob3N0KGFwcC1uYXYpIGhlYWRlciBuYXYgPiBkaXYge1xuICAgIG1hcmdpbi10b3A6IDFyZW07XG4gIH1cbiAgOmhvc3QoYXBwLW5hdikgaGVhZGVyIG5hdiAjdG9kYXkge1xuICAgIG1hcmdpbi10b3A6IDFyZW07XG4gIH1cbn1cbkBtZWRpYSAobWF4LXdpZHRoOiA0MjVweCkge1xuICA6aG9zdChhcHAtbmF2KSB7XG4gICAgcGFkZGluZy1ib3R0b206IDA7XG4gIH1cbiAgOmhvc3QoYXBwLW5hdikgaGVhZGVyIG5hdiBhcHAtc2VhcmNoLWJhciB7XG4gICAgd2lkdGg6IDc1JTtcbiAgfVxufSIsIi8vIERlc2NyaXB0aXZlIENvbG9yc1xuJHdoaXRlOiAjZmZmZmZmO1xuJGJsdWU6ICMzZjUxYjU7XG4kcmVkOiAjZGMxNDNjO1xuJGdyZXk6ICNiYmJiYmI7XG4kbGlnaHQtZ3JleTogI2VlZWVlZTtcblxuLy8gRnVuY3Rpb25hbCBDb2xvcnNcbiRwcmltYXJ5LS1jb2xvcjogJGJsdWU7XG4kc2Vjb25kYXJ5LS1jb2xvcjogJHdoaXRlO1xuIl19 */"
 
 /***/ }),
 
@@ -678,10 +691,15 @@ var NavComponent = /** @class */ (function () {
             }
         });
     };
+    NavComponent.ctorParameters = function () { return [
+        { type: undefined, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"], args: [_config_app_config__WEBPACK_IMPORTED_MODULE_2__["APP_CONFIG"],] }] },
+        { type: _shared_progress_bar_service__WEBPACK_IMPORTED_MODULE_3__["ProgressBarService"] },
+        { type: _ngx_translate_core__WEBPACK_IMPORTED_MODULE_1__["TranslateService"] }
+    ]; };
     NavComponent = __decorate([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["Component"])({
             selector: 'app-nav',
-            template: __webpack_require__(/*! ./nav.component.html */ "./src/app/core/nav/nav.component.html"),
+            template: __webpack_require__(/*! raw-loader!./nav.component.html */ "./node_modules/raw-loader/index.js!./src/app/core/nav/nav.component.html"),
             styles: [__webpack_require__(/*! ./nav.component.scss */ "./src/app/core/nav/nav.component.scss")]
         }),
         __param(0, Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["Inject"])(_config_app_config__WEBPACK_IMPORTED_MODULE_2__["APP_CONFIG"])),
@@ -799,6 +817,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ProgressInterceptor", function() { return ProgressInterceptor; });
 /* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! rxjs/operators */ "./node_modules/rxjs/_esm5/operators/index.js");
 /* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/common/http */ "./node_modules/@angular/common/fesm5/http.js");
+/* harmony import */ var _core_shared_progress_bar_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../core/shared/progress-bar.service */ "./src/app/core/shared/progress-bar.service.ts");
+
 
 
 var ProgressInterceptor = /** @class */ (function () {
@@ -816,6 +836,9 @@ var ProgressInterceptor = /** @class */ (function () {
             _this.progressBarService.decrease();
         }));
     };
+    ProgressInterceptor.ctorParameters = function () { return [
+        { type: _core_shared_progress_bar_service__WEBPACK_IMPORTED_MODULE_2__["ProgressBarService"] }
+    ]; };
     return ProgressInterceptor;
 }());
 
@@ -959,6 +982,7 @@ var SharedModule = /** @class */ (function () {
             providers: []
         };
     };
+    var SharedModule_1;
     SharedModule = SharedModule_1 = __decorate([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["NgModule"])({
             imports: [
@@ -974,7 +998,6 @@ var SharedModule = /** @class */ (function () {
         })
     ], SharedModule);
     return SharedModule;
-    var SharedModule_1;
 }());
 
 
@@ -1031,7 +1054,7 @@ Object(_angular_platform_browser_dynamic__WEBPACK_IMPORTED_MODULE_1__["platformB
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(/*! C:\workspace-playground\bip39-ng\src\main.ts */"./src/main.ts");
+module.exports = __webpack_require__(/*! /home/void/workspace/theborakompanioni/bip39-ng/src/main.ts */"./src/main.ts");
 
 
 /***/ })
