@@ -3,7 +3,7 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { MatDialog } from '@angular/material';
 import { AppConfig } from '../../config/app.config';
 import { Router } from '@angular/router';
-import { LoggerService } from '../../core/shared/logger.service';
+import { BlockchainInfoServiceService } from '../../core/shared/blockchain-info-service.service';
 import { HttpClient } from '@angular/common/http';
 
 
@@ -29,7 +29,7 @@ export class MainFrontComponent implements OnInit {
 
   constructor(private router: Router,
     private formBuilder: FormBuilder,
-    private httpClient: HttpClient) {
+    private blockchainInfo: BlockchainInfoServiceService) {
     this.mnemonicArray = [];
   }
 
@@ -71,11 +71,11 @@ export class MainFrontComponent implements OnInit {
           addresses: addresses,
         };
       }),
-      flatMap(foo => this.fetchReceivedByAddress(address)),
+      flatMap(foo => this.blockchainInfo.fetchReceivedByAddress(address)),
       delay(1250),
       tap(received => this.result.received = received),
       filter(received => received > 0),
-      flatMap(foo => this.fetchAddressBalance(address)),
+      flatMap(foo => this.blockchainInfo.fetchAddressBalance(address)),
       delay(750),
       tap(balance => this.result.balance = balance),
       delay(300)
@@ -104,20 +104,6 @@ export class MainFrontComponent implements OnInit {
     ]);
 
     return account;
-  }
-
-
-  private fetchReceivedByAddress(address: string) {
-    const url_prefix = 'https://blockchain.info/q/getreceivedbyaddress/';
-    const check_url = url_prefix + address;
-
-    return this.httpClient.get(check_url);
-  }
-  private fetchAddressBalance(address: string) {
-    const url_prefix = 'https://blockchain.info/q/addressbalance/';
-    const check_url = url_prefix + address;
-
-    return this.httpClient.get(check_url);
   }
 
   /*iAmFeelingLucky() {

@@ -2,13 +2,16 @@ import { NgModule, Optional, SkipSelf } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { throwIfAlreadyLoaded } from './module-import-guard';
-import { LoggerService } from './shared/logger.service';
 import { NavComponent } from './nav/nav.component';
 import { FooterComponent } from './footer/footer.component';
 import { SharedModule } from '../shared/modules/shared.module';
 import { RouterModule } from '@angular/router';
 import { Error404Component } from './error404/error-404.component';
+import { LoggerService } from './shared/logger.service';
 import { ProgressBarService } from './shared/progress-bar.service';
+import { BlockchainInfoServiceService } from './shared/blockchain-info-service.service';
+
+
 
 @NgModule({
   imports: [
@@ -29,7 +32,8 @@ import { ProgressBarService } from './shared/progress-bar.service';
   ],
   providers: [
     LoggerService,
-    ProgressBarService
+    ProgressBarService,
+    BlockchainInfoServiceService
   ]
 })
 
