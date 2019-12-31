@@ -93,7 +93,7 @@ export class MainFrontComponent implements OnInit {
   }
 
   createAccountFromMnemonic(mnemonic: string) {
-    const seed = Bip39.mnemonicToSeed(mnemonic);
+    const seed = Bip39.mnemonicToSeedSync(mnemonic);
     const m = Bitcoin.HDNode.fromSeedBuffer(seed);
     const i = m.deriveHardened(0);
     const external = i.derive(0);
