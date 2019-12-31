@@ -8,10 +8,15 @@ import { HttpClient } from '@angular/common/http';
 
 
 import * as Bitcoin from 'bitcoinjs-lib';
+import * as Bip32 from 'bip32';
 import * as Bip39 from 'bip39';
-import * as Bip32utils from 'bip32-utils';
 import { filter, tap, map, flatMap, delay } from 'rxjs/operators';
 import { of } from 'rxjs';
+
+
+function getAddress(node: any, network?: any): string {
+  return Bitcoin.payments.p2pkh({ pubkey: node.publicKey, network }).address!;
+}
 
 @Component({
   selector: 'app-main-front',
@@ -58,17 +63,22 @@ export class MainFrontComponent implements OnInit {
     this.loading = true;
     this.result = null;
 
-    const account = this.createAccountFromMnemonic(mnemonic);
-    const addresses = account.getAllAddresses();
-    const address = addresses[0];
+    // see BIP44 for why this path was chosen
+    // @link https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki 
+    const path = "m/44'/0'/0'/0/0";
 
+    const seed = Bip39.mnemonicToSeedSync(mnemonic);
+    const root = Bip32.fromSeed(seed);
+
+    const child1 = root.derivePath(path);
+    const address = getAddress(child1);
+    
     of(1).pipe(
       delay(1000),
       tap(foo => {
         this.result = {
           mnemonic: mnemonic,
           address: address,
-          addresses: addresses,
         };
       }),
       flatMap(foo => this.blockchainInfo.fetchReceivedByAddress(address)),
@@ -90,20 +100,6 @@ export class MainFrontComponent implements OnInit {
       this.result.received = this.result.received || 0;
       this.result.balance = this.result.balance || 0;
     });
-  }
-
-  createAccountFromMnemonic(mnemonic: string) {
-    const seed = Bip39.mnemonicToSeedSync(mnemonic);
-    const m = Bitcoin.HDNode.fromSeedBuffer(seed);
-    const i = m.deriveHardened(0);
-    const external = i.derive(0);
-    const internal = i.derive(1);
-    const account = new Bip32utils.Account([
-      new Bip32utils.Chain(external.neutered()),
-      new Bip32utils.Chain(internal.neutered())
-    ]);
-
-    return account;
   }
 
   /*iAmFeelingLucky() {
