@@ -3,6 +3,7 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { MatDialog } from '@angular/material';
 import { AppConfig } from '../../config/app.config';
 import { Router } from '@angular/router';
+import { Subject } from 'rxjs/Subject';
 import { BlockchainInfoServiceService } from '../../core/shared/blockchain-info-service.service';
 import { HttpClient } from '@angular/common/http';
 
@@ -10,8 +11,12 @@ import { HttpClient } from '@angular/common/http';
 import * as Bitcoin from 'bitcoinjs-lib';
 import * as Bip32 from 'bip32';
 import * as Bip39 from 'bip39';
-import { filter, tap, map, flatMap, delay } from 'rxjs/operators';
+import { filter, tap, map, flatMap, delay, throttleTime, distinctUntilChanged } from 'rxjs/operators';
 import { of } from 'rxjs';
+
+function buf2hex(buffer) { // buffer is an ArrayBuffer
+  return Array.prototype.map.call(new Uint8Array(buffer), x => ('00' + x.toString(16)).slice(-2)).join('');
+}
 
 
 function getAddress(node: any, network?: any): string {
@@ -27,36 +32,52 @@ function getAddress(node: any, network?: any): string {
 export class MainFrontComponent implements OnInit {
 
   result: any;
-  mnemonicArray: Array<String>;
+  mnemonicArray: Array<string>;
+  searchFieldValue: string;
+
+  mnemonicInputChangedSubject: Subject<string> = new Subject<string>();
+  searchInputChangedSubject: Subject<string> = new Subject<string>();
 
   tryCounter = 0;
+  feelingLuckyCounterClicked = 0;
   loading = false;
+
+  wordlist: string = Bip39.getDefaultWordlist();
 
   constructor(private router: Router,
     private formBuilder: FormBuilder,
     private blockchainInfo: BlockchainInfoServiceService) {
     this.mnemonicArray = [];
+    this.searchFieldValue = '';
   }
 
   ngOnInit() {
+    this.searchInputChangedSubject.pipe(
+      throttleTime(100)
+    ).subscribe(searchFieldValue => {
+      this.searchFieldValue = searchFieldValue;
+      this.mnemonicInputChangedSubject.next(searchFieldValue);
+    });
+
+    this.mnemonicInputChangedSubject.pipe(
+    ).subscribe(mnemonic => {
+      console.log('onChangeMnemonic');
+      this.mnemonicArray = mnemonic.split(' ');
+      this.searchFieldValue = mnemonic;
+
+      this.generateResult(mnemonic);
+    });
   }
 
-  generateNewRandomMnemonic() {
-    const mnemonic = Bip39.generateMnemonic();
-    this.mnemonicArray = mnemonic.split(' ');
-    return mnemonic;
-  }
-
-  onChangeMnemonic() {
-    const mnemonic = this.mnemonicArray.join(' ');
-
-    this.generateResult(mnemonic);
+  onChangeSearchInput(mnemonic: string) {
+    this.searchInputChangedSubject.next(mnemonic);
   }
 
   buttonIamFeelingLuckyClicked() {
-    const mnemonic = this.generateNewRandomMnemonic();
+    this.feelingLuckyCounterClicked++;
 
-    this.generateResult(mnemonic);
+    const mnemonic = Bip39.generateMnemonic();
+    this.mnemonicInputChangedSubject.next(mnemonic);
   }
 
   generateResult(mnemonic: string) {
@@ -65,19 +86,23 @@ export class MainFrontComponent implements OnInit {
 
     // see BIP44 for why this path was chosen
     // @link https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki 
-    const path = "m/44'/0'/0'/0/0";
+    const pathBip44 = `m/44'/0'/0'/0/0`; // legacy addresses 1xxx
+    const pathBip49 = `m/49'/0'/0'/0/0`; // legacy addresses 3xxx
+    const pathBip84 = `m/84'/0'/0'/0/0`; // legacy addresses bc1xxx
 
     const seed = Bip39.mnemonicToSeedSync(mnemonic);
     const root = Bip32.fromSeed(seed);
 
-    const child1 = root.derivePath(path);
-    const address = getAddress(child1);
-    
+    const childBip44 = root.derivePath(pathBip44);
+    const address = getAddress(childBip44);
+
     of(1).pipe(
-      delay(1000),
+      throttleTime(10),
+      delay(300),
       tap(foo => {
         this.result = {
-          mnemonic: mnemonic,
+          mnemonic: mnemonic || '(empty)',
+          seedHex: '0x' + buf2hex(seed),
           address: address,
         };
       }),

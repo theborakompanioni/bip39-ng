@@ -1,35 +1,64 @@
 <div class="container mat-typography">
   <h1>Generate random Bitcoin address and see if you are a winner</h1>
 
-  <div>
-    <div *ngIf="tryCounter >= 3">
-      <mat-card style="margin: 1em;">
-        <p style="font-size: 1.2em; line-height: normal;">
-          You have had your fair chance today.
-          <a routerLink="/faq" fragment="faq-1">It won't get any better</a>. Do not get blinded by trying to get rich quick. Learn how Bitcoin works and try your
-          best to integrate it in the real world. Bitcoin needs adoption. Maybe you are able to use it in you next project?
-          Talk and share your knowledge with others. Spread the word.
-        </p>
-      </mat-card>
-    </div>
-    
-    <div style="text-align: center" [hidden]="tryCounter >= 9000">
-      <button mat-raised-button color="primary" (click)="buttonIamFeelingLuckyClicked()" class="i-am-feeling-lucky-button" [disabled]="loading">
-        <span *ngIf="tryCounter === 0">I'm feeling lucky!</span>
-        <span *ngIf="tryCounter === 1">Try again!</span>
-        <span *ngIf="tryCounter === 2">And again!</span>
-        <span *ngIf="tryCounter === 3">And again ...</span>
-        <span *ngIf="tryCounter === 4">Again?</span>
-        <span *ngIf="tryCounter === 5">Try again!</span>
-        <span *ngIf="tryCounter === 6">I'm feeling lucky!</span>
-        <span *ngIf="tryCounter > 6">Try again!</span>
+  <div>    
+    <div fxLayout="row wrap" fxLayoutAlign="center center">
+      <div fxFlex="100%" fxFlex.gt-sm="80%" fxFlex.gt-md="70%" fxFlex.gt-md="50%"  style="text-align: center" >
+        
+        <div *ngIf="!(tryCounter > 3)" >
+          <button mat-raised-button color="primary"
+          (click)="buttonIamFeelingLuckyClicked()" 
+          class="i-am-feeling-lucky-button" 
+          [disabled]="loading">
+            <span *ngIf="feelingLuckyCounterClicked === 0">I'm feeling lucky!</span>
+            <span *ngIf="feelingLuckyCounterClicked === 1">Try again!</span>
+            <span *ngIf="feelingLuckyCounterClicked === 2">And again!</span>
+            <span *ngIf="feelingLuckyCounterClicked === 3">And again ...</span>
+            <span *ngIf="feelingLuckyCounterClicked === 4">Again?</span>
+            <span *ngIf="feelingLuckyCounterClicked === 5">Try again!</span>
+            <span *ngIf="feelingLuckyCounterClicked === 6">I'm feeling lucky!</span>
+            <span *ngIf="feelingLuckyCounterClicked > 6">Try again!</span>
+          </button>
+        </div>
 
-        <mat-spinner *ngIf="loading" style="margin: auto;" diameter="15"></mat-spinner>
-      </button>
+        <div *ngIf="tryCounter > 3">
+          <mat-card style="margin: 1em;">
+            <p style="font-size: 1.2em; line-height: normal;">
+              You have had your fair chance today.
+              <a routerLink="/faq" fragment="faq-1">It won't get any better</a>. Do not get blinded by trying to get rich quick. Learn how Bitcoin works and try your
+              best to integrate it in the real world. Bitcoin needs adoption. Maybe you are able to use it in you next project?
+              Talk and share your knowledge with others. Spread the word.
+            </p>
+          </mat-card>
+        </div>
+        
+      </div>
+    </div>
+
+    <div fxLayout="row wrap" fxLayoutAlign="center center">
+      <div fxFlex="100%" fxFlex.gt-sm="80%" fxFlex.gt-md="70%" fxFlex.gt-md="50%">
+          <mat-form-field appearance="outline" style="width: 100%;">
+            <mat-label>Search</mat-label>
+            <input matInput [ngModel]="searchFieldValue" (keyup.enter)="onChangeSearchInput($event.target.value)" />
+            <mat-spinner matSuffix *ngIf="loading" diameter="15" style="margin: auto 10px 4px 10px;"></mat-spinner>
+          </mat-form-field>
+      </div>
     </div>
     
+    <div style="text-align: center; margin-bottom: 3rem">
+      <p>
+        <button mat-raised-button (click)="!loading && onChangeSearchInput(searchFieldValue)">Search</button>
+        <button mat-raised-button color="primary" (click)="!loading && buttonIamFeelingLuckyClicked()">
+          <span>I'm feeling lucky!</span>
+        </button>
+      </p>
+    </div>
+
     <div *ngIf="result">
-      <mat-form-field class="full-width" appearance="fill" style="text-align: center;">
+      <p *ngIf="result.mnemonic">
+        Results for search term: {{result.mnemonic}}
+      </p>
+      <mat-form-field class="full-width" appearance="fill" style="text-align: center;" *ngIf="result.address">
         <mat-label>Address</mat-label>
         <input style="font-size: 150%" matInput type="text" placeholder="" [value]="result.address" disabled/>
       </mat-form-field>
@@ -38,14 +67,14 @@
         <p style="background-color: red; padding: 1em;">{{ result.error.message }}</p>
       </div>
 
-      <p style="text-align: center; font-size: 1.5em; margin: 1em; line-height: normal;">
+      <p style="text-align: center; font-size: 1.5em; margin: 1em; line-height: normal;" *ngIf="result.received !== undefined">
         <span *ngIf="result.received === 0">Address never received anything.</span>
         <span *ngIf="result.received > 0">Found address with
           <code>received > 0</code>
         </span>
       </p>
 
-      <p style="text-align: center; font-size: 3em; margin: 1em; line-height: normal;">
+      <p style="text-align: center; font-size: 3em; margin: 1em; line-height: normal;" *ngIf="result.balance !== undefined">
         <span *ngIf="result.balance === 0">Balance is 0 :(</span>
         <span *ngIf="result.balance > 0">Found address with
           <code>balance > 0</code>
@@ -55,15 +84,18 @@
 
     <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
     
-    <div [hidden]="!result">
-      <mat-card style="margin: 1em;" [hidden]="!result">
+    <div *ngIf="result" [hidden]="loading || result.mnemonic === undefined">
+      <mat-card style="margin: 1em;">
         <h3>Private Key Mnemonic</h3>
-        <div class="word-input-container" fxLayout="row wrap">
+        <div class="word-input-container" fxLayout="row wrap" *ngIf="mnemonicArray.length !== 12">
+          Input is not a valid BIP39 mnemonic seed.
+        </div>
+        <div class="word-input-container" fxLayout="row wrap" *ngIf="mnemonicArray.length === 12">
           <div fxFlex="100%" fxFlex.gt-sm="32%" fxFlex.gt-md="24%" fxFlex.gt-md="16.5%" *ngFor="let i of [0,1,2,3,4,5,6,7,8,9,10,11]">
             <span>
               <mat-form-field class="example-form-field-{{i}}" appearance="fill">
                 <mat-label>Word {{i+1}}</mat-label>
-                <input matInput type="text" placeholder="Word {{i+1}}" [(ngModel)]="mnemonicArray[i]" (change)="onChangeMnemonic()" disabled/>
+                <input matInput type="text" placeholder="Word {{i+1}}" [value]="mnemonicArray[i]" disabled/>
               </mat-form-field>
             </span>
           </div>
