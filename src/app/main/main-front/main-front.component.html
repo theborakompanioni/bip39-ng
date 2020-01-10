@@ -56,7 +56,10 @@
 
     <div *ngIf="result">
       <p *ngIf="result.mnemonic">
-        Results for search term: {{result.mnemonic}}
+          <span class="bold">Results for search term:</span> {{result.mnemonic}}
+      </p>
+      <p *ngIf="result.seedHex">
+        <span class="bold">Seed:</span> {{result.seedHex}}
       </p>
       <mat-form-field class="full-width" appearance="fill" style="text-align: center;" *ngIf="result.address">
         <mat-label>Address</mat-label>
