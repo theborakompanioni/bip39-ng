@@ -11,7 +11,7 @@ import { HttpClient } from '@angular/common/http';
 import * as Bitcoin from 'bitcoinjs-lib';
 import * as Bip32 from 'bip32';
 import * as Bip39 from 'bip39';
-import { filter, tap, map, flatMap, delay, throttleTime, distinctUntilChanged } from 'rxjs/operators';
+import { filter, tap, map, flatMap, delay, throttleTime } from 'rxjs/operators';
 import { of } from 'rxjs';
 
 function buf2hex(buffer) { // buffer is an ArrayBuffer
@@ -19,8 +19,36 @@ function buf2hex(buffer) { // buffer is an ArrayBuffer
 }
 
 
-function getAddress(node: any, network?: any): string {
+function p2pkhAddress(node: any, network?: any): string {
   return Bitcoin.payments.p2pkh({ pubkey: node.publicKey, network }).address!;
+}
+function segwitAdddress(node: any, network?: any): string {
+  const { address } = Bitcoin.payments.p2sh({
+    redeem: Bitcoin.payments.p2wpkh({ pubkey: node.publicKey }),
+  });
+  return address;
+}
+function p2wpkhAddress(node: any, network?: any): string {
+  return Bitcoin.payments.p2wpkh({ pubkey: node.publicKey, network }).address!;
+}
+
+function getAddress(path: string, node: Bip32.BIP32Interface, network?: any): string {
+  if (path.substr(0, `m/44'/`.length) === `m/44'/`) {
+    return p2pkhAddress(node, network);
+  }
+  if (path.substr(0, `m/49'/`.length) === `m/49'/`) {
+    return segwitAdddress(node, network);
+  }
+
+  if (path.substr(0, `m/84'/`.length) === `m/84'/`) {
+    return p2wpkhAddress(node, network);
+  }
+
+  return  p2pkhAddress(node, network);
+}
+
+function buildPath(prefix: string, account: number, change: number, index: number) {
+  return `${prefix}${account}'/${change}/${index}`;
 }
 
 @Component({
@@ -30,10 +58,21 @@ function getAddress(node: any, network?: any): string {
 })
 
 export class MainFrontComponent implements OnInit {
+   // path : = m / purpose' / coin_type' / account' / change / address_index
+   pathPrefixBip44 = `m/44'/0'/`; // addresses 1xxx
+   pathPrefixBip49 = `m/49'/0'/`; // addresses 3xxx
+   pathPrefixBip84 = `m/84'/0'/`; // addresses bc1xxx
+
 
   result: any;
   mnemonicArray: Array<string>;
   searchFieldValue: string;
+
+  pathAccount = 0;
+  pathChange = 0;
+  pathIndex = 0;
+
+  pathPrefix = `${this.pathPrefixBip44}`;
 
   mnemonicInputChangedSubject: Subject<string> = new Subject<string>();
   searchInputChangedSubject: Subject<string> = new Subject<string>();
@@ -43,12 +82,20 @@ export class MainFrontComponent implements OnInit {
   loading = false;
 
   wordlist: string = Bip39.getDefaultWordlist();
+  displayDetailedSettings = false;
 
   constructor(private router: Router,
     private formBuilder: FormBuilder,
     private blockchainInfo: BlockchainInfoServiceService) {
     this.mnemonicArray = [];
     this.searchFieldValue = '';
+  }
+
+  buildPath() {
+    return this.buildPathWithIndex(this.pathIndex);
+  }
+  buildPathWithIndex(index: number) {
+    return buildPath(this.pathPrefix, this.pathAccount, this.pathChange, index);
   }
 
   ngOnInit() {
@@ -84,17 +131,28 @@ export class MainFrontComponent implements OnInit {
     this.loading = true;
     this.result = null;
 
-    // see BIP44 for why this path was chosen
-    // @link https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki 
-    const pathBip44 = `m/44'/0'/0'/0/0`; // legacy addresses 1xxx
-    const pathBip49 = `m/49'/0'/0'/0/0`; // legacy addresses 3xxx
-    const pathBip84 = `m/84'/0'/0'/0/0`; // legacy addresses bc1xxx
-
     const seed = Bip39.mnemonicToSeedSync(mnemonic);
     const root = Bip32.fromSeed(seed);
+    const rootWif = root.toWIF();
+    const masterPrivateKey = root.privateKey;
 
-    const childBip44 = root.derivePath(pathBip44);
-    const address = getAddress(childBip44);
+    const path = this.buildPath();
+    const child = root.derivePath(path);
+    const address = getAddress(path, child);
+
+    const addresses = [{
+      address: address,
+      path: path
+    }];
+    for (let i = 1; i <= 20; i++) {
+      const iPath = this.buildPathWithIndex(i);
+      const iChild = root.derivePath(iPath);
+      const iAddress = getAddress(iPath, iChild);
+      addresses.push({
+        address: iAddress,
+        path: iPath
+      });
+    }
 
     of(1).pipe(
       throttleTime(10),
@@ -103,7 +161,11 @@ export class MainFrontComponent implements OnInit {
         this.result = {
           mnemonic: mnemonic || '(empty)',
           seedHex: '0x' + buf2hex(seed),
+          rootWif: rootWif,
+          masterPrivateKey: '0x' + buf2hex(masterPrivateKey),
           address: address,
+          addresses: addresses,
+          path: path
         };
       }),
       flatMap(foo => this.blockchainInfo.fetchReceivedByAddress(address)),
