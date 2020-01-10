@@ -558,7 +558,7 @@ function getKeySet(keyVals) {
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(Buffer) {
+
 Object.defineProperty(exports, '__esModule', { value: true });
 const typeFields_1 = __webpack_require__(/*! ../../typeFields */ "./node_modules/bip174/src/lib/typeFields.js");
 const range = n => [...Array(n).keys()];
@@ -642,7 +642,6 @@ function canAddToArray(array, item, dupeSet) {
 }
 exports.canAddToArray = canAddToArray;
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../../buffer/index.js */ "./node_modules/buffer/index.js").Buffer))
 
 /***/ }),
 
@@ -654,7 +653,7 @@ exports.canAddToArray = canAddToArray;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(Buffer) {
+
 Object.defineProperty(exports, '__esModule', { value: true });
 const typeFields_1 = __webpack_require__(/*! ../../typeFields */ "./node_modules/bip174/src/lib/typeFields.js");
 function encode(data) {
@@ -665,7 +664,6 @@ function encode(data) {
 }
 exports.encode = encode;
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../../buffer/index.js */ "./node_modules/buffer/index.js").Buffer))
 
 /***/ }),
 
@@ -750,7 +748,7 @@ exports.outputs = outputs;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(Buffer) {
+
 Object.defineProperty(exports, '__esModule', { value: true });
 const typeFields_1 = __webpack_require__(/*! ../../typeFields */ "./node_modules/bip174/src/lib/typeFields.js");
 function decode(keyVal) {
@@ -781,7 +779,6 @@ function canAdd(currentData, newData) {
 }
 exports.canAdd = canAdd;
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../../buffer/index.js */ "./node_modules/buffer/index.js").Buffer))
 
 /***/ }),
 
@@ -793,7 +790,7 @@ exports.canAdd = canAdd;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(Buffer) {
+
 Object.defineProperty(exports, '__esModule', { value: true });
 const typeFields_1 = __webpack_require__(/*! ../../typeFields */ "./node_modules/bip174/src/lib/typeFields.js");
 function decode(keyVal) {
@@ -826,7 +823,6 @@ function canAdd(currentData, newData) {
 }
 exports.canAdd = canAdd;
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../../buffer/index.js */ "./node_modules/buffer/index.js").Buffer))
 
 /***/ }),
 
@@ -838,7 +834,7 @@ exports.canAdd = canAdd;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(Buffer) {
+
 Object.defineProperty(exports, '__esModule', { value: true });
 const typeFields_1 = __webpack_require__(/*! ../../typeFields */ "./node_modules/bip174/src/lib/typeFields.js");
 function decode(keyVal) {
@@ -873,7 +869,6 @@ function canAdd(currentData, newData) {
 }
 exports.canAdd = canAdd;
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../../buffer/index.js */ "./node_modules/buffer/index.js").Buffer))
 
 /***/ }),
 
@@ -885,7 +880,7 @@ exports.canAdd = canAdd;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(Buffer) {
+
 Object.defineProperty(exports, '__esModule', { value: true });
 const typeFields_1 = __webpack_require__(/*! ../../typeFields */ "./node_modules/bip174/src/lib/typeFields.js");
 function decode(keyVal) {
@@ -951,7 +946,6 @@ function canAddToArray(array, item, dupeSet) {
 }
 exports.canAddToArray = canAddToArray;
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../../buffer/index.js */ "./node_modules/buffer/index.js").Buffer))
 
 /***/ }),
 
@@ -963,7 +957,7 @@ exports.canAddToArray = canAddToArray;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(Buffer) {
+
 Object.defineProperty(exports, '__esModule', { value: true });
 const typeFields_1 = __webpack_require__(/*! ../../typeFields */ "./node_modules/bip174/src/lib/typeFields.js");
 function decode(keyVal) {
@@ -994,7 +988,6 @@ function canAdd(currentData, newData) {
 }
 exports.canAdd = canAdd;
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../../buffer/index.js */ "./node_modules/buffer/index.js").Buffer))
 
 /***/ }),
 
@@ -1006,7 +999,7 @@ exports.canAdd = canAdd;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(Buffer) {
+
 Object.defineProperty(exports, '__esModule', { value: true });
 const typeFields_1 = __webpack_require__(/*! ../../typeFields */ "./node_modules/bip174/src/lib/typeFields.js");
 function decode(keyVal) {
@@ -1039,7 +1032,6 @@ function canAdd(currentData, newData) {
 }
 exports.canAdd = canAdd;
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../../buffer/index.js */ "./node_modules/buffer/index.js").Buffer))
 
 /***/ }),
 
@@ -1051,7 +1043,7 @@ exports.canAdd = canAdd;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(Buffer) {
+
 Object.defineProperty(exports, '__esModule', { value: true });
 const typeFields_1 = __webpack_require__(/*! ../../typeFields */ "./node_modules/bip174/src/lib/typeFields.js");
 const tools_1 = __webpack_require__(/*! ../tools */ "./node_modules/bip174/src/lib/converter/tools.js");
@@ -1105,7 +1097,6 @@ function canAdd(currentData, newData) {
 }
 exports.canAdd = canAdd;
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../../buffer/index.js */ "./node_modules/buffer/index.js").Buffer))
 
 /***/ }),
 
@@ -1117,7 +1108,7 @@ exports.canAdd = canAdd;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(Buffer) {
+
 Object.defineProperty(exports, '__esModule', { value: true });
 const range = n => [...Array(n).keys()];
 function makeConverter(TYPE_BYTE) {
@@ -1203,7 +1194,6 @@ function makeConverter(TYPE_BYTE) {
 }
 exports.makeConverter = makeConverter;
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../../buffer/index.js */ "./node_modules/buffer/index.js").Buffer))
 
 /***/ }),
 
@@ -1248,7 +1238,7 @@ exports.makeChecker = makeChecker;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(Buffer) {
+
 Object.defineProperty(exports, '__esModule', { value: true });
 function makeConverter(TYPE_BYTE) {
   function decode(keyVal) {
@@ -1284,7 +1274,6 @@ function makeConverter(TYPE_BYTE) {
 }
 exports.makeConverter = makeConverter;
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../../buffer/index.js */ "./node_modules/buffer/index.js").Buffer))
 
 /***/ }),
 
@@ -1296,7 +1285,7 @@ exports.makeConverter = makeConverter;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(Buffer) {
+
 Object.defineProperty(exports, '__esModule', { value: true });
 function makeConverter(TYPE_BYTE) {
   function decode(keyVal) {
@@ -1334,7 +1323,6 @@ function makeConverter(TYPE_BYTE) {
 }
 exports.makeConverter = makeConverter;
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../../buffer/index.js */ "./node_modules/buffer/index.js").Buffer))
 
 /***/ }),
 
@@ -1346,7 +1334,7 @@ exports.makeConverter = makeConverter;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(Buffer) {
+
 Object.defineProperty(exports, '__esModule', { value: true });
 const varuint = __webpack_require__(/*! ./varint */ "./node_modules/bip174/src/lib/converter/varint.js");
 exports.range = n => [...Array(n).keys()];
@@ -1410,7 +1398,6 @@ function writeUInt64LE(buffer, value, offset) {
 }
 exports.writeUInt64LE = writeUInt64LE;
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../buffer/index.js */ "./node_modules/buffer/index.js").Buffer))
 
 /***/ }),
 
@@ -1422,7 +1409,7 @@ exports.writeUInt64LE = writeUInt64LE;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(Buffer) {
+
 Object.defineProperty(exports, '__esModule', { value: true });
 // Number.MAX_SAFE_INTEGER
 const MAX_SAFE_INTEGER = 9007199254740991;
@@ -1500,7 +1487,6 @@ function encodingLength(_number) {
 }
 exports.encodingLength = encodingLength;
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../buffer/index.js */ "./node_modules/buffer/index.js").Buffer))
 
 /***/ }),
 
@@ -1512,7 +1498,7 @@ exports.encodingLength = encodingLength;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(Buffer) {
+
 Object.defineProperty(exports, '__esModule', { value: true });
 const convert = __webpack_require__(/*! ../converter */ "./node_modules/bip174/src/lib/converter/index.js");
 const tools_1 = __webpack_require__(/*! ../converter/tools */ "./node_modules/bip174/src/lib/converter/tools.js");
@@ -1849,7 +1835,6 @@ function psbtFromKeyVals(
 }
 exports.psbtFromKeyVals = psbtFromKeyVals;
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../buffer/index.js */ "./node_modules/buffer/index.js").Buffer))
 
 /***/ }),
 
@@ -1880,7 +1865,7 @@ __export(__webpack_require__(/*! ./toBuffer */ "./node_modules/bip174/src/lib/pa
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(Buffer) {
+
 Object.defineProperty(exports, '__esModule', { value: true });
 const convert = __webpack_require__(/*! ../converter */ "./node_modules/bip174/src/lib/converter/index.js");
 const tools_1 = __webpack_require__(/*! ../converter/tools */ "./node_modules/bip174/src/lib/converter/tools.js");
@@ -1945,7 +1930,6 @@ function psbtToKeyVals({ globalMap, inputs, outputs }) {
 }
 exports.psbtToKeyVals = psbtToKeyVals;
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../buffer/index.js */ "./node_modules/buffer/index.js").Buffer))
 
 /***/ }),
 
@@ -1957,7 +1941,7 @@ exports.psbtToKeyVals = psbtToKeyVals;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(Buffer) {
+
 Object.defineProperty(exports, '__esModule', { value: true });
 const combiner_1 = __webpack_require__(/*! ./combiner */ "./node_modules/bip174/src/lib/combiner/index.js");
 const parser_1 = __webpack_require__(/*! ./parser */ "./node_modules/bip174/src/lib/parser/index.js");
@@ -2106,7 +2090,6 @@ class Psbt {
 }
 exports.Psbt = Psbt;
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../buffer/index.js */ "./node_modules/buffer/index.js").Buffer))
 
 /***/ }),
 
@@ -2174,7 +2157,7 @@ exports.OUTPUT_TYPE_NAMES = [
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(Buffer) {
+
 Object.defineProperty(exports, '__esModule', { value: true });
 const converter = __webpack_require__(/*! ./converter */ "./node_modules/bip174/src/lib/converter/index.js");
 function checkForInput(inputs, inputIndex) {
@@ -2313,7 +2296,6 @@ function defaultLocktimeSetter(locktime, txBuf) {
 }
 exports.defaultLocktimeSetter = defaultLocktimeSetter;
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../buffer/index.js */ "./node_modules/buffer/index.js").Buffer))
 
 /***/ }),
 
@@ -2325,7 +2307,7 @@ exports.defaultLocktimeSetter = defaultLocktimeSetter;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(Buffer) {
+
 Object.defineProperty(exports, "__esModule", { value: true });
 const crypto = __webpack_require__(/*! ./crypto */ "./node_modules/bip32/src/crypto.js");
 const bs58check = __webpack_require__(/*! bs58check */ "./node_modules/bs58check/index.js");
@@ -2616,7 +2598,6 @@ function fromSeed(seed, network) {
 }
 exports.fromSeed = fromSeed;
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../buffer/index.js */ "./node_modules/buffer/index.js").Buffer))
 
 /***/ }),
 
@@ -2748,7 +2729,7 @@ catch (err) { }
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(Buffer) {
+
 Object.defineProperty(exports, "__esModule", { value: true });
 const createHash = __webpack_require__(/*! create-hash */ "./node_modules/create-hash/browser.js");
 const pbkdf2_1 = __webpack_require__(/*! pbkdf2 */ "./node_modules/pbkdf2/browser.js");
@@ -2908,7 +2889,6 @@ exports.getDefaultWordlist = getDefaultWordlist;
 var _wordlists_2 = __webpack_require__(/*! ./_wordlists */ "./node_modules/bip39/src/_wordlists.js");
 exports.wordlists = _wordlists_2.wordlists;
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../buffer/index.js */ "./node_modules/buffer/index.js").Buffer))
 
 /***/ }),
 
@@ -3163,7 +3143,7 @@ module.exports = map
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(Buffer) {
+
 Object.defineProperty(exports, '__esModule', { value: true });
 const networks = __webpack_require__(/*! ./networks */ "./node_modules/bitcoinjs-lib/src/networks.js");
 const payments = __webpack_require__(/*! ./payments */ "./node_modules/bitcoinjs-lib/src/payments/index.js");
@@ -3255,7 +3235,6 @@ function toOutputScript(address, network) {
 }
 exports.toOutputScript = toOutputScript;
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../buffer/index.js */ "./node_modules/buffer/index.js").Buffer))
 
 /***/ }),
 
@@ -3267,7 +3246,7 @@ exports.toOutputScript = toOutputScript;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(Buffer) {
+
 Object.defineProperty(exports, '__esModule', { value: true });
 const bufferutils_1 = __webpack_require__(/*! ./bufferutils */ "./node_modules/bitcoinjs-lib/src/bufferutils.js");
 const bcrypto = __webpack_require__(/*! ./crypto */ "./node_modules/bitcoinjs-lib/src/crypto.js");
@@ -3510,7 +3489,6 @@ function anyTxHasWitness(transactions) {
   );
 }
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../buffer/index.js */ "./node_modules/buffer/index.js").Buffer))
 
 /***/ }),
 
@@ -3692,7 +3670,7 @@ exports.hash256 = hash256;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(Buffer) {
+
 Object.defineProperty(exports, '__esModule', { value: true });
 const NETWORKS = __webpack_require__(/*! ./networks */ "./node_modules/bitcoinjs-lib/src/networks.js");
 const types = __webpack_require__(/*! ./types */ "./node_modules/bitcoinjs-lib/src/types.js");
@@ -3800,7 +3778,6 @@ function makeRandom(options) {
 }
 exports.makeRandom = makeRandom;
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../buffer/index.js */ "./node_modules/buffer/index.js").Buffer))
 
 /***/ }),
 
@@ -4272,7 +4249,7 @@ exports.p2pk = p2pk;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(Buffer) {
+
 Object.defineProperty(exports, '__esModule', { value: true });
 const bcrypto = __webpack_require__(/*! ../crypto */ "./node_modules/bitcoinjs-lib/src/crypto.js");
 const networks_1 = __webpack_require__(/*! ../networks */ "./node_modules/bitcoinjs-lib/src/networks.js");
@@ -4405,7 +4382,6 @@ function p2pkh(a, opts) {
 }
 exports.p2pkh = p2pkh;
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../buffer/index.js */ "./node_modules/buffer/index.js").Buffer))
 
 /***/ }),
 
@@ -4417,7 +4393,7 @@ exports.p2pkh = p2pkh;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(Buffer) {
+
 Object.defineProperty(exports, '__esModule', { value: true });
 const bcrypto = __webpack_require__(/*! ../crypto */ "./node_modules/bitcoinjs-lib/src/crypto.js");
 const networks_1 = __webpack_require__(/*! ../networks */ "./node_modules/bitcoinjs-lib/src/networks.js");
@@ -4601,7 +4577,6 @@ function p2sh(a, opts) {
 }
 exports.p2sh = p2sh;
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../buffer/index.js */ "./node_modules/buffer/index.js").Buffer))
 
 /***/ }),
 
@@ -4613,7 +4588,7 @@ exports.p2sh = p2sh;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(Buffer) {
+
 Object.defineProperty(exports, '__esModule', { value: true });
 const bcrypto = __webpack_require__(/*! ../crypto */ "./node_modules/bitcoinjs-lib/src/crypto.js");
 const networks_1 = __webpack_require__(/*! ../networks */ "./node_modules/bitcoinjs-lib/src/networks.js");
@@ -4742,7 +4717,6 @@ function p2wpkh(a, opts) {
 }
 exports.p2wpkh = p2wpkh;
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../buffer/index.js */ "./node_modules/buffer/index.js").Buffer))
 
 /***/ }),
 
@@ -4754,7 +4728,7 @@ exports.p2wpkh = p2wpkh;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(Buffer) {
+
 Object.defineProperty(exports, '__esModule', { value: true });
 const bcrypto = __webpack_require__(/*! ../crypto */ "./node_modules/bitcoinjs-lib/src/crypto.js");
 const networks_1 = __webpack_require__(/*! ../networks */ "./node_modules/bitcoinjs-lib/src/networks.js");
@@ -4936,7 +4910,6 @@ function p2wsh(a, opts) {
 }
 exports.p2wsh = p2wsh;
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../buffer/index.js */ "./node_modules/buffer/index.js").Buffer))
 
 /***/ }),
 
@@ -4948,7 +4921,7 @@ exports.p2wsh = p2wsh;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(Buffer) {
+
 Object.defineProperty(exports, '__esModule', { value: true });
 const bip174_1 = __webpack_require__(/*! bip174 */ "./node_modules/bip174/src/lib/psbt.js");
 const varuint = __webpack_require__(/*! bip174/src/lib/converter/varint */ "./node_modules/bip174/src/lib/converter/varint.js");
@@ -6110,7 +6083,6 @@ function range(n) {
   return [...Array(n).keys()];
 }
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../buffer/index.js */ "./node_modules/buffer/index.js").Buffer))
 
 /***/ }),
 
@@ -6122,7 +6094,7 @@ function range(n) {
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(Buffer) {
+
 Object.defineProperty(exports, '__esModule', { value: true });
 const scriptNumber = __webpack_require__(/*! ./script_number */ "./node_modules/bitcoinjs-lib/src/script_number.js");
 const scriptSignature = __webpack_require__(/*! ./script_signature */ "./node_modules/bitcoinjs-lib/src/script_signature.js");
@@ -6300,7 +6272,6 @@ exports.isCanonicalScriptSignature = isCanonicalScriptSignature;
 exports.number = scriptNumber;
 exports.signature = scriptSignature;
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../buffer/index.js */ "./node_modules/buffer/index.js").Buffer))
 
 /***/ }),
 
@@ -6312,7 +6283,7 @@ exports.signature = scriptSignature;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(Buffer) {
+
 Object.defineProperty(exports, '__esModule', { value: true });
 function decode(buffer, maxLength, minimal) {
   maxLength = maxLength || 4;
@@ -6374,7 +6345,6 @@ function encode(_number) {
 }
 exports.encode = encode;
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../buffer/index.js */ "./node_modules/buffer/index.js").Buffer))
 
 /***/ }),
 
@@ -6386,7 +6356,7 @@ exports.encode = encode;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(Buffer) {
+
 Object.defineProperty(exports, '__esModule', { value: true });
 const types = __webpack_require__(/*! ./types */ "./node_modules/bitcoinjs-lib/src/types.js");
 const bip66 = __webpack_require__(/*! bip66 */ "./node_modules/bip66/index.js");
@@ -6439,7 +6409,6 @@ function encode(signature, hashType) {
 }
 exports.encode = encode;
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../buffer/index.js */ "./node_modules/buffer/index.js").Buffer))
 
 /***/ }),
 
@@ -6737,7 +6706,7 @@ exports.output = output;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(Buffer) {
+
 // <scriptSig> {serialized scriptPubKey script}
 Object.defineProperty(exports, '__esModule', { value: true });
 const bscript = __webpack_require__(/*! ../../script */ "./node_modules/bitcoinjs-lib/src/script.js");
@@ -6788,7 +6757,6 @@ check.toJSON = () => {
   return 'scriptHash input';
 };
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../buffer/index.js */ "./node_modules/buffer/index.js").Buffer))
 
 /***/ }),
 
@@ -6846,7 +6814,7 @@ exports.output = output;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(Buffer) {
+
 // OP_RETURN {aa21a9ed} {commitment}
 Object.defineProperty(exports, '__esModule', { value: true });
 const bscript = __webpack_require__(/*! ../../script */ "./node_modules/bitcoinjs-lib/src/script.js");
@@ -6881,7 +6849,6 @@ function decode(buffer) {
 }
 exports.decode = decode;
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../buffer/index.js */ "./node_modules/buffer/index.js").Buffer))
 
 /***/ }),
 
@@ -6989,7 +6956,7 @@ exports.output = output;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(Buffer) {
+
 // <scriptSig> {serialized scriptPubKey script}
 Object.defineProperty(exports, '__esModule', { value: true });
 const bscript = __webpack_require__(/*! ../../script */ "./node_modules/bitcoinjs-lib/src/script.js");
@@ -7029,7 +6996,6 @@ check.toJSON = () => {
   return 'witnessScriptHash input';
 };
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../buffer/index.js */ "./node_modules/buffer/index.js").Buffer))
 
 /***/ }),
 
@@ -7070,7 +7036,7 @@ check.toJSON = () => {
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(Buffer) {
+
 Object.defineProperty(exports, '__esModule', { value: true });
 const bufferutils = __webpack_require__(/*! ./bufferutils */ "./node_modules/bitcoinjs-lib/src/bufferutils.js");
 const bufferutils_1 = __webpack_require__(/*! ./bufferutils */ "./node_modules/bitcoinjs-lib/src/bufferutils.js");
@@ -7549,7 +7515,6 @@ Transaction.ADVANCED_TRANSACTION_MARKER = 0x00;
 Transaction.ADVANCED_TRANSACTION_FLAG = 0x01;
 exports.Transaction = Transaction;
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../buffer/index.js */ "./node_modules/buffer/index.js").Buffer))
 
 /***/ }),
 
@@ -7561,7 +7526,7 @@ exports.Transaction = Transaction;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(Buffer) {
+
 Object.defineProperty(exports, '__esModule', { value: true });
 const baddress = __webpack_require__(/*! ./address */ "./node_modules/bitcoinjs-lib/src/address.js");
 const bufferutils_1 = __webpack_require__(/*! ./bufferutils */ "./node_modules/bitcoinjs-lib/src/bufferutils.js");
@@ -8627,7 +8592,6 @@ function getSigningData(
   };
 }
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../buffer/index.js */ "./node_modules/buffer/index.js").Buffer))
 
 /***/ }),
 
@@ -12325,7 +12289,7 @@ module.exports = bs58checkBase(sha256x2)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(global) {/*!
+/*!
  * The buffer module from node.js, for the browser.
  *
  * @author   Feross Aboukhadijeh <http://feross.org>
@@ -14115,7 +14079,6 @@ function isnan (val) {
   return val !== val // eslint-disable-line no-self-compare
 }
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
 
 /***/ }),
 
@@ -14234,9 +14197,9 @@ module.exports = CipherBase
   !*** ./node_modules/core-util-is/lib/util.js ***!
   \***********************************************/
 /*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, exports) {
 
-/* WEBPACK VAR INJECTION */(function(Buffer) {// Copyright Joyent, Inc. and other Node contributors.
+// Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the
@@ -14344,7 +14307,6 @@ function objectToString(o) {
   return Object.prototype.toString.call(o);
 }
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../buffer/index.js */ "./node_modules/buffer/index.js").Buffer))
 
 /***/ }),
 
@@ -18539,10 +18501,10 @@ utils.intFromLE = intFromLE;
 /*!********************************************!*\
   !*** ./node_modules/elliptic/package.json ***!
   \********************************************/
-/*! exports provided: _args, _development, _from, _id, _inBundle, _integrity, _location, _phantomChildren, _requested, _requiredBy, _resolved, _spec, _where, author, bugs, dependencies, description, devDependencies, files, homepage, keywords, license, main, name, repository, scripts, version, default */
+/*! exports provided: _from, _id, _inBundle, _integrity, _location, _phantomChildren, _requested, _requiredBy, _resolved, _shasum, _spec, _where, author, bugs, bundleDependencies, dependencies, deprecated, description, devDependencies, files, homepage, keywords, license, main, name, repository, scripts, version, default */
 /***/ (function(module) {
 
-module.exports = JSON.parse("{\"_args\":[[\"elliptic@6.5.0\",\"/home/void/workspace/github/theborakompanioni/bip39-ng\"]],\"_development\":true,\"_from\":\"elliptic@6.5.0\",\"_id\":\"elliptic@6.5.0\",\"_inBundle\":false,\"_integrity\":\"sha512-eFOJTMyCYb7xtE/caJ6JJu+bhi67WCYNbkGSknu20pmM8Ke/bqOfdnZWxyoGN26JgfxTbXrsCkEw4KheCT/KGg==\",\"_location\":\"/elliptic\",\"_phantomChildren\":{},\"_requested\":{\"type\":\"version\",\"registry\":true,\"raw\":\"elliptic@6.5.0\",\"name\":\"elliptic\",\"escapedName\":\"elliptic\",\"rawSpec\":\"6.5.0\",\"saveSpec\":null,\"fetchSpec\":\"6.5.0\"},\"_requiredBy\":[\"/browserify-sign\",\"/create-ecdh\",\"/tiny-secp256k1\"],\"_resolved\":\"https://registry.npmjs.org/elliptic/-/elliptic-6.5.0.tgz\",\"_spec\":\"6.5.0\",\"_where\":\"/home/void/workspace/github/theborakompanioni/bip39-ng\",\"author\":{\"name\":\"Fedor Indutny\",\"email\":\"fedor@indutny.com\"},\"bugs\":{\"url\":\"https://github.com/indutny/elliptic/issues\"},\"dependencies\":{\"bn.js\":\"^4.4.0\",\"brorand\":\"^1.0.1\",\"hash.js\":\"^1.0.0\",\"hmac-drbg\":\"^1.0.0\",\"inherits\":\"^2.0.1\",\"minimalistic-assert\":\"^1.0.0\",\"minimalistic-crypto-utils\":\"^1.0.0\"},\"description\":\"EC cryptography\",\"devDependencies\":{\"brfs\":\"^1.4.3\",\"coveralls\":\"^2.11.3\",\"grunt\":\"^0.4.5\",\"grunt-browserify\":\"^5.0.0\",\"grunt-cli\":\"^1.2.0\",\"grunt-contrib-connect\":\"^1.0.0\",\"grunt-contrib-copy\":\"^1.0.0\",\"grunt-contrib-uglify\":\"^1.0.1\",\"grunt-mocha-istanbul\":\"^3.0.1\",\"grunt-saucelabs\":\"^8.6.2\",\"istanbul\":\"^0.4.2\",\"jscs\":\"^2.9.0\",\"jshint\":\"^2.6.0\",\"mocha\":\"^2.1.0\"},\"files\":[\"lib\"],\"homepage\":\"https://github.com/indutny/elliptic\",\"keywords\":[\"EC\",\"Elliptic\",\"curve\",\"Cryptography\"],\"license\":\"MIT\",\"main\":\"lib/elliptic.js\",\"name\":\"elliptic\",\"repository\":{\"type\":\"git\",\"url\":\"git+ssh://git@github.com/indutny/elliptic.git\"},\"scripts\":{\"jscs\":\"jscs benchmarks/*.js lib/*.js lib/**/*.js lib/**/**/*.js test/index.js\",\"jshint\":\"jscs benchmarks/*.js lib/*.js lib/**/*.js lib/**/**/*.js test/index.js\",\"lint\":\"npm run jscs && npm run jshint\",\"test\":\"npm run lint && npm run unit\",\"unit\":\"istanbul test _mocha --reporter=spec test/index.js\",\"version\":\"grunt dist && git add dist/\"},\"version\":\"6.5.0\"}");
+module.exports = JSON.parse("{\"_from\":\"elliptic@^6.0.0\",\"_id\":\"elliptic@6.5.0\",\"_inBundle\":false,\"_integrity\":\"sha512-eFOJTMyCYb7xtE/caJ6JJu+bhi67WCYNbkGSknu20pmM8Ke/bqOfdnZWxyoGN26JgfxTbXrsCkEw4KheCT/KGg==\",\"_location\":\"/elliptic\",\"_phantomChildren\":{},\"_requested\":{\"type\":\"range\",\"registry\":true,\"raw\":\"elliptic@^6.0.0\",\"name\":\"elliptic\",\"escapedName\":\"elliptic\",\"rawSpec\":\"^6.0.0\",\"saveSpec\":null,\"fetchSpec\":\"^6.0.0\"},\"_requiredBy\":[\"/browserify-sign\",\"/create-ecdh\"],\"_resolved\":\"https://registry.npmjs.org/elliptic/-/elliptic-6.5.0.tgz\",\"_shasum\":\"2b8ed4c891b7de3200e14412a5b8248c7af505ca\",\"_spec\":\"elliptic@^6.0.0\",\"_where\":\"/home/void/workspace/theborakompanioni/bip39-ng/node_modules/browserify-sign\",\"author\":{\"name\":\"Fedor Indutny\",\"email\":\"fedor@indutny.com\"},\"bugs\":{\"url\":\"https://github.com/indutny/elliptic/issues\"},\"bundleDependencies\":false,\"dependencies\":{\"bn.js\":\"^4.4.0\",\"brorand\":\"^1.0.1\",\"hash.js\":\"^1.0.0\",\"hmac-drbg\":\"^1.0.0\",\"inherits\":\"^2.0.1\",\"minimalistic-assert\":\"^1.0.0\",\"minimalistic-crypto-utils\":\"^1.0.0\"},\"deprecated\":false,\"description\":\"EC cryptography\",\"devDependencies\":{\"brfs\":\"^1.4.3\",\"coveralls\":\"^2.11.3\",\"grunt\":\"^0.4.5\",\"grunt-browserify\":\"^5.0.0\",\"grunt-cli\":\"^1.2.0\",\"grunt-contrib-connect\":\"^1.0.0\",\"grunt-contrib-copy\":\"^1.0.0\",\"grunt-contrib-uglify\":\"^1.0.1\",\"grunt-mocha-istanbul\":\"^3.0.1\",\"grunt-saucelabs\":\"^8.6.2\",\"istanbul\":\"^0.4.2\",\"jscs\":\"^2.9.0\",\"jshint\":\"^2.6.0\",\"mocha\":\"^2.1.0\"},\"files\":[\"lib\"],\"homepage\":\"https://github.com/indutny/elliptic\",\"keywords\":[\"EC\",\"Elliptic\",\"curve\",\"Cryptography\"],\"license\":\"MIT\",\"main\":\"lib/elliptic.js\",\"name\":\"elliptic\",\"repository\":{\"type\":\"git\",\"url\":\"git+ssh://git@github.com/indutny/elliptic.git\"},\"scripts\":{\"jscs\":\"jscs benchmarks/*.js lib/*.js lib/**/*.js lib/**/**/*.js test/index.js\",\"jshint\":\"jscs benchmarks/*.js lib/*.js lib/**/*.js lib/**/**/*.js test/index.js\",\"lint\":\"npm run jscs && npm run jshint\",\"test\":\"npm run lint && npm run unit\",\"unit\":\"istanbul test _mocha --reporter=spec test/index.js\",\"version\":\"grunt dist && git add dist/\"},\"version\":\"6.5.0\"}");
 
 /***/ }),
 
@@ -20897,9 +20859,9 @@ module.exports = MD5
   !*** ./node_modules/merkle-lib/fastRoot.js ***!
   \*********************************************/
 /*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, exports) {
 
-/* WEBPACK VAR INJECTION */(function(Buffer) {// constant-space merkle root calculation algorithm
+// constant-space merkle root calculation algorithm
 module.exports = function fastRoot (values, digestFn) {
   if (!Array.isArray(values)) throw TypeError('Expected values Array')
   if (typeof digestFn !== 'function') throw TypeError('Expected digest Function')
@@ -20924,7 +20886,6 @@ module.exports = function fastRoot (values, digestFn) {
   return results[0]
 }
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../buffer/index.js */ "./node_modules/buffer/index.js").Buffer))
 
 /***/ }),
 
@@ -21040,7 +21001,7 @@ exports.pbkdf2Sync = __webpack_require__(/*! ./lib/sync */ "./node_modules/pbkdf
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(global, process) {var checkParameters = __webpack_require__(/*! ./precondition */ "./node_modules/pbkdf2/lib/precondition.js")
+var checkParameters = __webpack_require__(/*! ./precondition */ "./node_modules/pbkdf2/lib/precondition.js")
 var defaultEncoding = __webpack_require__(/*! ./default-encoding */ "./node_modules/pbkdf2/lib/default-encoding.js")
 var sync = __webpack_require__(/*! ./sync */ "./node_modules/pbkdf2/lib/sync-browser.js")
 var Buffer = __webpack_require__(/*! safe-buffer */ "./node_modules/safe-buffer/index.js").Buffer
@@ -21141,7 +21102,6 @@ module.exports = function (password, salt, iterations, keylen, digest, callback)
   }), callback)
 }
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js"), __webpack_require__(/*! ./../../process/browser.js */ "./node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -21150,9 +21110,9 @@ module.exports = function (password, salt, iterations, keylen, digest, callback)
   !*** ./node_modules/pbkdf2/lib/default-encoding.js ***!
   \*****************************************************/
 /*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, exports) {
 
-/* WEBPACK VAR INJECTION */(function(process) {var defaultEncoding
+var defaultEncoding
 /* istanbul ignore next */
 if (process.browser) {
   defaultEncoding = 'utf-8'
@@ -21163,7 +21123,6 @@ if (process.browser) {
 }
 module.exports = defaultEncoding
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../process/browser.js */ "./node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -21172,9 +21131,9 @@ module.exports = defaultEncoding
   !*** ./node_modules/pbkdf2/lib/precondition.js ***!
   \*************************************************/
 /*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, exports) {
 
-/* WEBPACK VAR INJECTION */(function(Buffer) {var MAX_ALLOC = Math.pow(2, 30) - 1 // default in iojs
+var MAX_ALLOC = Math.pow(2, 30) - 1 // default in iojs
 
 function checkBuffer (buf, name) {
   if (typeof buf !== 'string' && !Buffer.isBuffer(buf)) {
@@ -21203,7 +21162,6 @@ module.exports = function (password, salt, iterations, keylen) {
   }
 }
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../buffer/index.js */ "./node_modules/buffer/index.js").Buffer))
 
 /***/ }),
 
@@ -21330,7 +21288,7 @@ module.exports = pbkdf2
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(process) {
+
 
 if (!process.version ||
     process.version.indexOf('v0.') === 0 ||
@@ -21375,7 +21333,6 @@ function nextTick(fn, arg1, arg2, arg3) {
 }
 
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../process/browser.js */ "./node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -21475,7 +21432,7 @@ module.exports = {
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(global, process) {
+
 
 // limit of Crypto.getRandomValues()
 // https://developer.mozilla.org/en-US/docs/Web/API/Crypto/getRandomValues
@@ -21526,7 +21483,6 @@ function randomBytes (size, cb) {
   return bytes
 }
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js"), __webpack_require__(/*! ./../process/browser.js */ "./node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -21552,7 +21508,7 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony default export */ __webpack_exports__["default"] = ("<div class=\"container mat-typography\">\n  <h1>Generate random Bitcoin address and see if you are a winner</h1>\n\n  <div>\n    <div *ngIf=\"tryCounter >= 3\">\n      <mat-card style=\"margin: 1em;\">\n        <p style=\"font-size: 1.2em; line-height: normal;\">\n          You have had your fair chance today.\n          <a routerLink=\"/faq\" fragment=\"faq-1\">It won't get any better</a>. Do not get blinded by trying to get rich quick. Learn how Bitcoin works and try your\n          best to integrate it in the real world. Bitcoin needs adoption. Maybe you are able to use it in you next project?\n          Talk and share your knowledge with others. Spread the word.\n        </p>\n      </mat-card>\n    </div>\n    \n    <div style=\"text-align: center\" [hidden]=\"tryCounter >= 9000\">\n      <button mat-raised-button color=\"primary\" (click)=\"buttonIamFeelingLuckyClicked()\" class=\"i-am-feeling-lucky-button\" [disabled]=\"loading\">\n        <span *ngIf=\"tryCounter === 0\">I'm feeling lucky!</span>\n        <span *ngIf=\"tryCounter === 1\">Try again!</span>\n        <span *ngIf=\"tryCounter === 2\">And again!</span>\n        <span *ngIf=\"tryCounter === 3\">And again ...</span>\n        <span *ngIf=\"tryCounter === 4\">Again?</span>\n        <span *ngIf=\"tryCounter === 5\">Try again!</span>\n        <span *ngIf=\"tryCounter === 6\">I'm feeling lucky!</span>\n        <span *ngIf=\"tryCounter > 6\">Try again!</span>\n\n        <mat-spinner *ngIf=\"loading\" style=\"margin: auto;\" diameter=\"15\"></mat-spinner>\n      </button>\n    </div>\n    \n    <div *ngIf=\"result\">\n      <mat-form-field class=\"full-width\" appearance=\"fill\" style=\"text-align: center;\">\n        <mat-label>Address</mat-label>\n        <input style=\"font-size: 150%\" matInput type=\"text\" placeholder=\"\" [value]=\"result.address\" disabled/>\n      </mat-form-field>\n\n      <div *ngIf=\"result.error\">\n        <p style=\"background-color: red; padding: 1em;\">{{ result.error.message }}</p>\n      </div>\n\n      <p style=\"text-align: center; font-size: 1.5em; margin: 1em; line-height: normal;\">\n        <span *ngIf=\"result.received === 0\">Address never received anything.</span>\n        <span *ngIf=\"result.received > 0\">Found address with\n          <code>received > 0</code>\n        </span>\n      </p>\n\n      <p style=\"text-align: center; font-size: 3em; margin: 1em; line-height: normal;\">\n        <span *ngIf=\"result.balance === 0\">Balance is 0 :(</span>\n        <span *ngIf=\"result.balance > 0\">Found address with\n          <code>balance > 0</code>\n        </span>\n      </p>\n    </div>\n\n    <mat-progress-bar *ngIf=\"loading\" mode=\"indeterminate\"></mat-progress-bar>\n    \n    <div [hidden]=\"!result\">\n      <mat-card style=\"margin: 1em;\" [hidden]=\"!result\">\n        <h3>Private Key Mnemonic</h3>\n        <div class=\"word-input-container\" fxLayout=\"row wrap\">\n          <div fxFlex=\"100%\" fxFlex.gt-sm=\"32%\" fxFlex.gt-md=\"24%\" fxFlex.gt-md=\"16.5%\" *ngFor=\"let i of [0,1,2,3,4,5,6,7,8,9,10,11]\">\n            <span>\n              <mat-form-field class=\"example-form-field-{{i}}\" appearance=\"fill\">\n                <mat-label>Word {{i+1}}</mat-label>\n                <input matInput type=\"text\" placeholder=\"Word {{i+1}}\" [(ngModel)]=\"mnemonicArray[i]\" (change)=\"onChangeMnemonic()\" disabled/>\n              </mat-form-field>\n            </span>\n          </div>\n        </div>\n      </mat-card>\n    </div>\n  </div>\n\n</div>\n<div class=\"clear\"></div>");
+/* harmony default export */ __webpack_exports__["default"] = ("<div class=\"container mat-typography\">\n  <h1>Generate random Bitcoin address and see if you are a winner</h1>\n\n  <div>    \n    <div fxLayout=\"row wrap\" fxLayoutAlign=\"center center\">\n      <div fxFlex=\"100%\" fxFlex.gt-sm=\"80%\" fxFlex.gt-md=\"70%\" fxFlex.gt-md=\"50%\"  style=\"text-align: center\" >\n        \n        <div *ngIf=\"!(tryCounter > 3)\" >\n          <button mat-raised-button color=\"primary\"\n          (click)=\"buttonIamFeelingLuckyClicked()\" \n          class=\"i-am-feeling-lucky-button\" \n          [disabled]=\"loading\">\n            <span *ngIf=\"feelingLuckyCounterClicked === 0\">I'm feeling lucky!</span>\n            <span *ngIf=\"feelingLuckyCounterClicked === 1\">Try again!</span>\n            <span *ngIf=\"feelingLuckyCounterClicked === 2\">And again!</span>\n            <span *ngIf=\"feelingLuckyCounterClicked === 3\">And again ...</span>\n            <span *ngIf=\"feelingLuckyCounterClicked === 4\">Again?</span>\n            <span *ngIf=\"feelingLuckyCounterClicked === 5\">Try again!</span>\n            <span *ngIf=\"feelingLuckyCounterClicked === 6\">I'm feeling lucky!</span>\n            <span *ngIf=\"feelingLuckyCounterClicked > 6\">Try again!</span>\n          </button>\n        </div>\n\n        <div *ngIf=\"tryCounter > 3\">\n          <mat-card style=\"margin: 1em;\">\n            <p style=\"font-size: 1.2em; line-height: normal;\">\n              You have had your fair chance today.\n              <a routerLink=\"/faq\" fragment=\"faq-1\">It won't get any better</a>. Do not get blinded by trying to get rich quick. Learn how Bitcoin works and try your\n              best to integrate it in the real world. Bitcoin needs adoption. Maybe you are able to use it in you next project?\n              Talk and share your knowledge with others. Spread the word.\n            </p>\n          </mat-card>\n        </div>\n        \n      </div>\n    </div>\n\n    <div fxLayout=\"row wrap\" fxLayoutAlign=\"center center\">\n      <div fxFlex=\"100%\" fxFlex.gt-sm=\"80%\" fxFlex.gt-md=\"70%\" fxFlex.gt-md=\"50%\">\n          <mat-form-field appearance=\"outline\" style=\"width: 100%;\">\n            <mat-label>Search</mat-label>\n            <input matInput [(ngModel)]=\"searchFieldValue\" (keyup.enter)=\"onChangeSearchInput($event.target.value)\" />\n            <mat-spinner matSuffix *ngIf=\"loading\" diameter=\"15\" style=\"margin: auto 10px 4px 10px;\"></mat-spinner>\n          </mat-form-field>\n      </div>\n    </div>\n    \n    <div style=\"text-align: center;\">\n      <p>\n        <button mat-raised-button (click)=\"!loading && onChangeSearchInput(searchFieldValue)\">\n          <i matPrefix class=\"material-icons\">search</i>\n          Balance Search\n        </button>\n        <span>&nbsp;</span>\n        <button mat-raised-button color=\"primary\" (click)=\"!loading && buttonIamFeelingLuckyClicked()\">\n          <span>I'm feeling lucky!</span>\n        </button>\n      </p>\n      <p>\n        <button mat-button (click)=\"displayDetailedSettings = !displayDetailedSettings\">\n          <i class=\"material-icons\">\n              settings_applications\n          </i>\n        </button>\n      </p>\n    </div>\n\n    <div fxLayout=\"row wrap\" fxLayoutAlign=\"center center\" *ngIf=\"displayDetailedSettings\">\n        <div fxFlex=\"100%\" fxFlex.gt-sm=\"50%\" fxFlex.gt-md=\"25%\" fxFlex.gt-md=\"25%\">\n            <mat-form-field appearance=\"outline\" style=\"width: 100%;\">\n              <mat-label>Path Prefix</mat-label>\n              <input matInput type=\"text\" [(ngModel)]=\"pathPrefix\"/>\n            </mat-form-field>\n        </div>\n        <div fxFlex=\"100%\" fxFlex.gt-sm=\"50%\" fxFlex.gt-md=\"25%\" fxFlex.gt-md=\"25%\">\n            <mat-form-field appearance=\"outline\" style=\"width: 100%;\">\n              <mat-label>Path Account</mat-label>\n              <input matInput type=\"number\" [(ngModel)]=\"pathAccount\"/>\n            </mat-form-field>\n        </div>\n        <div fxFlex=\"100%\" fxFlex.gt-sm=\"50%\" fxFlex.gt-md=\"25%\" fxFlex.gt-md=\"25%\">\n            <mat-form-field appearance=\"outline\" style=\"width: 100%;\">\n              <mat-label>Path Change</mat-label>\n              <input matInput type=\"number\" [(ngModel)]=\"pathChange\"/>\n            </mat-form-field>\n        </div>\n        <div fxFlex=\"100%\" fxFlex.gt-sm=\"50%\" fxFlex.gt-md=\"25%\" fxFlex.gt-md=\"25%\">\n            <mat-form-field appearance=\"outline\" style=\"width: 100%;\">\n              <mat-label>Path Index</mat-label>\n              <input matInput type=\"number\" [(ngModel)]=\"pathIndex\"/>\n            </mat-form-field>\n        </div>\n      </div>\n    \n    <div style=\"text-align: center; margin-bottom: 3rem\"></div>\n\n    <div *ngIf=\"result\">\n      <p *ngIf=\"result.mnemonic\">\n          <span class=\"bold\">Results for search term:</span> {{result.mnemonic}}\n      </p>\n      <p *ngIf=\"result.seedHex\">\n        <span class=\"bold\">Seed:</span> {{result.seedHex}}\n      </p>\n      <p *ngIf=\"result.rootWif\">\n        <span class=\"bold\">WIF:</span> {{result.rootWif}}\n      </p>\n      <p *ngIf=\"result.masterPrivateKey\">\n        <span class=\"bold\">Master Private Key:</span> {{result.masterPrivateKey}}\n      </p>\n      <p *ngIf=\"result.privateKey\">\n        <span class=\"bold\">Master Private Key:</span> {{result.privateKey}}\n      </p>\n      <div *ngIf=\"result.path\">\n          <p>\n            <span class=\"bold\">Path (BIP44):</span> {{result.path}}\n            (see <a href=\"https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki\">BIP44</a>)\n          </p>\n          <p style=\"display: none\">\n            See <a href=\"https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki\">BIP32</a> and \n            <a href=\"https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki\">BIP39</a>, \n            <a href=\"https://github.com/bitcoin/bips/blob/master/bip-0049.mediawiki\">BIP49</a>, \n            <a href=\"https://github.com/bitcoin/bips/blob/master/bip-0084.mediawiki\">BIP84</a>.\n          </p>\n      </div>\n      <mat-form-field class=\"full-width\" appearance=\"fill\" style=\"text-align: center;\" *ngIf=\"result.address\">\n        <mat-label>Address</mat-label>\n        <input style=\"font-size: 150%\" matInput type=\"text\" placeholder=\"\" [value]=\"result.address\" disabled/>\n        <a href=\"https://www.blockchain.com/btc/address/{{result.address}}\" target=\"_blank\">https://www.blockchain.com/btc/address/{{result.address}}</a>\n      </mat-form-field>\n\n      <div *ngIf=\"result.error\">\n        <p style=\"background-color: red; padding: 1em;\">{{ result.error.message }}</p>\n      </div>\n\n      <p style=\"text-align: center; font-size: 1.5em; margin: 1em; line-height: normal;\" *ngIf=\"result.received !== undefined\">\n        <span *ngIf=\"result.received === 0\">Address never received anything.</span>\n        <span *ngIf=\"result.received > 0\">Found address with\n          <code>received > 0</code>\n        </span>\n      </p>\n\n      <p style=\"text-align: center; font-size: 3em; margin: 1em; line-height: normal;\" *ngIf=\"result.balance !== undefined\">\n        <span *ngIf=\"result.balance === 0\">Balance is 0 :(</span>\n        <span *ngIf=\"result.balance > 0\">Found address with\n          <code>balance > 0</code>\n        </span>\n      </p>\n    </div>\n\n    <mat-progress-bar *ngIf=\"loading\" mode=\"indeterminate\"></mat-progress-bar>\n    \n\n    <div *ngIf=\"result\" [hidden]=\"loading || result.mnemonic === undefined\">\n      <mat-card style=\"margin: 1em;\">\n        <h3>Private Key Mnemonic</h3>\n        <div class=\"word-input-container\" fxLayout=\"row wrap\" *ngIf=\"mnemonicArray.length !== 12\">\n          Input is not a valid BIP39 mnemonic seed.\n        </div>\n        <div class=\"word-input-container\" fxLayout=\"row wrap\" *ngIf=\"mnemonicArray.length === 12\">\n          <div fxFlex=\"100%\" fxFlex.gt-sm=\"32%\" fxFlex.gt-md=\"24%\" fxFlex.gt-md=\"16.5%\" *ngFor=\"let i of [0,1,2,3,4,5,6,7,8,9,10,11]\">\n            <span>\n              <mat-form-field class=\"example-form-field-{{i}}\" appearance=\"fill\">\n                <mat-label>Word {{i+1}}</mat-label>\n                <input matInput type=\"text\" placeholder=\"Word {{i+1}}\" [value]=\"mnemonicArray[i]\" disabled/>\n              </mat-form-field>\n            </span>\n          </div>\n        </div>\n      </mat-card>\n    </div>\n\n    <div *ngIf=\"result\" [hidden]=\"loading || result.addresses === undefined\">\n      <mat-card style=\"margin: 1em;\">\n        <h3>More Addresses</h3>\n        <div *ngFor=\"let address of result.addresses\">\n            {{address.path}}: {{address.address}} - \n            <a href=\"https://www.blockchain.com/btc/address/{{address.address}}\" target=\"_blank\">https://www.blockchain.com/btc/address/{{address.address}}</a>\n        </div>\n      </mat-card>\n\n      \n    </div>\n  </div>\n\n</div>\n<div class=\"clear\"></div>");
 
 /***/ }),
 
@@ -21777,7 +21733,7 @@ PassThrough.prototype._transform = function (chunk, encoding, cb) {
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(global, process) {// Copyright Joyent, Inc. and other Node contributors.
+// Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the
@@ -22796,7 +22752,6 @@ function indexOf(xs, x) {
   }
   return -1;
 }
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js"), __webpack_require__(/*! ./../../process/browser.js */ "./node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -23033,7 +22988,7 @@ function done(stream, er, data) {
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(process, setImmediate, global) {// Copyright Joyent, Inc. and other Node contributors.
+// Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the
@@ -23720,7 +23675,6 @@ Writable.prototype._destroy = function (err, cb) {
   this.end();
   cb(err);
 };
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../process/browser.js */ "./node_modules/process/browser.js"), __webpack_require__(/*! ./../../timers-browserify/main.js */ "./node_modules/timers-browserify/main.js").setImmediate, __webpack_require__(/*! ./../../webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
 
 /***/ }),
 
@@ -24104,6 +24058,23 @@ module.exports = RIPEMD160
 
 /***/ }),
 
+/***/ "./node_modules/rxjs-compat/_esm5/Subject.js":
+/*!***************************************************!*\
+  !*** ./node_modules/rxjs-compat/_esm5/Subject.js ***!
+  \***************************************************/
+/*! exports provided: Subject */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! rxjs */ "./node_modules/rxjs/_esm5/index.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Subject", function() { return rxjs__WEBPACK_IMPORTED_MODULE_0__["Subject"]; });
+
+
+//# sourceMappingURL=Subject.js.map
+
+/***/ }),
+
 /***/ "./node_modules/safe-buffer/index.js":
 /*!*******************************************!*\
   !*** ./node_modules/safe-buffer/index.js ***!
@@ -24174,204 +24145,6 @@ SafeBuffer.allocUnsafeSlow = function (size) {
   return buffer.SlowBuffer(size)
 }
 
-
-/***/ }),
-
-/***/ "./node_modules/setimmediate/setImmediate.js":
-/*!***************************************************!*\
-  !*** ./node_modules/setimmediate/setImmediate.js ***!
-  \***************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-/* WEBPACK VAR INJECTION */(function(global, process) {(function (global, undefined) {
-    "use strict";
-
-    if (global.setImmediate) {
-        return;
-    }
-
-    var nextHandle = 1; // Spec says greater than zero
-    var tasksByHandle = {};
-    var currentlyRunningATask = false;
-    var doc = global.document;
-    var registerImmediate;
-
-    function setImmediate(callback) {
-      // Callback can either be a function or a string
-      if (typeof callback !== "function") {
-        callback = new Function("" + callback);
-      }
-      // Copy function arguments
-      var args = new Array(arguments.length - 1);
-      for (var i = 0; i < args.length; i++) {
-          args[i] = arguments[i + 1];
-      }
-      // Store and register the task
-      var task = { callback: callback, args: args };
-      tasksByHandle[nextHandle] = task;
-      registerImmediate(nextHandle);
-      return nextHandle++;
-    }
-
-    function clearImmediate(handle) {
-        delete tasksByHandle[handle];
-    }
-
-    function run(task) {
-        var callback = task.callback;
-        var args = task.args;
-        switch (args.length) {
-        case 0:
-            callback();
-            break;
-        case 1:
-            callback(args[0]);
-            break;
-        case 2:
-            callback(args[0], args[1]);
-            break;
-        case 3:
-            callback(args[0], args[1], args[2]);
-            break;
-        default:
-            callback.apply(undefined, args);
-            break;
-        }
-    }
-
-    function runIfPresent(handle) {
-        // From the spec: "Wait until any invocations of this algorithm started before this one have completed."
-        // So if we're currently running a task, we'll need to delay this invocation.
-        if (currentlyRunningATask) {
-            // Delay by doing a setTimeout. setImmediate was tried instead, but in Firefox 7 it generated a
-            // "too much recursion" error.
-            setTimeout(runIfPresent, 0, handle);
-        } else {
-            var task = tasksByHandle[handle];
-            if (task) {
-                currentlyRunningATask = true;
-                try {
-                    run(task);
-                } finally {
-                    clearImmediate(handle);
-                    currentlyRunningATask = false;
-                }
-            }
-        }
-    }
-
-    function installNextTickImplementation() {
-        registerImmediate = function(handle) {
-            process.nextTick(function () { runIfPresent(handle); });
-        };
-    }
-
-    function canUsePostMessage() {
-        // The test against `importScripts` prevents this implementation from being installed inside a web worker,
-        // where `global.postMessage` means something completely different and can't be used for this purpose.
-        if (global.postMessage && !global.importScripts) {
-            var postMessageIsAsynchronous = true;
-            var oldOnMessage = global.onmessage;
-            global.onmessage = function() {
-                postMessageIsAsynchronous = false;
-            };
-            global.postMessage("", "*");
-            global.onmessage = oldOnMessage;
-            return postMessageIsAsynchronous;
-        }
-    }
-
-    function installPostMessageImplementation() {
-        // Installs an event handler on `global` for the `message` event: see
-        // * https://developer.mozilla.org/en/DOM/window.postMessage
-        // * http://www.whatwg.org/specs/web-apps/current-work/multipage/comms.html#crossDocumentMessages
-
-        var messagePrefix = "setImmediate$" + Math.random() + "$";
-        var onGlobalMessage = function(event) {
-            if (event.source === global &&
-                typeof event.data === "string" &&
-                event.data.indexOf(messagePrefix) === 0) {
-                runIfPresent(+event.data.slice(messagePrefix.length));
-            }
-        };
-
-        if (global.addEventListener) {
-            global.addEventListener("message", onGlobalMessage, false);
-        } else {
-            global.attachEvent("onmessage", onGlobalMessage);
-        }
-
-        registerImmediate = function(handle) {
-            global.postMessage(messagePrefix + handle, "*");
-        };
-    }
-
-    function installMessageChannelImplementation() {
-        var channel = new MessageChannel();
-        channel.port1.onmessage = function(event) {
-            var handle = event.data;
-            runIfPresent(handle);
-        };
-
-        registerImmediate = function(handle) {
-            channel.port2.postMessage(handle);
-        };
-    }
-
-    function installReadyStateChangeImplementation() {
-        var html = doc.documentElement;
-        registerImmediate = function(handle) {
-            // Create a <script> element; its readystatechange event will be fired asynchronously once it is inserted
-            // into the document. Do so, thus queuing up the task. Remember to clean up once it's been called.
-            var script = doc.createElement("script");
-            script.onreadystatechange = function () {
-                runIfPresent(handle);
-                script.onreadystatechange = null;
-                html.removeChild(script);
-                script = null;
-            };
-            html.appendChild(script);
-        };
-    }
-
-    function installSetTimeoutImplementation() {
-        registerImmediate = function(handle) {
-            setTimeout(runIfPresent, 0, handle);
-        };
-    }
-
-    // If supported, we should attach to the prototype of global, since that is where setTimeout et al. live.
-    var attachTo = Object.getPrototypeOf && Object.getPrototypeOf(global);
-    attachTo = attachTo && attachTo.setTimeout ? attachTo : global;
-
-    // Don't get fooled by e.g. browserify environments.
-    if ({}.toString.call(global.process) === "[object process]") {
-        // For Node.js before 0.9
-        installNextTickImplementation();
-
-    } else if (canUsePostMessage()) {
-        // For non-IE10 modern browsers
-        installPostMessageImplementation();
-
-    } else if (global.MessageChannel) {
-        // For web workers, where supported
-        installMessageChannelImplementation();
-
-    } else if (doc && "onreadystatechange" in doc.createElement("script")) {
-        // For IE 6–8
-        installReadyStateChangeImplementation();
-
-    } else {
-        // For older browsers
-        installSetTimeoutImplementation();
-    }
-
-    attachTo.setImmediate = setImmediate;
-    attachTo.clearImmediate = clearImmediate;
-}(typeof self === "undefined" ? typeof global === "undefined" ? this : global : self));
-
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js"), __webpack_require__(/*! ./../process/browser.js */ "./node_modules/process/browser.js")))
 
 /***/ }),
 
@@ -25564,81 +25337,6 @@ function simpleEnd(buf) {
 
 /***/ }),
 
-/***/ "./node_modules/timers-browserify/main.js":
-/*!************************************************!*\
-  !*** ./node_modules/timers-browserify/main.js ***!
-  \************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-/* WEBPACK VAR INJECTION */(function(global) {var scope = (typeof global !== "undefined" && global) ||
-            (typeof self !== "undefined" && self) ||
-            window;
-var apply = Function.prototype.apply;
-
-// DOM APIs, for completeness
-
-exports.setTimeout = function() {
-  return new Timeout(apply.call(setTimeout, scope, arguments), clearTimeout);
-};
-exports.setInterval = function() {
-  return new Timeout(apply.call(setInterval, scope, arguments), clearInterval);
-};
-exports.clearTimeout =
-exports.clearInterval = function(timeout) {
-  if (timeout) {
-    timeout.close();
-  }
-};
-
-function Timeout(id, clearFn) {
-  this._id = id;
-  this._clearFn = clearFn;
-}
-Timeout.prototype.unref = Timeout.prototype.ref = function() {};
-Timeout.prototype.close = function() {
-  this._clearFn.call(scope, this._id);
-};
-
-// Does not start the time, just sets up the members needed.
-exports.enroll = function(item, msecs) {
-  clearTimeout(item._idleTimeoutId);
-  item._idleTimeout = msecs;
-};
-
-exports.unenroll = function(item) {
-  clearTimeout(item._idleTimeoutId);
-  item._idleTimeout = -1;
-};
-
-exports._unrefActive = exports.active = function(item) {
-  clearTimeout(item._idleTimeoutId);
-
-  var msecs = item._idleTimeout;
-  if (msecs >= 0) {
-    item._idleTimeoutId = setTimeout(function onTimeout() {
-      if (item._onTimeout)
-        item._onTimeout();
-    }, msecs);
-  }
-};
-
-// setimmediate attaches itself to the global object
-__webpack_require__(/*! setimmediate */ "./node_modules/setimmediate/setImmediate.js");
-// On some exotic environments, it's not clear which object `setimmediate` was
-// able to install onto.  Search each possibility in the same order as the
-// `setimmediate` library.
-exports.setImmediate = (typeof self !== "undefined" && self.setImmediate) ||
-                       (typeof global !== "undefined" && global.setImmediate) ||
-                       (this && this.setImmediate);
-exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
-                         (typeof global !== "undefined" && global.clearImmediate) ||
-                         (this && this.clearImmediate);
-
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
-
-/***/ }),
-
 /***/ "./node_modules/tiny-secp256k1/js.js":
 /*!*******************************************!*\
   !*** ./node_modules/tiny-secp256k1/js.js ***!
@@ -25646,7 +25344,7 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(Buffer) {const BN = __webpack_require__(/*! bn.js */ "./node_modules/bn.js/lib/bn.js")
+const BN = __webpack_require__(/*! bn.js */ "./node_modules/bn.js/lib/bn.js")
 const EC = __webpack_require__(/*! elliptic */ "./node_modules/elliptic/lib/elliptic.js").ec
 const secp256k1 = new EC('secp256k1')
 const deterministicGenerateK = __webpack_require__(/*! ./rfc6979 */ "./node_modules/tiny-secp256k1/rfc6979.js")
@@ -25923,7 +25621,6 @@ module.exports = {
   verify
 }
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../buffer/index.js */ "./node_modules/buffer/index.js").Buffer))
 
 /***/ }),
 
@@ -25934,7 +25631,7 @@ module.exports = {
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(Buffer) {const createHmac = __webpack_require__(/*! create-hmac */ "./node_modules/create-hmac/browser.js")
+const createHmac = __webpack_require__(/*! create-hmac */ "./node_modules/create-hmac/browser.js")
 
 const ONE1 = Buffer.alloc(1, 1)
 const ZERO1 = Buffer.alloc(1, 0)
@@ -25997,7 +25694,6 @@ function deterministicGenerateK (hash, x, checkSig, isPrivate, extraEntropy) {
 
 module.exports = deterministicGenerateK
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../buffer/index.js */ "./node_modules/buffer/index.js").Buffer))
 
 /***/ }),
 
@@ -26129,7 +25825,7 @@ module.exports = {
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(Buffer) {var NATIVE = __webpack_require__(/*! ./native */ "./node_modules/typeforce/native.js")
+var NATIVE = __webpack_require__(/*! ./native */ "./node_modules/typeforce/native.js")
 var ERRORS = __webpack_require__(/*! ./errors */ "./node_modules/typeforce/errors.js")
 
 function _Buffer (value) {
@@ -26221,7 +25917,6 @@ for (var typeName in types) {
 
 module.exports = types
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../buffer/index.js */ "./node_modules/buffer/index.js").Buffer))
 
 /***/ }),
 
@@ -26533,9 +26228,9 @@ module.exports = types
   !*** ./node_modules/util-deprecate/browser.js ***!
   \************************************************/
 /*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, exports) {
 
-/* WEBPACK VAR INJECTION */(function(global) {
+
 /**
  * Module exports.
  */
@@ -26603,7 +26298,6 @@ function config (name) {
   return String(val).toLowerCase() === 'true';
 }
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
 
 /***/ }),
 
@@ -26749,7 +26443,7 @@ module.exports = function(module) {
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(Buffer) {var bs58check = __webpack_require__(/*! bs58check */ "./node_modules/bs58check/index.js")
+var bs58check = __webpack_require__(/*! bs58check */ "./node_modules/bs58check/index.js")
 
 function decodeRaw (buffer, version) {
   // check version only if defined
@@ -26813,7 +26507,6 @@ module.exports = {
   encodeRaw: encodeRaw
 }
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../buffer/index.js */ "./node_modules/buffer/index.js").Buffer))
 
 /***/ }),
 
@@ -26826,7 +26519,7 @@ module.exports = {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony default export */ __webpack_exports__["default"] = ("#faq-top {\n  position: absolute;\n  top: 0;\n  left: 0;\n  right: 0;\n  height: 0;\n  width: 100%; }\n\n.container {\n  margin: 0 1rem; }\n\n.faq-nav-list {\n  margin-bottom: 5rem; }\n\n.faq-card {\n  margin-top: 1rem;\n  margin-bottom: 1rem; }\n\n.faq-card .mat-card-title h2 {\n  display: inline;\n  padding-left: 4px; }\n\n.faq-card app-scroll-to-top-button {\n  opacity: 0.8; }\n\n.faq-card app-scroll-to-top-button:hover {\n  cursor: pointer; }\n\n.faq-card p {\n  word-break: break-word; }\n\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi9ob21lL3ZvaWQvd29ya3NwYWNlL2dpdGh1Yi90aGVib3Jha29tcGFuaW9uaS9iaXAzOS1uZy9zcmMvYXBwL21haW4vbWFpbi1mYXEvbWFpbi1mYXEuY29tcG9uZW50LnNjc3MiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBRUE7RUFDRSxrQkFBa0I7RUFDbEIsTUFBTTtFQUNOLE9BQU87RUFDUCxRQUFRO0VBQ1IsU0FBUztFQUNULFdBQVcsRUFBQTs7QUFHYjtFQUNFLGNBQWMsRUFBQTs7QUFHaEI7RUFDRSxtQkFBbUIsRUFBQTs7QUFHckI7RUFDRSxnQkFBZ0I7RUFDaEIsbUJBQW1CLEVBQUE7O0FBR3JCO0VBQ0UsZUFBZTtFQUNmLGlCQUFpQixFQUFBOztBQUVuQjtFQUNFLFlBQVksRUFBQTs7QUFFZDtFQUNFLGVBQWUsRUFBQTs7QUFHakI7RUFDRSxzQkFBc0IsRUFBQSIsImZpbGUiOiJzcmMvYXBwL21haW4vbWFpbi1mYXEvbWFpbi1mYXEuY29tcG9uZW50LnNjc3MiLCJzb3VyY2VzQ29udGVudCI6WyJAaW1wb3J0IFwibWl4aW5zXCI7XG5cbiNmYXEtdG9wIHtcbiAgcG9zaXRpb246IGFic29sdXRlO1xuICB0b3A6IDA7XG4gIGxlZnQ6IDA7XG4gIHJpZ2h0OiAwO1xuICBoZWlnaHQ6IDA7XG4gIHdpZHRoOiAxMDAlO1xufVxuXG4uY29udGFpbmVyIHtcbiAgbWFyZ2luOiAwIDFyZW07XG59XG5cbi5mYXEtbmF2LWxpc3Qge1xuICBtYXJnaW4tYm90dG9tOiA1cmVtO1xufVxuXG4uZmFxLWNhcmQge1xuICBtYXJnaW4tdG9wOiAxcmVtO1xuICBtYXJnaW4tYm90dG9tOiAxcmVtO1xufVxuXG4uZmFxLWNhcmQgLm1hdC1jYXJkLXRpdGxlIGgyIHtcbiAgZGlzcGxheTogaW5saW5lO1xuICBwYWRkaW5nLWxlZnQ6IDRweDtcbn1cbi5mYXEtY2FyZCBhcHAtc2Nyb2xsLXRvLXRvcC1idXR0b24ge1xuICBvcGFjaXR5OiAwLjg7XG59XG4uZmFxLWNhcmQgYXBwLXNjcm9sbC10by10b3AtYnV0dG9uOmhvdmVyIHtcbiAgY3Vyc29yOiBwb2ludGVyO1xufVxuXG4uZmFxLWNhcmQgcCB7XG4gIHdvcmQtYnJlYWs6IGJyZWFrLXdvcmQ7XG59Il19 */");
+/* harmony default export */ __webpack_exports__["default"] = ("#faq-top {\n  position: absolute;\n  top: 0;\n  left: 0;\n  right: 0;\n  height: 0;\n  width: 100%;\n}\n\n.container {\n  margin: 0 1rem;\n}\n\n.faq-nav-list {\n  margin-bottom: 5rem;\n}\n\n.faq-card {\n  margin-top: 1rem;\n  margin-bottom: 1rem;\n}\n\n.faq-card .mat-card-title h2 {\n  display: inline;\n  padding-left: 4px;\n}\n\n.faq-card app-scroll-to-top-button {\n  opacity: 0.8;\n}\n\n.faq-card app-scroll-to-top-button:hover {\n  cursor: pointer;\n}\n\n.faq-card p {\n  word-break: break-word;\n}\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi9ob21lL3ZvaWQvd29ya3NwYWNlL3RoZWJvcmFrb21wYW5pb25pL2JpcDM5LW5nL3NyYy9hcHAvbWFpbi9tYWluLWZhcS9tYWluLWZhcS5jb21wb25lbnQuc2NzcyIsInNyYy9hcHAvbWFpbi9tYWluLWZhcS9tYWluLWZhcS5jb21wb25lbnQuc2NzcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFFQTtFQUNFLGtCQUFBO0VBQ0EsTUFBQTtFQUNBLE9BQUE7RUFDQSxRQUFBO0VBQ0EsU0FBQTtFQUNBLFdBQUE7QUNERjs7QURJQTtFQUNFLGNBQUE7QUNERjs7QURJQTtFQUNFLG1CQUFBO0FDREY7O0FESUE7RUFDRSxnQkFBQTtFQUNBLG1CQUFBO0FDREY7O0FESUE7RUFDRSxlQUFBO0VBQ0EsaUJBQUE7QUNERjs7QURHQTtFQUNFLFlBQUE7QUNBRjs7QURFQTtFQUNFLGVBQUE7QUNDRjs7QURFQTtFQUNFLHNCQUFBO0FDQ0YiLCJmaWxlIjoic3JjL2FwcC9tYWluL21haW4tZmFxL21haW4tZmFxLmNvbXBvbmVudC5zY3NzIiwic291cmNlc0NvbnRlbnQiOlsiQGltcG9ydCBcIm1peGluc1wiO1xuXG4jZmFxLXRvcCB7XG4gIHBvc2l0aW9uOiBhYnNvbHV0ZTtcbiAgdG9wOiAwO1xuICBsZWZ0OiAwO1xuICByaWdodDogMDtcbiAgaGVpZ2h0OiAwO1xuICB3aWR0aDogMTAwJTtcbn1cblxuLmNvbnRhaW5lciB7XG4gIG1hcmdpbjogMCAxcmVtO1xufVxuXG4uZmFxLW5hdi1saXN0IHtcbiAgbWFyZ2luLWJvdHRvbTogNXJlbTtcbn1cblxuLmZhcS1jYXJkIHtcbiAgbWFyZ2luLXRvcDogMXJlbTtcbiAgbWFyZ2luLWJvdHRvbTogMXJlbTtcbn1cblxuLmZhcS1jYXJkIC5tYXQtY2FyZC10aXRsZSBoMiB7XG4gIGRpc3BsYXk6IGlubGluZTtcbiAgcGFkZGluZy1sZWZ0OiA0cHg7XG59XG4uZmFxLWNhcmQgYXBwLXNjcm9sbC10by10b3AtYnV0dG9uIHtcbiAgb3BhY2l0eTogMC44O1xufVxuLmZhcS1jYXJkIGFwcC1zY3JvbGwtdG8tdG9wLWJ1dHRvbjpob3ZlciB7XG4gIGN1cnNvcjogcG9pbnRlcjtcbn1cblxuLmZhcS1jYXJkIHAge1xuICB3b3JkLWJyZWFrOiBicmVhay13b3JkO1xufSIsIiNmYXEtdG9wIHtcbiAgcG9zaXRpb246IGFic29sdXRlO1xuICB0b3A6IDA7XG4gIGxlZnQ6IDA7XG4gIHJpZ2h0OiAwO1xuICBoZWlnaHQ6IDA7XG4gIHdpZHRoOiAxMDAlO1xufVxuXG4uY29udGFpbmVyIHtcbiAgbWFyZ2luOiAwIDFyZW07XG59XG5cbi5mYXEtbmF2LWxpc3Qge1xuICBtYXJnaW4tYm90dG9tOiA1cmVtO1xufVxuXG4uZmFxLWNhcmQge1xuICBtYXJnaW4tdG9wOiAxcmVtO1xuICBtYXJnaW4tYm90dG9tOiAxcmVtO1xufVxuXG4uZmFxLWNhcmQgLm1hdC1jYXJkLXRpdGxlIGgyIHtcbiAgZGlzcGxheTogaW5saW5lO1xuICBwYWRkaW5nLWxlZnQ6IDRweDtcbn1cblxuLmZhcS1jYXJkIGFwcC1zY3JvbGwtdG8tdG9wLWJ1dHRvbiB7XG4gIG9wYWNpdHk6IDAuODtcbn1cblxuLmZhcS1jYXJkIGFwcC1zY3JvbGwtdG8tdG9wLWJ1dHRvbjpob3ZlciB7XG4gIGN1cnNvcjogcG9pbnRlcjtcbn1cblxuLmZhcS1jYXJkIHAge1xuICB3b3JkLWJyZWFrOiBicmVhay13b3JkO1xufSJdfQ== */");
 
 /***/ }),
 
@@ -26958,7 +26651,7 @@ var ScrollToTopButtonComponent = /** @class */ (function () {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony default export */ __webpack_exports__["default"] = (".container {\n  margin: 0 1rem; }\n\n.container h1 {\n  text-align: center; }\n\n.i-am-feeling-lucky-button {\n  padding: 1.3rem 2rem;\n  font-size: 2rem;\n  margin: 1rem 1rem 3rem 1rem; }\n\n.container .mat-input-element:disabled {\n  color: inherit; }\n\n.mat-form-field-wrapper {\n  margin-left: 1rem !important;\n  margin-right: 1rem;\n  padding-left: 1rem;\n  padding-right: 1rem; }\n\n.clear {\n  clear: both; }\n\n.full-width {\n  width: 100%; }\n\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi9ob21lL3ZvaWQvd29ya3NwYWNlL2dpdGh1Yi90aGVib3Jha29tcGFuaW9uaS9iaXAzOS1uZy9zcmMvYXBwL21haW4vbWFpbi1mcm9udC9tYWluLWZyb250LmNvbXBvbmVudC5zY3NzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUdBO0VBQ0UsY0FBYyxFQUFBOztBQUdoQjtFQUNFLGtCQUFrQixFQUFBOztBQUdwQjtFQUNFLG9CQUFvQjtFQUNwQixlQUFlO0VBQ2YsMkJBQTJCLEVBQUE7O0FBRzdCO0VBQ0UsY0FBYyxFQUFBOztBQUdoQjtFQUNFLDRCQUE0QjtFQUM1QixrQkFBa0I7RUFDbEIsa0JBQWtCO0VBQ2xCLG1CQUFtQixFQUFBOztBQUdyQjtFQUNFLFdBQVcsRUFBQTs7QUFHYjtFQUNFLFdBQVcsRUFBQSIsImZpbGUiOiJzcmMvYXBwL21haW4vbWFpbi1mcm9udC9tYWluLWZyb250LmNvbXBvbmVudC5zY3NzIiwic291cmNlc0NvbnRlbnQiOlsiQGltcG9ydCBcIm1peGluc1wiO1xuXG5cbi5jb250YWluZXIge1xuICBtYXJnaW46IDAgMXJlbTtcbn1cblxuLmNvbnRhaW5lciBoMSB7XG4gIHRleHQtYWxpZ246IGNlbnRlcjtcbn1cblxuLmktYW0tZmVlbGluZy1sdWNreS1idXR0b24ge1xuICBwYWRkaW5nOiAxLjNyZW0gMnJlbTtcbiAgZm9udC1zaXplOiAycmVtO1xuICBtYXJnaW46IDFyZW0gMXJlbSAzcmVtIDFyZW07XG59XG5cbi5jb250YWluZXIgLm1hdC1pbnB1dC1lbGVtZW50OmRpc2FibGVkIHtcbiAgY29sb3I6IGluaGVyaXQ7XG59XG5cbi5tYXQtZm9ybS1maWVsZC13cmFwcGVyIHtcbiAgbWFyZ2luLWxlZnQ6IDFyZW0gIWltcG9ydGFudDtcbiAgbWFyZ2luLXJpZ2h0OiAxcmVtO1xuICBwYWRkaW5nLWxlZnQ6IDFyZW07XG4gIHBhZGRpbmctcmlnaHQ6IDFyZW07XG59XG5cbi5jbGVhciB7XG4gIGNsZWFyOiBib3RoO1xufVxuXG4uZnVsbC13aWR0aCB7XG4gIHdpZHRoOiAxMDAlO1xufSJdfQ== */");
+/* harmony default export */ __webpack_exports__["default"] = (".container {\n  margin: 0 1rem;\n}\n\n.container h1 {\n  text-align: center;\n}\n\n.i-am-feeling-lucky-button {\n  padding: 1.3rem 2rem;\n  font-size: 2rem;\n  margin: 1rem 1rem 3rem 1rem;\n}\n\n.container .mat-input-element:disabled {\n  color: inherit;\n}\n\n.mat-form-field-wrapper {\n  margin-left: 1rem !important;\n  margin-right: 1rem;\n  padding-left: 1rem;\n  padding-right: 1rem;\n}\n\n.clear {\n  clear: both;\n}\n\n.full-width {\n  width: 100%;\n}\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi9ob21lL3ZvaWQvd29ya3NwYWNlL3RoZWJvcmFrb21wYW5pb25pL2JpcDM5LW5nL3NyYy9hcHAvbWFpbi9tYWluLWZyb250L21haW4tZnJvbnQuY29tcG9uZW50LnNjc3MiLCJzcmMvYXBwL21haW4vbWFpbi1mcm9udC9tYWluLWZyb250LmNvbXBvbmVudC5zY3NzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUdBO0VBQ0UsY0FBQTtBQ0ZGOztBREtBO0VBQ0Usa0JBQUE7QUNGRjs7QURLQTtFQUNFLG9CQUFBO0VBQ0EsZUFBQTtFQUNBLDJCQUFBO0FDRkY7O0FES0E7RUFDRSxjQUFBO0FDRkY7O0FES0E7RUFDRSw0QkFBQTtFQUNBLGtCQUFBO0VBQ0Esa0JBQUE7RUFDQSxtQkFBQTtBQ0ZGOztBREtBO0VBQ0UsV0FBQTtBQ0ZGOztBREtBO0VBQ0UsV0FBQTtBQ0ZGIiwiZmlsZSI6InNyYy9hcHAvbWFpbi9tYWluLWZyb250L21haW4tZnJvbnQuY29tcG9uZW50LnNjc3MiLCJzb3VyY2VzQ29udGVudCI6WyJAaW1wb3J0IFwibWl4aW5zXCI7XG5cblxuLmNvbnRhaW5lciB7XG4gIG1hcmdpbjogMCAxcmVtO1xufVxuXG4uY29udGFpbmVyIGgxIHtcbiAgdGV4dC1hbGlnbjogY2VudGVyO1xufVxuXG4uaS1hbS1mZWVsaW5nLWx1Y2t5LWJ1dHRvbiB7XG4gIHBhZGRpbmc6IDEuM3JlbSAycmVtO1xuICBmb250LXNpemU6IDJyZW07XG4gIG1hcmdpbjogMXJlbSAxcmVtIDNyZW0gMXJlbTtcbn1cblxuLmNvbnRhaW5lciAubWF0LWlucHV0LWVsZW1lbnQ6ZGlzYWJsZWQge1xuICBjb2xvcjogaW5oZXJpdDtcbn1cblxuLm1hdC1mb3JtLWZpZWxkLXdyYXBwZXIge1xuICBtYXJnaW4tbGVmdDogMXJlbSAhaW1wb3J0YW50O1xuICBtYXJnaW4tcmlnaHQ6IDFyZW07XG4gIHBhZGRpbmctbGVmdDogMXJlbTtcbiAgcGFkZGluZy1yaWdodDogMXJlbTtcbn1cblxuLmNsZWFyIHtcbiAgY2xlYXI6IGJvdGg7XG59XG5cbi5mdWxsLXdpZHRoIHtcbiAgd2lkdGg6IDEwMCU7XG59IiwiLmNvbnRhaW5lciB7XG4gIG1hcmdpbjogMCAxcmVtO1xufVxuXG4uY29udGFpbmVyIGgxIHtcbiAgdGV4dC1hbGlnbjogY2VudGVyO1xufVxuXG4uaS1hbS1mZWVsaW5nLWx1Y2t5LWJ1dHRvbiB7XG4gIHBhZGRpbmc6IDEuM3JlbSAycmVtO1xuICBmb250LXNpemU6IDJyZW07XG4gIG1hcmdpbjogMXJlbSAxcmVtIDNyZW0gMXJlbTtcbn1cblxuLmNvbnRhaW5lciAubWF0LWlucHV0LWVsZW1lbnQ6ZGlzYWJsZWQge1xuICBjb2xvcjogaW5oZXJpdDtcbn1cblxuLm1hdC1mb3JtLWZpZWxkLXdyYXBwZXIge1xuICBtYXJnaW4tbGVmdDogMXJlbSAhaW1wb3J0YW50O1xuICBtYXJnaW4tcmlnaHQ6IDFyZW07XG4gIHBhZGRpbmctbGVmdDogMXJlbTtcbiAgcGFkZGluZy1yaWdodDogMXJlbTtcbn1cblxuLmNsZWFyIHtcbiAgY2xlYXI6IGJvdGg7XG59XG5cbi5mdWxsLXdpZHRoIHtcbiAgd2lkdGg6IDEwMCU7XG59Il19 */");
 
 /***/ }),
 
@@ -26975,15 +26668,16 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
 /* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/forms */ "./node_modules/@angular/forms/fesm5/forms.js");
 /* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @angular/router */ "./node_modules/@angular/router/fesm5/router.js");
-/* harmony import */ var _core_shared_blockchain_info_service_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../core/shared/blockchain-info-service.service */ "./src/app/core/shared/blockchain-info-service.service.ts");
-/* harmony import */ var bitcoinjs_lib__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! bitcoinjs-lib */ "./node_modules/bitcoinjs-lib/src/index.js");
-/* harmony import */ var bitcoinjs_lib__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(bitcoinjs_lib__WEBPACK_IMPORTED_MODULE_4__);
-/* harmony import */ var bip32__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! bip32 */ "./node_modules/bip32/src/index.js");
-/* harmony import */ var bip32__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(bip32__WEBPACK_IMPORTED_MODULE_5__);
-/* harmony import */ var bip39__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! bip39 */ "./node_modules/bip39/src/index.js");
-/* harmony import */ var bip39__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(bip39__WEBPACK_IMPORTED_MODULE_6__);
-/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! rxjs/operators */ "./node_modules/rxjs/_esm5/operators/index.js");
-/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! rxjs */ "./node_modules/rxjs/_esm5/index.js");
+/* harmony import */ var rxjs_Subject__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! rxjs/Subject */ "./node_modules/rxjs-compat/_esm5/Subject.js");
+/* harmony import */ var _core_shared_blockchain_info_service_service__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../core/shared/blockchain-info-service.service */ "./src/app/core/shared/blockchain-info-service.service.ts");
+/* harmony import */ var bitcoinjs_lib__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! bitcoinjs-lib */ "./node_modules/bitcoinjs-lib/src/index.js");
+/* harmony import */ var bitcoinjs_lib__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(bitcoinjs_lib__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var bip32__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! bip32 */ "./node_modules/bip32/src/index.js");
+/* harmony import */ var bip32__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(bip32__WEBPACK_IMPORTED_MODULE_6__);
+/* harmony import */ var bip39__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! bip39 */ "./node_modules/bip39/src/index.js");
+/* harmony import */ var bip39__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(bip39__WEBPACK_IMPORTED_MODULE_7__);
+/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! rxjs/operators */ "./node_modules/rxjs/_esm5/operators/index.js");
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! rxjs */ "./node_modules/rxjs/_esm5/index.js");
 var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -27005,50 +26699,122 @@ var __importDefault = (undefined && undefined.__importDefault) || function (mod)
 
 
 
-function getAddress(node, network) {
-    return bitcoinjs_lib__WEBPACK_IMPORTED_MODULE_4__["payments"].p2pkh({ pubkey: node.publicKey, network: network }).address;
+
+function buf2hex(buffer) {
+    return Array.prototype.map.call(new Uint8Array(buffer), function (x) { return ('00' + x.toString(16)).slice(-2); }).join('');
+}
+function p2pkhAddress(node, network) {
+    return bitcoinjs_lib__WEBPACK_IMPORTED_MODULE_5__["payments"].p2pkh({ pubkey: node.publicKey, network: network }).address;
+}
+function segwitAdddress(node, network) {
+    var address = bitcoinjs_lib__WEBPACK_IMPORTED_MODULE_5__["payments"].p2sh({
+        redeem: bitcoinjs_lib__WEBPACK_IMPORTED_MODULE_5__["payments"].p2wpkh({ pubkey: node.publicKey }),
+    }).address;
+    return address;
+}
+function p2wpkhAddress(node, network) {
+    return bitcoinjs_lib__WEBPACK_IMPORTED_MODULE_5__["payments"].p2wpkh({ pubkey: node.publicKey, network: network }).address;
+}
+function getAddress(path, node, network) {
+    if (path.substr(0, "m/44'/".length) === "m/44'/") {
+        return p2pkhAddress(node, network);
+    }
+    if (path.substr(0, "m/49'/".length) === "m/49'/") {
+        return segwitAdddress(node, network);
+    }
+    if (path.substr(0, "m/84'/".length) === "m/84'/") {
+        return p2wpkhAddress(node, network);
+    }
+    return p2pkhAddress(node, network);
+}
+function buildPath(prefix, account, change, index) {
+    return "" + prefix + account + "'/" + change + "/" + index;
 }
 var MainFrontComponent = /** @class */ (function () {
     function MainFrontComponent(router, formBuilder, blockchainInfo) {
         this.router = router;
         this.formBuilder = formBuilder;
         this.blockchainInfo = blockchainInfo;
+        // path : = m / purpose' / coin_type' / account' / change / address_index
+        this.pathPrefixBip44 = "m/44'/0'/"; // addresses 1xxx
+        this.pathPrefixBip49 = "m/49'/0'/"; // addresses 3xxx
+        this.pathPrefixBip84 = "m/84'/0'/"; // addresses bc1xxx
+        this.pathAccount = 0;
+        this.pathChange = 0;
+        this.pathIndex = 0;
+        this.pathPrefix = "" + this.pathPrefixBip44;
+        this.mnemonicInputChangedSubject = new rxjs_Subject__WEBPACK_IMPORTED_MODULE_3__["Subject"]();
+        this.searchInputChangedSubject = new rxjs_Subject__WEBPACK_IMPORTED_MODULE_3__["Subject"]();
         this.tryCounter = 0;
+        this.feelingLuckyCounterClicked = 0;
         this.loading = false;
+        this.wordlist = bip39__WEBPACK_IMPORTED_MODULE_7__["getDefaultWordlist"]();
+        this.displayDetailedSettings = false;
         this.mnemonicArray = [];
+        this.searchFieldValue = '';
     }
+    MainFrontComponent.prototype.buildPath = function () {
+        return this.buildPathWithIndex(this.pathIndex);
+    };
+    MainFrontComponent.prototype.buildPathWithIndex = function (index) {
+        return buildPath(this.pathPrefix, this.pathAccount, this.pathChange, index);
+    };
     MainFrontComponent.prototype.ngOnInit = function () {
+        var _this = this;
+        this.searchInputChangedSubject.pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["throttleTime"])(100)).subscribe(function (searchFieldValue) {
+            _this.searchFieldValue = searchFieldValue;
+            _this.mnemonicInputChangedSubject.next(searchFieldValue);
+        });
+        this.mnemonicInputChangedSubject.pipe().subscribe(function (mnemonic) {
+            console.log('onChangeMnemonic');
+            _this.mnemonicArray = mnemonic.split(' ');
+            _this.searchFieldValue = mnemonic;
+            _this.generateResult(mnemonic);
+        });
     };
-    MainFrontComponent.prototype.generateNewRandomMnemonic = function () {
-        var mnemonic = bip39__WEBPACK_IMPORTED_MODULE_6__["generateMnemonic"]();
-        this.mnemonicArray = mnemonic.split(' ');
-        return mnemonic;
-    };
-    MainFrontComponent.prototype.onChangeMnemonic = function () {
-        var mnemonic = this.mnemonicArray.join(' ');
-        this.generateResult(mnemonic);
+    MainFrontComponent.prototype.onChangeSearchInput = function (mnemonic) {
+        this.searchInputChangedSubject.next(mnemonic);
     };
     MainFrontComponent.prototype.buttonIamFeelingLuckyClicked = function () {
-        var mnemonic = this.generateNewRandomMnemonic();
-        this.generateResult(mnemonic);
+        this.feelingLuckyCounterClicked++;
+        var mnemonic = bip39__WEBPACK_IMPORTED_MODULE_7__["generateMnemonic"]();
+        this.mnemonicInputChangedSubject.next(mnemonic);
     };
     MainFrontComponent.prototype.generateResult = function (mnemonic) {
         var _this = this;
         this.loading = true;
         this.result = null;
-        // see BIP44 for why this path was chosen
-        // @link https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki 
-        var path = "m/44'/0'/0'/0/0";
-        var seed = bip39__WEBPACK_IMPORTED_MODULE_6__["mnemonicToSeedSync"](mnemonic);
-        var root = bip32__WEBPACK_IMPORTED_MODULE_5__["fromSeed"](seed);
-        var child1 = root.derivePath(path);
-        var address = getAddress(child1);
-        Object(rxjs__WEBPACK_IMPORTED_MODULE_8__["of"])(1).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_7__["delay"])(1000), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_7__["tap"])(function (foo) {
-            _this.result = {
-                mnemonic: mnemonic,
+        var seed = bip39__WEBPACK_IMPORTED_MODULE_7__["mnemonicToSeedSync"](mnemonic);
+        var root = bip32__WEBPACK_IMPORTED_MODULE_6__["fromSeed"](seed);
+        var rootWif = root.toWIF();
+        var masterPrivateKey = root.privateKey;
+        var path = this.buildPath();
+        var child = root.derivePath(path);
+        var address = getAddress(path, child);
+        var addresses = [{
                 address: address,
+                path: path
+            }];
+        for (var i = 1; i <= 20; i++) {
+            var iPath = this.buildPathWithIndex(i);
+            var iChild = root.derivePath(iPath);
+            var iAddress = getAddress(iPath, iChild);
+            addresses.push({
+                address: iAddress,
+                path: iPath
+            });
+        }
+        Object(rxjs__WEBPACK_IMPORTED_MODULE_9__["of"])(1).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["throttleTime"])(10), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["delay"])(300), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(function (foo) {
+            _this.result = {
+                mnemonic: mnemonic || '(empty)',
+                seedHex: '0x' + buf2hex(seed),
+                rootWif: rootWif,
+                masterPrivateKey: '0x' + buf2hex(masterPrivateKey),
+                address: address,
+                addresses: addresses,
+                path: path
             };
-        }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_7__["flatMap"])(function (foo) { return _this.blockchainInfo.fetchReceivedByAddress(address); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_7__["delay"])(1250), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_7__["tap"])(function (received) { return _this.result.received = received; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_7__["filter"])(function (received) { return received > 0; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_7__["flatMap"])(function (foo) { return _this.blockchainInfo.fetchAddressBalance(address); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_7__["delay"])(750), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_7__["tap"])(function (balance) { return _this.result.balance = balance; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_7__["delay"])(300)).subscribe(function (foo) {
+        }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["flatMap"])(function (foo) { return _this.blockchainInfo.fetchReceivedByAddress(address); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["delay"])(1250), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(function (received) { return _this.result.received = received; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["filter"])(function (received) { return received > 0; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["flatMap"])(function (foo) { return _this.blockchainInfo.fetchAddressBalance(address); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["delay"])(750), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(function (balance) { return _this.result.balance = balance; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["delay"])(300)).subscribe(function (foo) {
         }, function (error) {
             _this.loading = false;
             _this.result.error = error;
@@ -27062,7 +26828,7 @@ var MainFrontComponent = /** @class */ (function () {
     MainFrontComponent.ctorParameters = function () { return [
         { type: _angular_router__WEBPACK_IMPORTED_MODULE_2__["Router"] },
         { type: _angular_forms__WEBPACK_IMPORTED_MODULE_1__["FormBuilder"] },
-        { type: _core_shared_blockchain_info_service_service__WEBPACK_IMPORTED_MODULE_3__["BlockchainInfoServiceService"] }
+        { type: _core_shared_blockchain_info_service_service__WEBPACK_IMPORTED_MODULE_4__["BlockchainInfoServiceService"] }
     ]; };
     MainFrontComponent = __decorate([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["Component"])({
@@ -27072,7 +26838,7 @@ var MainFrontComponent = /** @class */ (function () {
         }),
         __metadata("design:paramtypes", [_angular_router__WEBPACK_IMPORTED_MODULE_2__["Router"],
             _angular_forms__WEBPACK_IMPORTED_MODULE_1__["FormBuilder"],
-            _core_shared_blockchain_info_service_service__WEBPACK_IMPORTED_MODULE_3__["BlockchainInfoServiceService"]])
+            _core_shared_blockchain_info_service_service__WEBPACK_IMPORTED_MODULE_4__["BlockchainInfoServiceService"]])
     ], MainFrontComponent);
     return MainFrontComponent;
 }());
