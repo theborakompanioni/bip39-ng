@@ -94,6 +94,7 @@ export class MainFrontComponent implements OnInit {
   buildPath() {
     return this.buildPathWithIndex(this.pathIndex);
   }
+
   buildPathWithIndex(index: number) {
     return buildPath(this.pathPrefix, this.pathAccount, this.pathChange, index);
   }
@@ -136,15 +137,12 @@ export class MainFrontComponent implements OnInit {
     const rootWif = root.toWIF();
     const masterPrivateKey = root.privateKey;
 
-    const path = this.buildPath();
+    const path = this.buildPathWithIndex(this.pathIndex);
     const child = root.derivePath(path);
     const address = getAddress(path, child);
 
-    const addresses = [{
-      address: address,
-      path: path
-    }];
-    for (let i = 1; i <= 20; i++) {
+    const addresses = [];
+    for (let i = this.pathIndex; i <= 20; i++) {
       const iPath = this.buildPathWithIndex(i);
       const iChild = root.derivePath(iPath);
       const iAddress = getAddress(iPath, iChild);
