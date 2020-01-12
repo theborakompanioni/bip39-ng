@@ -146,7 +146,8 @@ export class MainFrontComponent implements OnInit {
         const seed = Bip39.mnemonicToSeedSync(mnemonic);
         const root = Bip32.fromSeed(seed);
 
-        const rootBip32Xpriv = root.toBase58();
+        const rootXpriv = root.toBase58();
+        const rootXpub = root.neutered().toBase58();
         const rootWif = root.toWIF();
         const masterPrivateKey = root.privateKey;
 
@@ -162,18 +163,25 @@ export class MainFrontComponent implements OnInit {
           const iAddress = getAddress(iPath, iChild);
           addresses.push({
             address: iAddress,
-            path: iPath
+            path: iPath,
+            publicKey: iChild.publicKey,
+            privateKey: iChild.privateKey,
+            xpriv: iChild.toBase58(),
+            xpub: iChild.neutered().toBase58(),
+            wif: iChild.toWIF()
           });
         }
 
         this.result = {
+          mneomincIsValid: Bip39.validateMnemonic(mnemonic),
           mnemonic: mnemonic || '(empty)',
           root: root,
 
           seedHex: '0x' + buf2hex(seed),
-          rootWif: rootWif,
-          rootBip32Xpriv: rootBip32Xpriv,
           masterPrivateKey: '0x' + buf2hex(masterPrivateKey),
+          rootWif: rootWif,
+          rootXpriv: rootXpriv,
+          rootXpub: rootXpub,
 
           child: child,
           path: path,

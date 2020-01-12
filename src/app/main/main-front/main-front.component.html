@@ -110,23 +110,6 @@
     <div style="text-align: center; margin-bottom: 3rem"></div>
 
     <div *ngIf="result">
-      <div *ngIf="result.mnemonic">
-          <span class="bold">Results for search term:</span> 
-          <pre>{{result.mnemonic}}</pre>
-      </div>
-      <div *ngIf="result.path">
-        <p>
-          <span class="bold">Path (BIP44):</span> {{result.path}}
-          (see <a href="https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki">BIP44</a>)
-        </p>
-        <p style="display: none">
-          See <a href="https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki">BIP32</a> and 
-          <a href="https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki">BIP39</a>, 
-          <a href="https://github.com/bitcoin/bips/blob/master/bip-0049.mediawiki">BIP49</a>, 
-          <a href="https://github.com/bitcoin/bips/blob/master/bip-0084.mediawiki">BIP84</a>.
-        </p>
-      </div>
-
       <mat-form-field class="full-width" appearance="fill" style="text-align: center;" *ngIf="result.address">
         <mat-label>Address</mat-label>
         <input style="font-size: 150%" matInput type="text" placeholder="" [value]="result.address" disabled/>
@@ -153,17 +136,49 @@
     </div>
 
     <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
-    
 
     <div *ngIf="result" [hidden]="loading">
       <mat-card style="margin: 1em;">
+        <h3>Search</h3>
+        <div *ngIf="result.mnemonic">
+            <span class="bold">Results for search term:</span> 
+            <pre>{{result.mnemonic}}</pre>
+        </div>
+        <div *ngIf="result.path">
+          <p>
+            <span class="bold">Path (BIP44):</span> {{result.path}}
+            (see <a href="https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki">BIP44</a>)
+          </p>
+          <p style="display: none">
+            See <a href="https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki">BIP32</a> and 
+            <a href="https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki">BIP39</a>, 
+            <a href="https://github.com/bitcoin/bips/blob/master/bip-0049.mediawiki">BIP49</a>, 
+            <a href="https://github.com/bitcoin/bips/blob/master/bip-0084.mediawiki">BIP84</a>.
+          </p>
+        </div>
+        <div *ngIf="result.address">
+          <span class="bold">Address:</span>
+          <pre>{{result.address}}</pre>
+        </div>
+      </mat-card>
+    </div>
+
+
+
+    <div *ngIf="result" [hidden]="loading">
+      <mat-card style="margin: 1em;">
+        <h3>Wallet Information</h3>
         <div *ngIf="result.seedHex">
           <span class="bold">Seed:</span>
           <pre>{{result.seedHex}}</pre>
         </div>
-        <div *ngIf="result.rootBip32Xpriv">
+        <div *ngIf="result.rootXpriv">
           <span class="bold">BIP32 xpriv:</span>
-          <pre>{{result.rootBip32Xpriv}}</pre>
+          <pre>{{result.rootXpriv}}</pre>
+        </div>
+        <div *ngIf="result.rootXpriv">
+          <span class="bold">BIP32 xpub:</span>
+          <pre>{{result.rootXpub}}</pre>
         </div>
         <div *ngIf="result.rootWif">
           <span class="bold">WIF:</span>
@@ -183,10 +198,10 @@
     <div *ngIf="result" [hidden]="loading || result.mnemonic === undefined">
       <mat-card style="margin: 1em;">
         <h3>Private Key Mnemonic</h3>
-        <div class="word-input-container" fxLayout="row wrap" *ngIf="mnemonicArray.length !== 12">
+        <div class="word-input-container" fxLayout="row wrap" *ngIf="!result.mneomincIsValid">
           Input is not a valid BIP39 mnemonic seed.
         </div>
-        <div class="word-input-container" fxLayout="row wrap" *ngIf="mnemonicArray.length === 12">
+        <div class="word-input-container" fxLayout="row wrap" *ngIf="result.mneomincIsValid">
           <div fxFlex="100%" fxFlex.gt-sm="32%" fxFlex.gt-md="24%" fxFlex.gt-md="16.5%" *ngFor="let i of [0,1,2,3,4,5,6,7,8,9,10,11]">
             <span>
               <mat-form-field class="example-form-field-{{i}}" appearance="fill">
@@ -205,6 +220,8 @@
         <div *ngFor="let address of result.addresses">
             {{address.path}}: {{address.address}} - 
             <a href="https://www.blockchain.com/btc/address/{{address.address}}" target="_blank">https://www.blockchain.com/btc/address/{{address.address}}</a>
+            - 
+            {{address.wif}}
         </div>
       </mat-card>
 
