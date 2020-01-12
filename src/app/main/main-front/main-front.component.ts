@@ -58,11 +58,10 @@ function buildPath(prefix: string, account: number, change: number, index: numbe
 })
 
 export class MainFrontComponent implements OnInit {
-   // path : = m / purpose' / coin_type' / account' / change / address_index
-   pathPrefixBip44 = `m/44'/0'/`; // addresses 1xxx
-   pathPrefixBip49 = `m/49'/0'/`; // addresses 3xxx
-   pathPrefixBip84 = `m/84'/0'/`; // addresses bc1xxx
-
+  // path : = m / purpose' / coin_type' / account' / change / address_index
+  pathPrefixBip44 = `m/44'/0'/`; // addresses 1xxx
+  pathPrefixBip49 = `m/49'/0'/`; // addresses 3xxx
+  pathPrefixBip84 = `m/84'/0'/`; // addresses bc1xxx
 
   result: any;
   mnemonicArray: Array<string>;
@@ -73,6 +72,12 @@ export class MainFrontComponent implements OnInit {
   pathIndex = 0;
 
   pathPrefix = `${this.pathPrefixBip44}`;
+
+  pathPrefixInputAutocompleteOptions = [
+    this.pathPrefixBip44,
+    this.pathPrefixBip49,
+    this.pathPrefixBip84
+  ];
 
   mnemonicInputChangedSubject: Subject<string> = new Subject<string>();
   searchInputChangedSubject: Subject<string> = new Subject<string>();
@@ -132,30 +137,32 @@ export class MainFrontComponent implements OnInit {
     this.loading = true;
     this.result = null;
 
-    const seed = Bip39.mnemonicToSeedSync(mnemonic);
-    const root = Bip32.fromSeed(seed);
-    const rootWif = root.toWIF();
-    const masterPrivateKey = root.privateKey;
-
-    const path = this.buildPathWithIndex(this.pathIndex);
-    const child = root.derivePath(path);
-    const address = getAddress(path, child);
-
-    const addresses = [];
-    for (let i = this.pathIndex; i <= 20; i++) {
-      const iPath = this.buildPathWithIndex(i);
-      const iChild = root.derivePath(iPath);
-      const iAddress = getAddress(iPath, iChild);
-      addresses.push({
-        address: iAddress,
-        path: iPath
-      });
-    }
+    let address: string;
 
     of(1).pipe(
       throttleTime(10),
       delay(300),
       tap(foo => {
+        const seed = Bip39.mnemonicToSeedSync(mnemonic);
+        const root = Bip32.fromSeed(seed);
+        const rootWif = root.toWIF();
+        const masterPrivateKey = root.privateKey;
+
+        const path = this.buildPathWithIndex(this.pathIndex);
+        const child = root.derivePath(path);
+        address = getAddress(path, child);
+
+        const addresses = [];
+        for (let i = this.pathIndex; i <= 20; i++) {
+          const iPath = this.buildPathWithIndex(i);
+          const iChild = root.derivePath(iPath);
+          const iAddress = getAddress(iPath, iChild);
+          addresses.push({
+            address: iAddress,
+            path: iPath
+          });
+        }
+
         this.result = {
           mnemonic: mnemonic || '(empty)',
           seedHex: '0x' + buf2hex(seed),
@@ -177,11 +184,14 @@ export class MainFrontComponent implements OnInit {
     ).subscribe(foo => {
     }, error => {
       this.loading = false;
+
+      this.result = this.result || {};
       this.result.error = error;
     }, () => {
       this.loading = false;
       this.tryCounter++;
 
+      this.result = this.result || {};
       this.result.received = this.result.received || 0;
       this.result.balance = this.result.balance || 0;
     });

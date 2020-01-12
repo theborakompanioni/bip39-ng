@@ -5,6 +5,10 @@
   @include font-roboto();
 }
 
+code {
+  font-family: monospace;
+}
+
 a, .cp {
   cursor: pointer;
 }
