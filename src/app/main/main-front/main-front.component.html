@@ -110,33 +110,23 @@
     <div style="text-align: center; margin-bottom: 3rem"></div>
 
     <div *ngIf="result">
-      <p *ngIf="result.mnemonic">
-          <span class="bold">Results for search term:</span> {{result.mnemonic}}
-      </p>
-      <p *ngIf="result.seedHex">
-        <span class="bold">Seed:</span> {{result.seedHex}}
-      </p>
-      <p *ngIf="result.rootWif">
-        <span class="bold">WIF:</span> {{result.rootWif}}
-      </p>
-      <p *ngIf="result.masterPrivateKey">
-        <span class="bold">Master Private Key:</span> {{result.masterPrivateKey}}
-      </p>
-      <p *ngIf="result.privateKey">
-        <span class="bold">Master Private Key:</span> {{result.privateKey}}
-      </p>
-      <div *ngIf="result.path">
-          <p>
-            <span class="bold">Path (BIP44):</span> {{result.path}}
-            (see <a href="https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki">BIP44</a>)
-          </p>
-          <p style="display: none">
-            See <a href="https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki">BIP32</a> and 
-            <a href="https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki">BIP39</a>, 
-            <a href="https://github.com/bitcoin/bips/blob/master/bip-0049.mediawiki">BIP49</a>, 
-            <a href="https://github.com/bitcoin/bips/blob/master/bip-0084.mediawiki">BIP84</a>.
-          </p>
+      <div *ngIf="result.mnemonic">
+          <span class="bold">Results for search term:</span> 
+          <pre>{{result.mnemonic}}</pre>
       </div>
+      <div *ngIf="result.path">
+        <p>
+          <span class="bold">Path (BIP44):</span> {{result.path}}
+          (see <a href="https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki">BIP44</a>)
+        </p>
+        <p style="display: none">
+          See <a href="https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki">BIP32</a> and 
+          <a href="https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki">BIP39</a>, 
+          <a href="https://github.com/bitcoin/bips/blob/master/bip-0049.mediawiki">BIP49</a>, 
+          <a href="https://github.com/bitcoin/bips/blob/master/bip-0084.mediawiki">BIP84</a>.
+        </p>
+      </div>
+
       <mat-form-field class="full-width" appearance="fill" style="text-align: center;" *ngIf="result.address">
         <mat-label>Address</mat-label>
         <input style="font-size: 150%" matInput type="text" placeholder="" [value]="result.address" disabled/>
@@ -164,6 +154,31 @@
 
     <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
     
+
+    <div *ngIf="result" [hidden]="loading">
+      <mat-card style="margin: 1em;">
+        <div *ngIf="result.seedHex">
+          <span class="bold">Seed:</span>
+          <pre>{{result.seedHex}}</pre>
+        </div>
+        <div *ngIf="result.rootBip32Xpriv">
+          <span class="bold">BIP32 xpriv:</span>
+          <pre>{{result.rootBip32Xpriv}}</pre>
+        </div>
+        <div *ngIf="result.rootWif">
+          <span class="bold">WIF:</span>
+          <pre>{{result.rootWif}}</pre>
+          <p>
+            See <a href="https://en.bitcoin.it/wiki/Wallet_import_format">Wallet Import Format wiki page on en.bitcoin.it</a> 
+            for more information.
+          </p>
+        </div>
+        <div *ngIf="result.masterPrivateKey">
+          <span class="bold">Master Private Key:</span>
+          <pre>{{result.masterPrivateKey}}</pre>
+        </div>
+      </mat-card>
+    </div>
 
     <div *ngIf="result" [hidden]="loading || result.mnemonic === undefined">
       <mat-card style="margin: 1em;">

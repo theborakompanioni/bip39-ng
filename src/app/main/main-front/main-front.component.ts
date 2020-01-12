@@ -145,11 +145,14 @@ export class MainFrontComponent implements OnInit {
       tap(foo => {
         const seed = Bip39.mnemonicToSeedSync(mnemonic);
         const root = Bip32.fromSeed(seed);
+
+        const rootBip32Xpriv = root.toBase58();
         const rootWif = root.toWIF();
         const masterPrivateKey = root.privateKey;
 
         const path = this.buildPathWithIndex(this.pathIndex);
         const child = root.derivePath(path);
+
         address = getAddress(path, child);
 
         const addresses = [];
@@ -165,12 +168,17 @@ export class MainFrontComponent implements OnInit {
 
         this.result = {
           mnemonic: mnemonic || '(empty)',
+          root: root,
+
           seedHex: '0x' + buf2hex(seed),
           rootWif: rootWif,
+          rootBip32Xpriv: rootBip32Xpriv,
           masterPrivateKey: '0x' + buf2hex(masterPrivateKey),
+
+          child: child,
+          path: path,
           address: address,
           addresses: addresses,
-          path: path
         };
       }),
       flatMap(foo => this.blockchainInfo.fetchReceivedByAddress(address)),
