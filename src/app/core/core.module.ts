@@ -10,6 +10,8 @@ import { Error404Component } from './error404/error-404.component';
 import { LoggerService } from './shared/logger.service';
 import { ProgressBarService } from './shared/progress-bar.service';
 import { BlockchainInfoServiceService } from './shared/blockchain-info-service.service';
+import { BlockstreamInfoServiceService } from './shared/blockstream-info-service.service';
+import { DataInfoServiceService } from './shared/data-info-service.service';
 
 
 
@@ -33,7 +35,9 @@ import { BlockchainInfoServiceService } from './shared/blockchain-info-service.s
   providers: [
     LoggerService,
     ProgressBarService,
-    BlockchainInfoServiceService
+    BlockchainInfoServiceService,
+    BlockstreamInfoServiceService,
+    DataInfoServiceService,
   ]
 })
 

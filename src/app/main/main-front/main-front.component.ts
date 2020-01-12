@@ -4,7 +4,7 @@ import { MatDialog } from '@angular/material';
 import { AppConfig } from '../../config/app.config';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs/Subject';
-import { BlockchainInfoServiceService } from '../../core/shared/blockchain-info-service.service';
+import { DataInfoServiceService } from '../../core/shared/data-info-service.service';
 import { HttpClient } from '@angular/common/http';
 
 
@@ -91,7 +91,7 @@ export class MainFrontComponent implements OnInit {
 
   constructor(private router: Router,
     private formBuilder: FormBuilder,
-    private blockchainInfo: BlockchainInfoServiceService) {
+    private dataInfoService: DataInfoServiceService) {
     this.mnemonicArray = [];
     this.searchFieldValue = '';
   }
@@ -178,7 +178,6 @@ export class MainFrontComponent implements OnInit {
           root: root,
 
           seedHex: '0x' + buf2hex(seed),
-          masterPrivateKey: '0x' + buf2hex(masterPrivateKey),
           rootWif: rootWif,
           rootXpriv: rootXpriv,
           rootXpub: rootXpub,
@@ -189,11 +188,11 @@ export class MainFrontComponent implements OnInit {
           addresses: addresses,
         };
       }),
-      flatMap(foo => this.blockchainInfo.fetchReceivedByAddress(address)),
+      flatMap(foo => this.dataInfoService.fetchReceivedByAddress(address)),
       delay(1250),
       tap(received => this.result.received = received),
       filter(received => received > 0),
-      flatMap(foo => this.blockchainInfo.fetchAddressBalance(address)),
+      flatMap(foo => this.dataInfoService.fetchAddressBalance(address)),
       delay(750),
       tap(balance => this.result.balance = balance),
       delay(300)
