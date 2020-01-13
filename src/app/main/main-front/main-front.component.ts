@@ -18,15 +18,13 @@ function buf2hex(buffer) { // buffer is an ArrayBuffer
   return Array.prototype.map.call(new Uint8Array(buffer), x => ('00' + x.toString(16)).slice(-2)).join('');
 }
 
-
 function p2pkhAddress(node: any, network?: any): string {
   return Bitcoin.payments.p2pkh({ pubkey: node.publicKey, network }).address!;
 }
 function segwitAdddress(node: any, network?: any): string {
-  const { address } = Bitcoin.payments.p2sh({
-    redeem: Bitcoin.payments.p2wpkh({ pubkey: node.publicKey }),
-  });
-  return address;
+  return Bitcoin.payments.p2sh({
+    redeem: Bitcoin.payments.p2wpkh({ pubkey: node.publicKey })
+  }).address!;
 }
 function p2wpkhAddress(node: any, network?: any): string {
   return Bitcoin.payments.p2wpkh({ pubkey: node.publicKey, network }).address!;
@@ -48,7 +46,27 @@ function getAddress(path: string, node: Bip32.BIP32Interface, network?: any): st
 }
 
 function buildPath(prefix: string, account: number, change: number, index: number) {
-  return `${prefix}${account}'/${change}/${index}`;
+  if (prefix && Number.isInteger(account) &&  Number.isInteger(change) && Number.isInteger(index)) {
+    return `${prefix}${account}'/${change}/${index}`;
+  }
+  if (prefix && Number.isInteger(account) &&  Number.isInteger(change)) {
+    return `${prefix}${account}'/${change}`;
+  }
+  if (prefix && Number.isInteger(account)) {
+    return `${prefix}${account}'`;
+  }
+  if (prefix && Number.isInteger(index)) {
+    return `${prefix}${index}`;
+  }
+  return `${prefix}`;
+}
+
+function findLastIntegerInString(val: string): number | null {
+  const match = val.match(/(\d+)(?!.*\d)/);
+  if (match.length === 2) {
+    return Number.parseInt(match[1], 10);
+  }
+  return null;
 }
 
 @Component({
@@ -73,10 +91,16 @@ export class MainFrontComponent implements OnInit {
 
   pathPrefix = `${this.pathPrefixBip44}`;
 
-  pathPrefixInputAutocompleteOptions = [
-    this.pathPrefixBip44,
-    this.pathPrefixBip49,
-    this.pathPrefixBip84
+  pathPrefixInputAutocompleteOptions = [{
+      value: this.pathPrefixBip44,
+      name: this.pathPrefixBip44 + ' (BIP44)'
+    }, {
+      value: this.pathPrefixBip49,
+      name: this.pathPrefixBip49 + ' (BIP49)'
+    }, {
+      value: this.pathPrefixBip84,
+      name: this.pathPrefixBip84 + ' (BIP84)'
+    }
   ];
 
   mnemonicInputChangedSubject: Subject<string> = new Subject<string>();
@@ -152,12 +176,13 @@ export class MainFrontComponent implements OnInit {
         const masterPrivateKey = root.privateKey;
 
         const path = this.buildPathWithIndex(this.pathIndex);
+        const currentIndex = findLastIntegerInString(path) || 0;
         const child = root.derivePath(path);
 
         address = getAddress(path, child);
 
         const addresses = [];
-        for (let i = this.pathIndex; i <= 20; i++) {
+        for (let i = currentIndex; i <= 20; i++) {
           const iPath = this.buildPathWithIndex(i);
           const iChild = root.derivePath(iPath);
           const iAddress = getAddress(iPath, iChild);
@@ -178,6 +203,7 @@ export class MainFrontComponent implements OnInit {
           root: root,
 
           seedHex: '0x' + buf2hex(seed),
+          masterPrivateKey: '0x' + buf2hex(masterPrivateKey),
           rootWif: rootWif,
           rootXpriv: rootXpriv,
           rootXpub: rootXpub,

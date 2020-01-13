@@ -94,12 +94,12 @@ export class BlockchainInfoServiceService {
   public fetchReceivedByAddress(address: string): Observable<number> {
     const url = `https://blockchain.info/q/getreceivedbyaddress/${address}`;
     // -> returns Observable<satoshi value>
-    return this.httpClient.get(url).pipe(map(val => val as number));
+    return this.httpClient.get(url).pipe(map(val => <number>val));
   }
 
   public fetchAddressBalance(address: string): Observable<number> {
     const url = `https://blockchain.info/q/addressbalance/${address}`;
     // -> returns Observable<satoshi value>
-    return this.httpClient.get(url).pipe(map(val => val as number));
+    return this.httpClient.get(url).pipe(map(val => <number>val));
   }
 }
