@@ -310,7 +310,7 @@ var AppModule = /** @class */ (function () {
                 _ngx_translate_core__WEBPACK_IMPORTED_MODULE_10__["TranslateModule"].forRoot({
                     loader: {
                         provide: _ngx_translate_core__WEBPACK_IMPORTED_MODULE_10__["TranslateLoader"],
-                        useFactory: _app_translate_factory__WEBPACK_IMPORTED_MODULE_11__["HttpLoaderFactory"],
+                        useFactory: (_app_translate_factory__WEBPACK_IMPORTED_MODULE_11__["createTranslateLoader"]),
                         deps: [_angular_common_http__WEBPACK_IMPORTED_MODULE_9__["HttpClient"]]
                     }
                 }),
@@ -340,17 +340,41 @@ var AppModule = /** @class */ (function () {
 /*!******************************************!*\
   !*** ./src/app/app.translate.factory.ts ***!
   \******************************************/
-/*! exports provided: HttpLoaderFactory */
+/*! exports provided: createTranslateLoader, HttpLoaderFactory */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "createTranslateLoader", function() { return createTranslateLoader; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "HttpLoaderFactory", function() { return HttpLoaderFactory; });
 /* harmony import */ var _ngx_translate_http_loader__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @ngx-translate/http-loader */ "./node_modules/@ngx-translate/http-loader/fesm5/ngx-translate-http-loader.js");
 var __importDefault = (undefined && undefined.__importDefault) || function (mod) {
   return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 
+// with aot is enabled, use this function
+/* e.g.
+TranslateModule.forRoot({
+    loader: {
+        provide: TranslateLoader,
+        useFactory: (createTranslateLoader),
+        deps: [HttpClient]
+    }
+})
+*/
+function createTranslateLoader(http) {
+    return new _ngx_translate_http_loader__WEBPACK_IMPORTED_MODULE_0__["TranslateHttpLoader"](http, './assets/i18n/', '.json');
+}
+// with aot is disabled, use this function
+/* e.g.
+TranslateModule.forRoot({
+    loader: {
+        provide: TranslateLoader,
+        useFactory: HttpLoaderFactory,
+        deps: [HttpClient]
+    }
+})
+*/
 function HttpLoaderFactory(http) {
     return new _ngx_translate_http_loader__WEBPACK_IMPORTED_MODULE_0__["TranslateHttpLoader"](http);
 }
@@ -410,6 +434,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _shared_logger_service__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./shared/logger.service */ "./src/app/core/shared/logger.service.ts");
 /* harmony import */ var _shared_progress_bar_service__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./shared/progress-bar.service */ "./src/app/core/shared/progress-bar.service.ts");
 /* harmony import */ var _shared_blockchain_info_service_service__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./shared/blockchain-info-service.service */ "./src/app/core/shared/blockchain-info-service.service.ts");
+/* harmony import */ var _shared_blockstream_info_service_service__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./shared/blockstream-info-service.service */ "./src/app/core/shared/blockstream-info-service.service.ts");
+/* harmony import */ var _shared_data_info_service_service__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./shared/data-info-service.service */ "./src/app/core/shared/data-info-service.service.ts");
 var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -425,6 +451,8 @@ var __param = (undefined && undefined.__param) || function (paramIndex, decorato
 var __importDefault = (undefined && undefined.__importDefault) || function (mod) {
   return (mod && mod.__esModule) ? mod : { "default": mod };
 };
+
+
 
 
 
@@ -465,7 +493,9 @@ var CoreModule = /** @class */ (function () {
             providers: [
                 _shared_logger_service__WEBPACK_IMPORTED_MODULE_9__["LoggerService"],
                 _shared_progress_bar_service__WEBPACK_IMPORTED_MODULE_10__["ProgressBarService"],
-                _shared_blockchain_info_service_service__WEBPACK_IMPORTED_MODULE_11__["BlockchainInfoServiceService"]
+                _shared_blockchain_info_service_service__WEBPACK_IMPORTED_MODULE_11__["BlockchainInfoServiceService"],
+                _shared_blockstream_info_service_service__WEBPACK_IMPORTED_MODULE_12__["BlockstreamInfoServiceService"],
+                _shared_data_info_service_service__WEBPACK_IMPORTED_MODULE_13__["DataInfoServiceService"],
             ]
         }),
         __param(0, Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["Optional"])()), __param(0, Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["SkipSelf"])()),
@@ -741,6 +771,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BlockchainInfoServiceService", function() { return BlockchainInfoServiceService; });
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
 /* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/common/http */ "./node_modules/@angular/common/fesm5/http.js");
+/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! rxjs/operators */ "./node_modules/rxjs/_esm5/operators/index.js");
 var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -755,19 +786,84 @@ var __importDefault = (undefined && undefined.__importDefault) || function (mod)
 };
 
 
+
 var BlockchainInfoServiceService = /** @class */ (function () {
     function BlockchainInfoServiceService(httpClient) {
         this.httpClient = httpClient;
     }
+    /**
+     * Cannot be used in the browser atm.
+     * Does not "access-control-allow-origin: *" header, like the other
+     * responses do.. (e.g. /q/getreceivedbyaddress)
+     */
+    BlockchainInfoServiceService.prototype.multiaddr = function (addresses) {
+        var addressesParam = addresses.join('|');
+        var url = "https://blockchain.info/multiaddr?active=" + addressesParam;
+        return this.httpClient.get(url).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["map"])(function (val) { return val; }));
+        // https://blockchain.info/multiaddr?active=1NuopUNPFWF91BYH18H3HyxfrcpVrmn7s6|1LnFgnFEpxMorhVMjQsugbWCnq8wY792Wp
+        /*
+        {"addresses":[{
+          "address":"1NuopUNPFWF91BYH18H3HyxfrcpVrmn7s6",
+          "final_balance":0,
+          "n_tx":0,
+          "total_received":0,
+          "total_sent":0
+        },
+        {"address":"1LnFgnFEpxMorhVMjQsugbWCnq8wY792Wp",
+        "final_balance":0,
+        "n_tx":0,
+        "total_received":0,
+        "total_sent":0
+      }],"wallet":{
+        "final_balance":0,
+        "n_tx":0,
+        "n_tx_filtered":0,
+        "total_received":0,
+        "total_sent":0
+      },"txs":[],
+      "info":{
+        "nconnected":0,
+        "conversion":100000000,
+        "symbol_local":{
+          "code":"USD","symbol":"$","name":"U.S. dollar","conversion":12263.60370900,"symbolAppearsAfter":false,"local":true},
+          "symbol_btc":{"code":"BTC","symbol":"BTC","name":"Bitcoin","conversion":100000000.00000000,"symbolAppearsAfter":true,"local":false},
+          "latest_block":{
+            "hash":"0000000000000000000820e95f4a5211b3fdbcc2423f8583448a68c5e05b70cf",
+            "height":612573,
+            "time":1578869242,
+            "block_index":0
+          }
+        },
+        "recommend_include_fee":true
+      }
+        */
+    };
+    BlockchainInfoServiceService.prototype.multiaddrInfo = function (addresses) {
+        return this.multiaddr(addresses).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["map"])(function (val) { return (val.addresses); }));
+    };
+    /*
+    public fetchReceivedByAddress(address: string): Observable<number> {
+      return this.multiaddrInfo([address]).pipe(
+        map(val => val[0]),
+        map(val => val.total_received)
+      );
+    }
+  
+    public fetchAddressBalance(address: string): Observable<number> {
+      return this.multiaddrInfo([address]).pipe(
+        map(val => val[0]),
+        map(val => val.final_balance)
+      );
+    }*/
     BlockchainInfoServiceService.prototype.fetchReceivedByAddress = function (address) {
-        var url_prefix = 'https://blockchain.info/q/getreceivedbyaddress/';
-        var check_url = url_prefix + address;
-        return this.httpClient.get(check_url);
+        var url = "https://blockchain.info/q/getreceivedbyaddress/" + address;
+        // -> returns Observable<satoshi value>
+        return this.httpClient.get(url).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["map"])(function (val) { return val; }));
     };
     BlockchainInfoServiceService.prototype.fetchAddressBalance = function (address) {
-        var url_prefix = 'https://blockchain.info/q/addressbalance/';
-        var check_url = url_prefix + address;
-        return this.httpClient.get(check_url);
+        var url = "https://blockchain.info/q/addressbalance/" + address;
+        // -> returns Observable<satoshi value>
+        return this.httpClient.get(url).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["map"])(function (val) { return val; }));
     };
     BlockchainInfoServiceService.ctorParameters = function () { return [
         { type: _angular_common_http__WEBPACK_IMPORTED_MODULE_1__["HttpClient"] }
@@ -779,6 +875,159 @@ var BlockchainInfoServiceService = /** @class */ (function () {
         __metadata("design:paramtypes", [_angular_common_http__WEBPACK_IMPORTED_MODULE_1__["HttpClient"]])
     ], BlockchainInfoServiceService);
     return BlockchainInfoServiceService;
+}());
+
+
+
+/***/ }),
+
+/***/ "./src/app/core/shared/blockstream-info-service.service.ts":
+/*!*****************************************************************!*\
+  !*** ./src/app/core/shared/blockstream-info-service.service.ts ***!
+  \*****************************************************************/
+/*! exports provided: BlockstreamInfoServiceService */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BlockstreamInfoServiceService", function() { return BlockstreamInfoServiceService; });
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
+/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/common/http */ "./node_modules/@angular/common/fesm5/http.js");
+/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! rxjs/operators */ "./node_modules/rxjs/_esm5/operators/index.js");
+var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (undefined && undefined.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __importDefault = (undefined && undefined.__importDefault) || function (mod) {
+  return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+
+
+
+var BlockstreamInfoServiceService = /** @class */ (function () {
+    function BlockstreamInfoServiceService(httpClient) {
+        this.httpClient = httpClient;
+    }
+    BlockstreamInfoServiceService.prototype.address = function (address) {
+        var url = "https://blockstream.info/api/address/" + address;
+        return this.httpClient.get(url).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["map"])(function (val) { return val; }));
+        /*
+        {
+          "address":"bc1qdcykktttdegcsap06v7gqv06ye45ljg5h0gt53",
+          "chain_stats":{
+            "funded_txo_count":3,
+            "funded_txo_sum":2107313,
+            "spent_txo_count":2,
+            "spent_txo_sum":2106254,
+            "tx_count":4
+          },
+          "mempool_stats":{
+            "funded_txo_count":0,
+            "funded_txo_sum":0,
+            "spent_txo_count":0,
+            "spent_txo_sum":0,
+            "tx_count":0
+          }
+        }
+        */
+    };
+    BlockstreamInfoServiceService.prototype.utxo = function (address) {
+        var url = "https://blockstream.info/api/address/" + address + "/utxo";
+        return this.httpClient.get(url).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["map"])(function (val) { return val; }));
+        /*
+         [{
+           "txid":"c1d77411f4441a8b8b0179358886ead8df14dd620a9b59cbb8b11df58f1ff55e",
+           "vout":1,
+           "status":{
+             "confirmed":true,
+             "block_height":611942,
+             "block_hash":"000000000000000000089ced765a2bd66412abb00360156ac4b431905dac412a",
+             "block_time":1578518718
+            },
+            "value":1059
+          }]
+         */
+    };
+    BlockstreamInfoServiceService.prototype.fetchReceivedByAddress = function (address) {
+        // -> returns Observable<satoshi value>
+        return this.address(address).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["map"])(function (val) { return val.chain_stats; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["map"])(function (val) { return val.funded_txo_sum; }));
+    };
+    BlockstreamInfoServiceService.prototype.fetchAddressBalance = function (address) {
+        // -> returns Observable<satoshi value>
+        return this.utxo(address).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["map"])(function (val) { return val.reduce(function (acc, currVal) { return acc + currVal.value; }, 0); }));
+    };
+    BlockstreamInfoServiceService.ctorParameters = function () { return [
+        { type: _angular_common_http__WEBPACK_IMPORTED_MODULE_1__["HttpClient"] }
+    ]; };
+    BlockstreamInfoServiceService = __decorate([
+        Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["Injectable"])({
+            providedIn: 'root'
+        }),
+        __metadata("design:paramtypes", [_angular_common_http__WEBPACK_IMPORTED_MODULE_1__["HttpClient"]])
+    ], BlockstreamInfoServiceService);
+    return BlockstreamInfoServiceService;
+}());
+
+
+
+/***/ }),
+
+/***/ "./src/app/core/shared/data-info-service.service.ts":
+/*!**********************************************************!*\
+  !*** ./src/app/core/shared/data-info-service.service.ts ***!
+  \**********************************************************/
+/*! exports provided: DataInfoServiceService */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DataInfoServiceService", function() { return DataInfoServiceService; });
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
+/* harmony import */ var _blockchain_info_service_service__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./blockchain-info-service.service */ "./src/app/core/shared/blockchain-info-service.service.ts");
+/* harmony import */ var _blockstream_info_service_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./blockstream-info-service.service */ "./src/app/core/shared/blockstream-info-service.service.ts");
+var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (undefined && undefined.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __importDefault = (undefined && undefined.__importDefault) || function (mod) {
+  return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+
+
+
+var DataInfoServiceService = /** @class */ (function () {
+    function DataInfoServiceService(blockchainInfo, blockstreemInfo) {
+        this.blockchainInfo = blockchainInfo;
+        this.blockstreemInfo = blockstreemInfo;
+    }
+    DataInfoServiceService.prototype.fetchReceivedByAddress = function (address) {
+        return this.blockstreemInfo.fetchReceivedByAddress(address);
+    };
+    DataInfoServiceService.prototype.fetchAddressBalance = function (address) {
+        return this.blockstreemInfo.fetchAddressBalance(address);
+    };
+    DataInfoServiceService.ctorParameters = function () { return [
+        { type: _blockchain_info_service_service__WEBPACK_IMPORTED_MODULE_1__["BlockchainInfoServiceService"] },
+        { type: _blockstream_info_service_service__WEBPACK_IMPORTED_MODULE_2__["BlockstreamInfoServiceService"] }
+    ]; };
+    DataInfoServiceService = __decorate([
+        Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["Injectable"])({
+            providedIn: 'root'
+        }),
+        __metadata("design:paramtypes", [_blockchain_info_service_service__WEBPACK_IMPORTED_MODULE_1__["BlockchainInfoServiceService"],
+            _blockstream_info_service_service__WEBPACK_IMPORTED_MODULE_2__["BlockstreamInfoServiceService"]])
+    ], DataInfoServiceService);
+    return DataInfoServiceService;
 }());
 
 

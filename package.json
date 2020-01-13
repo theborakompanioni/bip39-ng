@@ -9,7 +9,7 @@
     "build-all": "npm run-script build && npm run-script build-dev && npm run-script build-gh",
     "build": "ng build --prod --output-path ./dist/",
     "build-dev": "ng build --output-path ./dist-dev/",
-    "build-gh": "ng build --aot=false --base-href /bip39-ng/ --deploy-url /bip39-ng/ --output-path ./docs/ ",
+    "build-gh": "ng build --aot=false --base-href /bip39-ng/ --output-path ./docs/ ",
     "test": "ng test",
     "e2e": "ng e2e",
     "lint": "ng lint",

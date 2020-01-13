@@ -21508,7 +21508,7 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony default export */ __webpack_exports__["default"] = ("<div class=\"container mat-typography\">\n  <h1>Generate random Bitcoin address and see if you are a winner</h1>\n\n  <div>    \n    <div fxLayout=\"row wrap\" fxLayoutAlign=\"center center\">\n      <div fxFlex=\"100%\" fxFlex.gt-sm=\"80%\" fxFlex.gt-md=\"70%\" fxFlex.gt-md=\"50%\"  style=\"text-align: center\" >\n        \n        <div *ngIf=\"!(tryCounter > 3)\" >\n          <button mat-raised-button color=\"primary\"\n          (click)=\"buttonIamFeelingLuckyClicked()\" \n          class=\"i-am-feeling-lucky-button\" \n          [disabled]=\"loading\">\n            <span *ngIf=\"feelingLuckyCounterClicked === 0\">I'm feeling lucky!</span>\n            <span *ngIf=\"feelingLuckyCounterClicked === 1\">Try again!</span>\n            <span *ngIf=\"feelingLuckyCounterClicked === 2\">And again!</span>\n            <span *ngIf=\"feelingLuckyCounterClicked === 3\">And again ...</span>\n            <span *ngIf=\"feelingLuckyCounterClicked === 4\">Again?</span>\n            <span *ngIf=\"feelingLuckyCounterClicked === 5\">Try again!</span>\n            <span *ngIf=\"feelingLuckyCounterClicked === 6\">I'm feeling lucky!</span>\n            <span *ngIf=\"feelingLuckyCounterClicked > 6\">Try again!</span>\n          </button>\n        </div>\n\n        <div *ngIf=\"tryCounter > 3\">\n          <mat-card style=\"margin: 1em;\">\n            <p style=\"font-size: 1.2em; line-height: normal;\">\n              You have had your fair chance today.\n              <a routerLink=\"/faq\" fragment=\"faq-1\">It won't get any better</a>. Do not get blinded by trying to get rich quick. Learn how Bitcoin works and try your\n              best to integrate it in the real world. Bitcoin needs adoption. Maybe you are able to use it in you next project?\n              Talk and share your knowledge with others. Spread the word.\n            </p>\n          </mat-card>\n        </div>\n        \n      </div>\n    </div>\n\n    <div fxLayout=\"row wrap\" fxLayoutAlign=\"center center\">\n      <div fxFlex=\"100%\" fxFlex.gt-sm=\"80%\" fxFlex.gt-md=\"70%\" fxFlex.gt-md=\"50%\">\n          <mat-form-field appearance=\"outline\" style=\"width: 100%;\">\n            <mat-label>Search</mat-label>\n            <input matInput [(ngModel)]=\"searchFieldValue\" (keyup.enter)=\"onChangeSearchInput($event.target.value)\" />\n            <mat-spinner matSuffix *ngIf=\"loading\" diameter=\"15\" style=\"margin: auto 10px 4px 10px;\"></mat-spinner>\n          </mat-form-field>\n      </div>\n    </div>\n    \n    <div style=\"text-align: center;\">\n      <p>\n        <button mat-raised-button (click)=\"!loading && onChangeSearchInput(searchFieldValue)\">\n          <i matPrefix class=\"material-icons\">search</i>\n          Balance Search\n        </button>\n        <span>&nbsp;</span>\n        <button mat-raised-button color=\"primary\" (click)=\"!loading && buttonIamFeelingLuckyClicked()\">\n          <span>I'm feeling lucky!</span>\n        </button>\n      </p>\n      <p>\n        <button mat-button (click)=\"displayDetailedSettings = !displayDetailedSettings\">\n          <i class=\"material-icons\">\n              settings_applications\n          </i>\n        </button>\n      </p>\n    </div>\n\n    <div fxLayout=\"row wrap\" fxLayoutAlign=\"center center\" *ngIf=\"displayDetailedSettings\">\n        <div fxFlex=\"100%\" fxFlex.gt-sm=\"50%\" fxFlex.gt-md=\"25%\" fxFlex.gt-md=\"25%\">\n            <mat-form-field appearance=\"outline\" style=\"width: 100%;\">\n              <mat-label>Path Prefix</mat-label>\n              <input matInput type=\"text\" [(ngModel)]=\"pathPrefix\"/>\n            </mat-form-field>\n        </div>\n        <div fxFlex=\"100%\" fxFlex.gt-sm=\"50%\" fxFlex.gt-md=\"25%\" fxFlex.gt-md=\"25%\">\n            <mat-form-field appearance=\"outline\" style=\"width: 100%;\">\n              <mat-label>Path Account</mat-label>\n              <input matInput type=\"number\" [(ngModel)]=\"pathAccount\"/>\n            </mat-form-field>\n        </div>\n        <div fxFlex=\"100%\" fxFlex.gt-sm=\"50%\" fxFlex.gt-md=\"25%\" fxFlex.gt-md=\"25%\">\n            <mat-form-field appearance=\"outline\" style=\"width: 100%;\">\n              <mat-label>Path Change</mat-label>\n              <input matInput type=\"number\" [(ngModel)]=\"pathChange\"/>\n            </mat-form-field>\n        </div>\n        <div fxFlex=\"100%\" fxFlex.gt-sm=\"50%\" fxFlex.gt-md=\"25%\" fxFlex.gt-md=\"25%\">\n            <mat-form-field appearance=\"outline\" style=\"width: 100%;\">\n              <mat-label>Path Index</mat-label>\n              <input matInput type=\"number\" [(ngModel)]=\"pathIndex\"/>\n            </mat-form-field>\n        </div>\n      </div>\n    \n    <div style=\"text-align: center; margin-bottom: 3rem\"></div>\n\n    <div *ngIf=\"result\">\n      <p *ngIf=\"result.mnemonic\">\n          <span class=\"bold\">Results for search term:</span> {{result.mnemonic}}\n      </p>\n      <p *ngIf=\"result.seedHex\">\n        <span class=\"bold\">Seed:</span> {{result.seedHex}}\n      </p>\n      <p *ngIf=\"result.rootWif\">\n        <span class=\"bold\">WIF:</span> {{result.rootWif}}\n      </p>\n      <p *ngIf=\"result.masterPrivateKey\">\n        <span class=\"bold\">Master Private Key:</span> {{result.masterPrivateKey}}\n      </p>\n      <p *ngIf=\"result.privateKey\">\n        <span class=\"bold\">Master Private Key:</span> {{result.privateKey}}\n      </p>\n      <div *ngIf=\"result.path\">\n          <p>\n            <span class=\"bold\">Path (BIP44):</span> {{result.path}}\n            (see <a href=\"https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki\">BIP44</a>)\n          </p>\n          <p style=\"display: none\">\n            See <a href=\"https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki\">BIP32</a> and \n            <a href=\"https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki\">BIP39</a>, \n            <a href=\"https://github.com/bitcoin/bips/blob/master/bip-0049.mediawiki\">BIP49</a>, \n            <a href=\"https://github.com/bitcoin/bips/blob/master/bip-0084.mediawiki\">BIP84</a>.\n          </p>\n      </div>\n      <mat-form-field class=\"full-width\" appearance=\"fill\" style=\"text-align: center;\" *ngIf=\"result.address\">\n        <mat-label>Address</mat-label>\n        <input style=\"font-size: 150%\" matInput type=\"text\" placeholder=\"\" [value]=\"result.address\" disabled/>\n        <a href=\"https://www.blockchain.com/btc/address/{{result.address}}\" target=\"_blank\">https://www.blockchain.com/btc/address/{{result.address}}</a>\n      </mat-form-field>\n\n      <div *ngIf=\"result.error\">\n        <p style=\"background-color: red; padding: 1em;\">{{ result.error.message }}</p>\n      </div>\n\n      <p style=\"text-align: center; font-size: 1.5em; margin: 1em; line-height: normal;\" *ngIf=\"result.received !== undefined\">\n        <span *ngIf=\"result.received === 0\">Address never received anything.</span>\n        <span *ngIf=\"result.received > 0\">Found address with\n          <code>received > 0</code>\n        </span>\n      </p>\n\n      <p style=\"text-align: center; font-size: 3em; margin: 1em; line-height: normal;\" *ngIf=\"result.balance !== undefined\">\n        <span *ngIf=\"result.balance === 0\">Balance is 0 :(</span>\n        <span *ngIf=\"result.balance > 0\">Found address with\n          <code>balance > 0</code>\n        </span>\n      </p>\n    </div>\n\n    <mat-progress-bar *ngIf=\"loading\" mode=\"indeterminate\"></mat-progress-bar>\n    \n\n    <div *ngIf=\"result\" [hidden]=\"loading || result.mnemonic === undefined\">\n      <mat-card style=\"margin: 1em;\">\n        <h3>Private Key Mnemonic</h3>\n        <div class=\"word-input-container\" fxLayout=\"row wrap\" *ngIf=\"mnemonicArray.length !== 12\">\n          Input is not a valid BIP39 mnemonic seed.\n        </div>\n        <div class=\"word-input-container\" fxLayout=\"row wrap\" *ngIf=\"mnemonicArray.length === 12\">\n          <div fxFlex=\"100%\" fxFlex.gt-sm=\"32%\" fxFlex.gt-md=\"24%\" fxFlex.gt-md=\"16.5%\" *ngFor=\"let i of [0,1,2,3,4,5,6,7,8,9,10,11]\">\n            <span>\n              <mat-form-field class=\"example-form-field-{{i}}\" appearance=\"fill\">\n                <mat-label>Word {{i+1}}</mat-label>\n                <input matInput type=\"text\" placeholder=\"Word {{i+1}}\" [value]=\"mnemonicArray[i]\" disabled/>\n              </mat-form-field>\n            </span>\n          </div>\n        </div>\n      </mat-card>\n    </div>\n\n    <div *ngIf=\"result\" [hidden]=\"loading || result.addresses === undefined\">\n      <mat-card style=\"margin: 1em;\">\n        <h3>More Addresses</h3>\n        <div *ngFor=\"let address of result.addresses\">\n            {{address.path}}: {{address.address}} - \n            <a href=\"https://www.blockchain.com/btc/address/{{address.address}}\" target=\"_blank\">https://www.blockchain.com/btc/address/{{address.address}}</a>\n        </div>\n      </mat-card>\n\n      \n    </div>\n  </div>\n\n</div>\n<div class=\"clear\"></div>");
+/* harmony default export */ __webpack_exports__["default"] = ("<div class=\"container mat-typography\">\n  <h1>Generate random Bitcoin address and see if you are a winner</h1>\n\n  <div>    \n    <div fxLayout=\"row wrap\" fxLayoutAlign=\"center center\">\n      <div fxFlex=\"100%\" fxFlex.gt-sm=\"80%\" fxFlex.gt-md=\"70%\" fxFlex.gt-md=\"50%\"  style=\"text-align: center\" >\n        \n        <div *ngIf=\"!(tryCounter > 3)\" >\n          <button mat-raised-button color=\"primary\"\n          (click)=\"buttonIamFeelingLuckyClicked()\" \n          class=\"i-am-feeling-lucky-button\" \n          [disabled]=\"loading\">\n            <span *ngIf=\"feelingLuckyCounterClicked === 0\">I'm feeling lucky!</span>\n            <span *ngIf=\"feelingLuckyCounterClicked === 1\">Try again!</span>\n            <span *ngIf=\"feelingLuckyCounterClicked === 2\">And again!</span>\n            <span *ngIf=\"feelingLuckyCounterClicked === 3\">And again ...</span>\n            <span *ngIf=\"feelingLuckyCounterClicked === 4\">Again?</span>\n            <span *ngIf=\"feelingLuckyCounterClicked === 5\">Try again!</span>\n            <span *ngIf=\"feelingLuckyCounterClicked === 6\">I'm feeling lucky!</span>\n            <span *ngIf=\"feelingLuckyCounterClicked > 6\">Try again!</span>\n          </button>\n        </div>\n\n        <div *ngIf=\"tryCounter > 3\">\n          <mat-card style=\"margin: 1em;\">\n            <p style=\"font-size: 1.2em; line-height: normal;\">\n              You have had your fair chance today.\n              <a routerLink=\"/faq\" fragment=\"faq-1\">It won't get any better</a>. Do not get blinded by trying to get rich quick. Learn how Bitcoin works and try your\n              best to integrate it in the real world. Bitcoin needs adoption. Maybe you are able to use it in you next project?\n              Talk and share your knowledge with others. Spread the word.\n            </p>\n          </mat-card>\n        </div>\n        \n      </div>\n    </div>\n\n    <div fxLayout=\"row wrap\" fxLayoutAlign=\"center center\">\n      <div fxFlex=\"100%\" fxFlex.gt-sm=\"80%\" fxFlex.gt-md=\"70%\" fxFlex.gt-md=\"50%\">\n          <mat-form-field appearance=\"outline\" style=\"width: 100%;\">\n            <mat-label>Search</mat-label>\n            <input matInput [(ngModel)]=\"searchFieldValue\" (keyup.enter)=\"onChangeSearchInput($event.target.value)\" />\n            <mat-spinner matSuffix *ngIf=\"loading\" diameter=\"15\" style=\"margin: auto 10px 4px 10px;\"></mat-spinner>\n          </mat-form-field>\n      </div>\n    </div>\n    \n    <div style=\"text-align: center;\">\n      <p>\n        <button mat-raised-button (click)=\"!loading && onChangeSearchInput(searchFieldValue)\">\n          <i matPrefix class=\"material-icons\">search</i>\n          Balance Search\n        </button>\n        <span>&nbsp;</span>\n        <button mat-raised-button color=\"primary\" (click)=\"!loading && buttonIamFeelingLuckyClicked()\">\n          <span>I'm feeling lucky!</span>\n        </button>\n      </p>\n      <p>\n        <button mat-button (click)=\"displayDetailedSettings = !displayDetailedSettings\">\n          <i class=\"material-icons\">\n              settings_applications\n          </i>\n        </button>\n      </p>\n    </div>\n\n    <mat-card *ngIf=\"displayDetailedSettings\">\n      <mat-card-header>\n        <mat-card-title>BIP32 path settings</mat-card-title>\n        <mat-card-subtitle></mat-card-subtitle>\n      </mat-card-header>\n      <div fxLayout=\"row wrap\" fxLayoutAlign=\"center center\" >\n      <div fxFlex=\"100%\" fxFlex.gt-sm=\"50%\" fxFlex.gt-md=\"25%\" fxFlex.gt-md=\"25%\">\n          <mat-form-field appearance=\"outline\" style=\"width: 100%;\">\n            <mat-label>Path Prefix</mat-label>\n            <input matInput type=\"text\" \n            pattern=\"m/((\\d)+'?/)*\"\n            placeholder=\"m/44'/0'/\"\n            required\n            [(ngModel)]=\"pathPrefix\" \n            [matAutocomplete]=\"pathPrefixInputAutocomplete\" />\n            <mat-hint>BIP32 path prefix (pattern <code>m/purpose'/coin_type'/)</code></mat-hint>\n          </mat-form-field>\n\n          <mat-autocomplete #pathPrefixInputAutocomplete=\"matAutocomplete\">\n            <mat-option *ngFor=\"let option of pathPrefixInputAutocompleteOptions\" [value]=\"option.value\">{{option.name}}</mat-option>\n          </mat-autocomplete>\n      </div>\n      <div fxFlex=\"100%\" fxFlex.gt-sm=\"50%\" fxFlex.gt-md=\"25%\" fxFlex.gt-md=\"25%\">\n          <mat-form-field appearance=\"outline\" style=\"width: 100%;\">\n            <mat-label>Path Account</mat-label>\n            <input matInput type=\"number\" [(ngModel)]=\"pathAccount\" placeholder=\"0\" required/>\n          </mat-form-field>\n      </div>\n      <div fxFlex=\"100%\" fxFlex.gt-sm=\"50%\" fxFlex.gt-md=\"25%\" fxFlex.gt-md=\"25%\">\n          <mat-form-field appearance=\"outline\" style=\"width: 100%;\">\n            <mat-label>Path Change</mat-label>\n            <input matInput type=\"number\" [(ngModel)]=\"pathChange\"  placeholder=\"0\" required/>\n          </mat-form-field>\n      </div>\n      <div fxFlex=\"100%\" fxFlex.gt-sm=\"50%\" fxFlex.gt-md=\"25%\" fxFlex.gt-md=\"25%\">\n          <mat-form-field appearance=\"outline\" style=\"width: 100%;\">\n            <mat-label>Path Index</mat-label>\n            <input matInput type=\"number\" [(ngModel)]=\"pathIndex\" placeholder=\"0\" required/>\n          </mat-form-field>\n      </div></div>\n    </mat-card>\n    \n    <div style=\"text-align: center; margin-bottom: 3rem\"></div>\n\n    <div *ngIf=\"result\">\n      <mat-form-field class=\"full-width\" appearance=\"fill\" style=\"text-align: center;\" *ngIf=\"result.address\">\n        <mat-label>Address</mat-label>\n        <input style=\"font-size: 150%\" matInput type=\"text\" placeholder=\"\" [value]=\"result.address\" disabled/>\n        <a href=\"https://www.blockchain.com/btc/address/{{result.address}}\" target=\"_blank\">https://www.blockchain.com/btc/address/{{result.address}}</a>\n      </mat-form-field>\n\n      <div *ngIf=\"result.error\">\n        <p style=\"background-color: red; padding: 1em;\">{{ result.error.message }}</p>\n      </div>\n\n      <p style=\"text-align: center; font-size: 1.5em; margin: 1em; line-height: normal;\" *ngIf=\"result.received !== undefined\">\n        <span *ngIf=\"result.received === 0\">Address never received anything.</span>\n        <span *ngIf=\"result.received > 0\">Found address with\n          <code>received > 0</code>\n        </span>\n      </p>\n\n      <p style=\"text-align: center; font-size: 3em; margin: 1em; line-height: normal;\" *ngIf=\"result.balance !== undefined\">\n        <span *ngIf=\"result.balance === 0\">Balance is 0 :(</span>\n        <span *ngIf=\"result.balance > 0\">Found address with\n          <code>{{result.balance}} satoshis</code>\n        </span>\n      </p>\n    </div>\n\n    <mat-progress-bar *ngIf=\"loading\" mode=\"indeterminate\"></mat-progress-bar>\n\n    <div *ngIf=\"result\" [hidden]=\"loading\">\n      <mat-card style=\"margin: 1em;\">\n        <h3>Search</h3>\n        <div *ngIf=\"result.mnemonic\">\n            <span class=\"bold\">Results for search term:</span> \n            <pre>{{result.mnemonic}}</pre>\n        </div>\n        <div *ngIf=\"result.path\">\n          <p>\n            <span class=\"bold\">Path (BIP44):</span> {{result.path}}\n            (see <a href=\"https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki\">BIP44</a>)\n          </p>\n          <p style=\"display: none\">\n            See <a href=\"https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki\">BIP32</a> and \n            <a href=\"https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki\">BIP39</a>, \n            <a href=\"https://github.com/bitcoin/bips/blob/master/bip-0049.mediawiki\">BIP49</a>, \n            <a href=\"https://github.com/bitcoin/bips/blob/master/bip-0084.mediawiki\">BIP84</a>.\n          </p>\n        </div>\n        <div *ngIf=\"result.address\">\n          <span class=\"bold\">Address:</span>\n          <pre>{{result.address}}</pre>\n        </div>\n      </mat-card>\n    </div>\n\n\n\n    <div *ngIf=\"result\" [hidden]=\"loading\">\n      <mat-card style=\"margin: 1em;\">\n        <h3>Wallet Information</h3>\n        <div *ngIf=\"result.seedHex\">\n          <span class=\"bold\">Seed:</span>\n          <pre>{{result.seedHex}}</pre>\n        </div>\n        <div *ngIf=\"result.rootXpriv\">\n          <span class=\"bold\">BIP32 xpriv:</span>\n          <pre>{{result.rootXpriv}}</pre>\n        </div>\n        <div *ngIf=\"result.rootXpriv\">\n          <span class=\"bold\">BIP32 xpub:</span>\n          <pre>{{result.rootXpub}}</pre>\n        </div>\n        <div *ngIf=\"result.rootWif\">\n          <span class=\"bold\">WIF:</span>\n          <pre>{{result.rootWif}}</pre>\n          <p>\n            See <a href=\"https://en.bitcoin.it/wiki/Wallet_import_format\">Wallet Import Format wiki page on en.bitcoin.it</a> \n            for more information.\n          </p>\n        </div>\n        <div *ngIf=\"result.masterPrivateKey\">\n          <span class=\"bold\">Master Private Key:</span>\n          <pre>{{result.masterPrivateKey}}</pre>\n        </div>\n      </mat-card>\n    </div>\n\n    <div *ngIf=\"result\" [hidden]=\"loading || result.mnemonic === undefined\">\n      <mat-card style=\"margin: 1em;\">\n        <h3>Private Key Mnemonic</h3>\n        <div class=\"word-input-container\" fxLayout=\"row wrap\" *ngIf=\"!result.mneomincIsValid\">\n          Input is not a valid BIP39 mnemonic seed.\n        </div>\n        <div class=\"word-input-container\" fxLayout=\"row wrap\" *ngIf=\"result.mneomincIsValid\">\n          <div fxFlex=\"100%\" fxFlex.gt-sm=\"32%\" fxFlex.gt-md=\"24%\" fxFlex.gt-md=\"16.5%\" *ngFor=\"let i of [0,1,2,3,4,5,6,7,8,9,10,11]\">\n            <span>\n              <mat-form-field class=\"example-form-field-{{i}}\" appearance=\"fill\">\n                <mat-label>Word {{i+1}}</mat-label>\n                <input matInput type=\"text\" placeholder=\"Word {{i+1}}\" [value]=\"mnemonicArray[i]\" disabled/>\n              </mat-form-field>\n            </span>\n          </div>\n        </div>\n      </mat-card>\n    </div>\n\n    <div *ngIf=\"result\" [hidden]=\"loading || result.addresses === undefined\">\n      <mat-card style=\"margin: 1em;\">\n        <h3>More Addresses</h3>\n        <div *ngFor=\"let address of result.addresses\">\n            {{address.path}}: {{address.address}} - \n            <a href=\"https://www.blockchain.com/btc/address/{{address.address}}\" target=\"_blank\">https://www.blockchain.com/btc/address/{{address.address}}</a>\n            - \n            {{address.wif}}\n        </div>\n      </mat-card>\n\n      \n    </div>\n  </div>\n\n</div>\n<div class=\"clear\"></div>");
 
 /***/ }),
 
@@ -26669,7 +26669,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/forms */ "./node_modules/@angular/forms/fesm5/forms.js");
 /* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @angular/router */ "./node_modules/@angular/router/fesm5/router.js");
 /* harmony import */ var rxjs_Subject__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! rxjs/Subject */ "./node_modules/rxjs-compat/_esm5/Subject.js");
-/* harmony import */ var _core_shared_blockchain_info_service_service__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../core/shared/blockchain-info-service.service */ "./src/app/core/shared/blockchain-info-service.service.ts");
+/* harmony import */ var _core_shared_data_info_service_service__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../core/shared/data-info-service.service */ "./src/app/core/shared/data-info-service.service.ts");
 /* harmony import */ var bitcoinjs_lib__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! bitcoinjs-lib */ "./node_modules/bitcoinjs-lib/src/index.js");
 /* harmony import */ var bitcoinjs_lib__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(bitcoinjs_lib__WEBPACK_IMPORTED_MODULE_5__);
 /* harmony import */ var bip32__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! bip32 */ "./node_modules/bip32/src/index.js");
@@ -26707,10 +26707,9 @@ function p2pkhAddress(node, network) {
     return bitcoinjs_lib__WEBPACK_IMPORTED_MODULE_5__["payments"].p2pkh({ pubkey: node.publicKey, network: network }).address;
 }
 function segwitAdddress(node, network) {
-    var address = bitcoinjs_lib__WEBPACK_IMPORTED_MODULE_5__["payments"].p2sh({
-        redeem: bitcoinjs_lib__WEBPACK_IMPORTED_MODULE_5__["payments"].p2wpkh({ pubkey: node.publicKey }),
+    return bitcoinjs_lib__WEBPACK_IMPORTED_MODULE_5__["payments"].p2sh({
+        redeem: bitcoinjs_lib__WEBPACK_IMPORTED_MODULE_5__["payments"].p2wpkh({ pubkey: node.publicKey })
     }).address;
-    return address;
 }
 function p2wpkhAddress(node, network) {
     return bitcoinjs_lib__WEBPACK_IMPORTED_MODULE_5__["payments"].p2wpkh({ pubkey: node.publicKey, network: network }).address;
@@ -26728,13 +26727,32 @@ function getAddress(path, node, network) {
     return p2pkhAddress(node, network);
 }
 function buildPath(prefix, account, change, index) {
-    return "" + prefix + account + "'/" + change + "/" + index;
+    if (prefix && Number.isInteger(account) && Number.isInteger(change) && Number.isInteger(index)) {
+        return "" + prefix + account + "'/" + change + "/" + index;
+    }
+    if (prefix && Number.isInteger(account) && Number.isInteger(change)) {
+        return "" + prefix + account + "'/" + change;
+    }
+    if (prefix && Number.isInteger(account)) {
+        return "" + prefix + account + "'";
+    }
+    if (prefix && Number.isInteger(index)) {
+        return "" + prefix + index;
+    }
+    return "" + prefix;
+}
+function findLastIntegerInString(val) {
+    var match = val.match(/(\d+)(?!.*\d)/);
+    if (match.length === 2) {
+        return Number.parseInt(match[1], 10);
+    }
+    return null;
 }
 var MainFrontComponent = /** @class */ (function () {
-    function MainFrontComponent(router, formBuilder, blockchainInfo) {
+    function MainFrontComponent(router, formBuilder, dataInfoService) {
         this.router = router;
         this.formBuilder = formBuilder;
-        this.blockchainInfo = blockchainInfo;
+        this.dataInfoService = dataInfoService;
         // path : = m / purpose' / coin_type' / account' / change / address_index
         this.pathPrefixBip44 = "m/44'/0'/"; // addresses 1xxx
         this.pathPrefixBip49 = "m/49'/0'/"; // addresses 3xxx
@@ -26743,6 +26761,17 @@ var MainFrontComponent = /** @class */ (function () {
         this.pathChange = 0;
         this.pathIndex = 0;
         this.pathPrefix = "" + this.pathPrefixBip44;
+        this.pathPrefixInputAutocompleteOptions = [{
+                value: this.pathPrefixBip44,
+                name: this.pathPrefixBip44 + ' (BIP44)'
+            }, {
+                value: this.pathPrefixBip49,
+                name: this.pathPrefixBip49 + ' (BIP49)'
+            }, {
+                value: this.pathPrefixBip84,
+                name: this.pathPrefixBip84 + ' (BIP84)'
+            }
+        ];
         this.mnemonicInputChangedSubject = new rxjs_Subject__WEBPACK_IMPORTED_MODULE_3__["Subject"]();
         this.searchInputChangedSubject = new rxjs_Subject__WEBPACK_IMPORTED_MODULE_3__["Subject"]();
         this.tryCounter = 0;
@@ -26784,43 +26813,56 @@ var MainFrontComponent = /** @class */ (function () {
         var _this = this;
         this.loading = true;
         this.result = null;
-        var seed = bip39__WEBPACK_IMPORTED_MODULE_7__["mnemonicToSeedSync"](mnemonic);
-        var root = bip32__WEBPACK_IMPORTED_MODULE_6__["fromSeed"](seed);
-        var rootWif = root.toWIF();
-        var masterPrivateKey = root.privateKey;
-        var path = this.buildPath();
-        var child = root.derivePath(path);
-        var address = getAddress(path, child);
-        var addresses = [{
-                address: address,
-                path: path
-            }];
-        for (var i = 1; i <= 20; i++) {
-            var iPath = this.buildPathWithIndex(i);
-            var iChild = root.derivePath(iPath);
-            var iAddress = getAddress(iPath, iChild);
-            addresses.push({
-                address: iAddress,
-                path: iPath
-            });
-        }
+        var address;
         Object(rxjs__WEBPACK_IMPORTED_MODULE_9__["of"])(1).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["throttleTime"])(10), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["delay"])(300), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(function (foo) {
+            var seed = bip39__WEBPACK_IMPORTED_MODULE_7__["mnemonicToSeedSync"](mnemonic);
+            var root = bip32__WEBPACK_IMPORTED_MODULE_6__["fromSeed"](seed);
+            var rootXpriv = root.toBase58();
+            var rootXpub = root.neutered().toBase58();
+            var rootWif = root.toWIF();
+            var masterPrivateKey = root.privateKey;
+            var path = _this.buildPathWithIndex(_this.pathIndex);
+            var currentIndex = findLastIntegerInString(path) || 0;
+            var child = root.derivePath(path);
+            address = getAddress(path, child);
+            var addresses = [];
+            for (var i = currentIndex; i <= 20; i++) {
+                var iPath = _this.buildPathWithIndex(i);
+                var iChild = root.derivePath(iPath);
+                var iAddress = getAddress(iPath, iChild);
+                addresses.push({
+                    address: iAddress,
+                    path: iPath,
+                    publicKey: iChild.publicKey,
+                    privateKey: iChild.privateKey,
+                    xpriv: iChild.toBase58(),
+                    xpub: iChild.neutered().toBase58(),
+                    wif: iChild.toWIF()
+                });
+            }
             _this.result = {
+                mneomincIsValid: bip39__WEBPACK_IMPORTED_MODULE_7__["validateMnemonic"](mnemonic),
                 mnemonic: mnemonic || '(empty)',
+                root: root,
                 seedHex: '0x' + buf2hex(seed),
-                rootWif: rootWif,
                 masterPrivateKey: '0x' + buf2hex(masterPrivateKey),
+                rootWif: rootWif,
+                rootXpriv: rootXpriv,
+                rootXpub: rootXpub,
+                child: child,
+                path: path,
                 address: address,
                 addresses: addresses,
-                path: path
             };
-        }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["flatMap"])(function (foo) { return _this.blockchainInfo.fetchReceivedByAddress(address); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["delay"])(1250), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(function (received) { return _this.result.received = received; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["filter"])(function (received) { return received > 0; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["flatMap"])(function (foo) { return _this.blockchainInfo.fetchAddressBalance(address); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["delay"])(750), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(function (balance) { return _this.result.balance = balance; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["delay"])(300)).subscribe(function (foo) {
+        }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["flatMap"])(function (foo) { return _this.dataInfoService.fetchReceivedByAddress(address); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["delay"])(1250), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(function (received) { return _this.result.received = received; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["filter"])(function (received) { return received > 0; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["flatMap"])(function (foo) { return _this.dataInfoService.fetchAddressBalance(address); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["delay"])(750), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(function (balance) { return _this.result.balance = balance; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["delay"])(300)).subscribe(function (foo) {
         }, function (error) {
             _this.loading = false;
+            _this.result = _this.result || {};
             _this.result.error = error;
         }, function () {
             _this.loading = false;
             _this.tryCounter++;
+            _this.result = _this.result || {};
             _this.result.received = _this.result.received || 0;
             _this.result.balance = _this.result.balance || 0;
         });
@@ -26828,7 +26870,7 @@ var MainFrontComponent = /** @class */ (function () {
     MainFrontComponent.ctorParameters = function () { return [
         { type: _angular_router__WEBPACK_IMPORTED_MODULE_2__["Router"] },
         { type: _angular_forms__WEBPACK_IMPORTED_MODULE_1__["FormBuilder"] },
-        { type: _core_shared_blockchain_info_service_service__WEBPACK_IMPORTED_MODULE_4__["BlockchainInfoServiceService"] }
+        { type: _core_shared_data_info_service_service__WEBPACK_IMPORTED_MODULE_4__["DataInfoServiceService"] }
     ]; };
     MainFrontComponent = __decorate([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["Component"])({
@@ -26838,7 +26880,7 @@ var MainFrontComponent = /** @class */ (function () {
         }),
         __metadata("design:paramtypes", [_angular_router__WEBPACK_IMPORTED_MODULE_2__["Router"],
             _angular_forms__WEBPACK_IMPORTED_MODULE_1__["FormBuilder"],
-            _core_shared_blockchain_info_service_service__WEBPACK_IMPORTED_MODULE_4__["BlockchainInfoServiceService"]])
+            _core_shared_data_info_service_service__WEBPACK_IMPORTED_MODULE_4__["DataInfoServiceService"]])
     ], MainFrontComponent);
     return MainFrontComponent;
 }());
