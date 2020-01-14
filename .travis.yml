@@ -34,7 +34,7 @@ install:
   - npm install
 
 script:
-  - npm run ci
+  #- npm run ci
   - npm run build-all
 
 notifications:

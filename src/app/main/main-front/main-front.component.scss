@@ -33,3 +33,15 @@
 .full-width {
   width: 100%;
 }
+
+.more-addresses-container table  {
+  .mat-cell, .mat-footer-cell {
+    font-size: 0.7rem;
+  }
+  tr.mat-header-row {
+    height: auto;
+  }
+  td.mat-cell:first-of-type, td.mat-footer-cell:first-of-type, th.mat-header-cell:first-of-type {
+      padding-left: 7px;
+  }
+}

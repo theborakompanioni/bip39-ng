@@ -215,22 +215,62 @@
       </mat-card>
     </div>
 
-    <div *ngIf="result" [hidden]="loading || result.addresses === undefined">
+    <div *ngIf="result" [hidden]="loading || result.addresses === undefined" class="more-addresses-container">
       <mat-card style="margin: 1em;">
         <h3>More Addresses</h3>
-        <div *ngFor="let address of result.addresses">
-            {{address.path}}: {{address.address}} - 
-            <a href="https://www.blockchain.com/btc/address/{{address.address}}" target="_blank">https://www.blockchain.com/btc/address/{{address.address}}</a>
-            - 
-            {{address.wif}} <br /> 
-            {{address.received}} <br /> 
-            {{address.balance}}<br />
-            lastCheckTimestamp: {{address.lastCheckTimestamp}}<br />
-            <hr />
+        <div *ngIf="result.addresses && result.addresses.length > 0">
+          <table mat-table [dataSource]="result.addresses" class="full-width">
+            <ng-container matColumnDef="info">
+              <th mat-header-cell *matHeaderCellDef> info </th>
+              <td mat-cell *matCellDef="let address"> 
+                path: {{address.path}}
+                <br />
+                address: <a href="https://www.blockchain.com/btc/address/{{address.address}}" target="_blank">{{address.address}}</a>
+                <br />
+                wif: {{address.wif}}
+                <br /> 
+                lastCheckTimestamp: {{address.lastCheckTimestamp | date: 'yyyy-mm-ddThh:mm:ss'}}
+              </td>
+              <td mat-footer-cell *matFooterCellDef></td>
+            </ng-container>
+            <ng-container matColumnDef="path">
+              <th mat-header-cell *matHeaderCellDef> path </th>
+              <td mat-cell *matCellDef="let address"> {{address.path}} </td>
+              <td mat-footer-cell *matFooterCellDef></td>
+            </ng-container>
+            <ng-container matColumnDef="address">
+              <th mat-header-cell *matHeaderCellDef> address </th>
+              <td mat-cell *matCellDef="let address"> {{address.address}} </td>
+              <td mat-footer-cell *matFooterCellDef></td>
+            </ng-container>
+            <ng-container matColumnDef="wif">
+              <th mat-header-cell *matHeaderCellDef> wif </th>
+              <td mat-cell *matCellDef="let address"> {{address.wif}} </td>
+              <td mat-footer-cell *matFooterCellDef></td>
+            </ng-container>
+            <ng-container matColumnDef="received">
+              <th mat-header-cell *matHeaderCellDef> received </th>
+              <td mat-cell *matCellDef="let address"> {{address.received}} </td>
+              <td mat-footer-cell *matFooterCellDef> <strong>total received</strong><br />{{result.received}}</td>
+            </ng-container>
+            <ng-container matColumnDef="balance">
+              <th mat-header-cell *matHeaderCellDef> balance </th>
+              <td mat-cell *matCellDef="let address"> {{address.balance}} </td>
+              <td mat-footer-cell *matFooterCellDef> <strong>total balance</strong><br/>{{result.balance}}</td>
+            </ng-container>
+            <ng-container matColumnDef="lastCheckedTimestamp">
+              <th mat-header-cell *matHeaderCellDef> lastCheckedTimestamp </th>
+              <td mat-cell *matCellDef="let address"> {{address.lastCheckedTimestamp | date: 'yyyy-mm-ddThh:mm:ss'}} </td>
+              <td mat-footer-cell *matFooterCellDef></td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="addressesDisplayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: addressesDisplayedColumns;"></tr>
+            <tr mat-footer-row *matFooterRowDef="addressesDisplayedColumns; sticky: true"></tr>
+          </table>
         </div>
       </mat-card>
 
-      
     </div>
   </div>
 

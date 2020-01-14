@@ -126,6 +126,7 @@ export class MainFrontComponent implements OnInit {
 
   wordlist: string = Bip39.getDefaultWordlist();
   displayDetailedSettings = false;
+  addressesDisplayedColumns = ['info', 'received', 'balance']; // ['path', 'address', 'wif', 'received', 'balance', 'lastCheckedTimestamp'];
 
   constructor(private router: Router,
     private formBuilder: FormBuilder,
