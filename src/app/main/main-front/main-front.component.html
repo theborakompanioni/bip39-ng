@@ -117,6 +117,7 @@
       </mat-form-field>
 
       <div *ngIf="result.error">
+        <p style="background-color: red; padding: 1em;">{{ result.error }}</p>
         <p style="background-color: red; padding: 1em;">{{ result.error.message }}</p>
       </div>
 
@@ -221,7 +222,11 @@
             {{address.path}}: {{address.address}} - 
             <a href="https://www.blockchain.com/btc/address/{{address.address}}" target="_blank">https://www.blockchain.com/btc/address/{{address.address}}</a>
             - 
-            {{address.wif}}
+            {{address.wif}} <br /> 
+            {{address.received}} <br /> 
+            {{address.balance}}<br />
+            lastCheckTimestamp: {{address.lastCheckTimestamp}}<br />
+            <hr />
         </div>
       </mat-card>
 

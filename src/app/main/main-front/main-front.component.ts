@@ -11,8 +11,22 @@ import { HttpClient } from '@angular/common/http';
 import * as Bitcoin from 'bitcoinjs-lib';
 import * as Bip32 from 'bip32';
 import * as Bip39 from 'bip39';
-import { filter, tap, map, flatMap, delay, throttleTime } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { filter, tap, map, flatMap, delay, throttleTime, takeWhile, takeLast, reduce, endWith, concatMap } from 'rxjs/operators';
+import { of, from } from 'rxjs';
+
+interface NgNode {
+    address: string;
+    path: string;
+    publicKey: string;
+    privateKey: string;
+    xpriv: string;
+    xpub: string;
+    wif: string;
+    error: any;
+    received: number;
+    balance: number;
+    lastCheckTimestamp: number; // last time the node was checked
+}
 
 function buf2hex(buffer) { // buffer is an ArrayBuffer
   return Array.prototype.map.call(new Uint8Array(buffer), x => ('00' + x.toString(16)).slice(-2)).join('');
@@ -161,12 +175,10 @@ export class MainFrontComponent implements OnInit {
     this.loading = true;
     this.result = null;
 
-    let address: string;
-
     of(1).pipe(
       throttleTime(10),
       delay(300),
-      tap(foo => {
+      map(foo => {
         const seed = Bip39.mnemonicToSeedSync(mnemonic);
         const root = Bip32.fromSeed(seed);
 
@@ -177,27 +189,30 @@ export class MainFrontComponent implements OnInit {
 
         const path = this.buildPathWithIndex(this.pathIndex);
         const currentIndex = findLastIntegerInString(path) || 0;
-        const child = root.derivePath(path);
 
-        address = getAddress(path, child);
-
-        const addresses = [];
+        const addresses: NgNode[] = [];
         for (let i = currentIndex; i <= 20; i++) {
           const iPath = this.buildPathWithIndex(i);
           const iChild = root.derivePath(iPath);
           const iAddress = getAddress(iPath, iChild);
-          addresses.push({
+
+          const addressResult = {
             address: iAddress,
             path: iPath,
-            publicKey: iChild.publicKey,
-            privateKey: iChild.privateKey,
+            publicKey: '0x' + buf2hex(iChild.publicKey),
+            privateKey: '0x' + buf2hex(iChild.privateKey),
             xpriv: iChild.toBase58(),
             xpub: iChild.neutered().toBase58(),
-            wif: iChild.toWIF()
-          });
+            wif: iChild.toWIF(),
+            error: null,
+            received: 0,
+            balance: 0,
+            lastCheckTimestamp: null,
+          };
+          addresses.push(addressResult);
         }
 
-        this.result = {
+        const result = {
           mneomincIsValid: Bip39.validateMnemonic(mnemonic),
           mnemonic: mnemonic || '(empty)',
           root: root,
@@ -208,60 +223,69 @@ export class MainFrontComponent implements OnInit {
           rootXpriv: rootXpriv,
           rootXpub: rootXpub,
 
-          child: child,
-          path: path,
-          address: address,
           addresses: addresses,
+          address: addresses.length > 0 ? addresses[0].address : null,
+
+          balance: null,
+          received: null
         };
+
+        return result;
       }),
-      flatMap(foo => this.dataInfoService.fetchReceivedByAddress(address)),
-      delay(1250),
-      tap(received => this.result.received = received),
-      filter(received => received > 0),
-      flatMap(foo => this.dataInfoService.fetchAddressBalance(address)),
-      delay(750),
-      tap(balance => this.result.balance = balance),
-      delay(300)
-    ).subscribe(foo => {
+      tap(result => this.result = result),
+      // fetch addresses balances and received by until reveived <= 0
+      concatMap(result => from(result.addresses as NgNode[]).pipe(
+          concatMap(val => this.dataInfoService.fetchReceivedByAddress(val.address).pipe(
+            tap(received => val.received = received),
+            tap(x => val.lastCheckTimestamp = new Date().getTime()),
+            map(x => val)
+          )),
+          takeWhile(val => val.received > 0),
+          tap(val => console.log('take ' + val.address + ' because reveiced > 0: ' + val.received)),
+          concatMap(val => this.dataInfoService.fetchAddressBalance(val.address).pipe(
+            tap(balance => val.balance = balance),
+            map(x => val)
+          )),
+          map(x => result),
+          endWith(result)
+        )),
+      takeLast(1),
+      concatMap(result => from(result.addresses as NgNode[]).pipe(
+        filter(val => val.received > 0),
+        map(val => val.received),
+        reduce((acc, curr) => acc + curr, 0),
+        tap(totalReceived => result.received = totalReceived),
+        map(x => result),
+        endWith(result)
+      )),
+      takeLast(1),
+      tap(result => this.result = result),
+      delay(1300),
+      concatMap(result => from(result.addresses as NgNode[]).pipe(
+        filter(val => val.balance > 0),
+        map(val => val.balance),
+        reduce((acc, curr) => acc + curr, 0),
+        tap(totalBalance => result.balance = totalBalance),
+        map(x => result),
+        endWith(result)
+      )),
+      takeLast(1),
+    ).subscribe(result => {
+      this.result = result;
+      console.log('subscribe');
     }, error => {
       this.loading = false;
 
       this.result = this.result || {};
       this.result.error = error;
+      console.log('error');
     }, () => {
       this.loading = false;
       this.tryCounter++;
 
       this.result = this.result || {};
-      this.result.received = this.result.received || 0;
-      this.result.balance = this.result.balance || 0;
+      console.log('end');
     });
   }
-
-  /*iAmFeelingLucky() {
-    let mnemonic = Bip39.generateMnemonic();
-    let account = this.createAccountFromMnemonic(mnemonic);
-
-    let balancesPromise = blockexplorer.getBalance(account.getAllAddresses(), {});
-
-    return balancesPromise.then(balances => {
-      let balanceWrappers = Object.keys(balances).map(address => {
-        return {
-          address: address,
-          balance: balances[address]
-        };
-      });
-
-      let hasAddressWithReceived = balanceWrappers.filter(val => val.balance.total_received > 0).length > 0;
-      let hasAddressWithBalance = balanceWrappers.filter(val => val.balance.final_balance > 0).length > 0;
-
-      return {
-        mnemonic: mnemonic,
-        hasReceived : hasAddressWithReceived,
-        hasBalance: hasAddressWithBalance,
-        balances: balanceWrappers
-      };
-    });
-  }*/
 
 }
