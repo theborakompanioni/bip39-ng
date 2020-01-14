@@ -1252,7 +1252,8 @@ var MaterialModule = /** @class */ (function () {
                 _angular_material__WEBPACK_IMPORTED_MODULE_0__["MatProgressSpinnerModule"],
                 _angular_material__WEBPACK_IMPORTED_MODULE_0__["MatTooltipModule"],
                 _angular_material__WEBPACK_IMPORTED_MODULE_0__["MatListModule"],
-                _angular_material__WEBPACK_IMPORTED_MODULE_0__["MatDialogModule"]
+                _angular_material__WEBPACK_IMPORTED_MODULE_0__["MatDialogModule"],
+                _angular_material__WEBPACK_IMPORTED_MODULE_0__["MatTableModule"],
             ],
             exports: [
                 _angular_material__WEBPACK_IMPORTED_MODULE_0__["MatButtonModule"],
@@ -1268,7 +1269,8 @@ var MaterialModule = /** @class */ (function () {
                 _angular_material__WEBPACK_IMPORTED_MODULE_0__["MatProgressSpinnerModule"],
                 _angular_material__WEBPACK_IMPORTED_MODULE_0__["MatTooltipModule"],
                 _angular_material__WEBPACK_IMPORTED_MODULE_0__["MatListModule"],
-                _angular_material__WEBPACK_IMPORTED_MODULE_0__["MatDialogModule"]
+                _angular_material__WEBPACK_IMPORTED_MODULE_0__["MatDialogModule"],
+                _angular_material__WEBPACK_IMPORTED_MODULE_0__["MatTableModule"],
             ],
         })
     ], MaterialModule);
