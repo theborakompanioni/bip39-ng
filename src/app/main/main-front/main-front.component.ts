@@ -2,21 +2,21 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material';
 import { AppConfig } from '../../config/app.config';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { Subject } from 'rxjs/Subject';
 import { DataInfoServiceService } from '../../core/shared/data-info-service.service';
 import { HttpClient } from '@angular/common/http';
-import { ActivatedRoute } from '@angular/router';
 
 
 
 import * as Bitcoin from 'bitcoinjs-lib';
 import * as Bip32 from 'bip32';
 import * as Bip39 from 'bip39';
-import { filter, tap, map, flatMap, delay, throttleTime, takeWhile, takeLast, reduce, endWith, concatMap } from 'rxjs/operators';
+import { filter, tap, map, take, delay, throttleTime, takeWhile, takeLast, reduce, endWith, concatMap } from 'rxjs/operators';
 import { of, from } from 'rxjs';
 
 interface NgNode {
+    root: Bip32.BIP32Interface;
     address: string;
     path: string;
     publicKey: string;
@@ -92,12 +92,16 @@ function findLastIntegerInString(val: string): number | null {
 })
 
 export class MainFrontComponent implements OnInit {
+  SEARCH_QUERY_PARAM_NAME = 'q';
+  PASSPHRASE_QUERY_PARAM_NAME = 'p';
+
   // path : = m / purpose' / coin_type' / account' / change / address_index
   pathPrefixBip44 = `m/44'/0'/`; // addresses 1xxx
   pathPrefixBip49 = `m/49'/0'/`; // addresses 3xxx
   pathPrefixBip84 = `m/84'/0'/`; // addresses bc1xxx
 
   result: any;
+
   mnemonicArray: Array<string>;
   searchInputValue: string;
   passphraseInputValue: string;
@@ -159,28 +163,52 @@ export class MainFrontComponent implements OnInit {
     });
 
     this.searchInputChangedSubject.pipe(
+      filter(val => val !== null),
       throttleTime(100)
     ).subscribe(searchFieldValue => {
       this.searchInputValue = searchFieldValue;
       this.mnemonicInputChangedSubject.next(searchFieldValue);
     });
 
-    // if query param "?q=<query>" is present, apply it as search term
     this.activatedRoute.queryParamMap.pipe(
-      filter(val => val.has('q')),
-      map(val => val.get('q')),
-    ).subscribe(q => this.onChangeSearchInput(q));
+    ).subscribe(p => {
+      this.passphraseInputValue = p.get(this.PASSPHRASE_QUERY_PARAM_NAME);
+    });
+
+    this.activatedRoute.queryParamMap.pipe(
+      take(1)
+    ).subscribe(p => {
+      const mnemonic = p.get(this.SEARCH_QUERY_PARAM_NAME);
+      this.searchInputChangedSubject.next(mnemonic);
+    });
   }
 
   onChangeSearchInput(mnemonic: string) {
+    const queryParams = {};
+    queryParams[this.SEARCH_QUERY_PARAM_NAME] = mnemonic;
+    queryParams[this.PASSPHRASE_QUERY_PARAM_NAME] = this.passphraseInputValue;
+    queryParams['ts'] = Date.now();
+
+    // add query params but do not reload page (default if same page)
+    this.router.navigate([''], {
+      queryParams: queryParams,
+      queryParamsHandling: 'merge',
+      relativeTo: this.activatedRoute,
+    });
+
+    // trigger search input update
     this.searchInputChangedSubject.next(mnemonic);
+  }
+
+  buttonSearchClicked() {
+    this.onChangeSearchInput(this.searchInputValue);
   }
 
   buttonIamFeelingLuckyClicked() {
     this.feelingLuckyCounterClicked++;
 
     const mnemonic = Bip39.generateMnemonic();
-    this.mnemonicInputChangedSubject.next(mnemonic);
+    this.onChangeSearchInput(mnemonic);
   }
 
   generateResult(mnemonic: string) {
@@ -208,6 +236,7 @@ export class MainFrontComponent implements OnInit {
           const iAddress = getAddress(iPath, iChild);
 
           const addressResult = {
+            root: iChild,
             address: iAddress,
             path: iPath,
             publicKey: '0x' + buf2hex(iChild.publicKey),

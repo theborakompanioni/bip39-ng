@@ -5,7 +5,7 @@
     <div fxLayout="row wrap" fxLayoutAlign="center center">
       <div fxFlex="100%" fxFlex.gt-sm="80%" fxFlex.gt-md="70%" fxFlex.gt-md="50%"  style="text-align: center" >
         
-        <div *ngIf="!(tryCounter > 3)" >
+        <div *ngIf="!(feelingLuckyCounterClicked > 3)" >
           <button mat-raised-button color="primary"
           (click)="buttonIamFeelingLuckyClicked()" 
           class="i-am-feeling-lucky-button" 
@@ -14,14 +14,11 @@
             <span *ngIf="feelingLuckyCounterClicked === 1">Try again!</span>
             <span *ngIf="feelingLuckyCounterClicked === 2">And again!</span>
             <span *ngIf="feelingLuckyCounterClicked === 3">And again ...</span>
-            <span *ngIf="feelingLuckyCounterClicked === 4">Again?</span>
-            <span *ngIf="feelingLuckyCounterClicked === 5">Try again!</span>
-            <span *ngIf="feelingLuckyCounterClicked === 6">I'm feeling lucky!</span>
-            <span *ngIf="feelingLuckyCounterClicked > 6">Try again!</span>
+            <span *ngIf="feelingLuckyCounterClicked > 3">Try again!</span>
           </button>
         </div>
 
-        <div *ngIf="tryCounter > 3">
+        <div *ngIf="feelingLuckyCounterClicked > 3">
           <mat-card style="margin: 1em;">
             <p style="font-size: 1.2em; line-height: normal;">
               You have had your fair chance today.
@@ -47,7 +44,7 @@
     
     <div style="text-align: center;">
       <p>
-        <button mat-raised-button (click)="!loading && onChangeSearchInput(searchInputValue)">
+        <button mat-raised-button (click)="!loading && buttonSearchClicked()">
           <i matPrefix class="material-icons">search</i>
           Balance Search
         </button>
@@ -65,8 +62,8 @@
       </p>
     </div>
 
-    <div *ngIf="displayDetailedSettings">
-      <mat-card>
+    <div *ngIf="displayDetailedSettings" fxLayout="row wrap">
+      <mat-card fxFlex="100%" style="margin-bottom: 10px">
         <mat-card-header>
           <mat-card-title>Passphrase settings</mat-card-title>
           <mat-card-subtitle></mat-card-subtitle>
@@ -79,13 +76,14 @@
           <mat-hint></mat-hint>
         </mat-form-field>
       </mat-card>
-      <mat-card>
+
+      <mat-card fxFlex="100%">
         <mat-card-header>
           <mat-card-title>BIP32 path settings</mat-card-title>
           <mat-card-subtitle></mat-card-subtitle>
         </mat-card-header>
         <div fxLayout="row wrap" fxLayoutAlign="center center" >
-        <div fxFlex="100%" fxFlex.gt-sm="50%" fxFlex.gt-md="25%" fxFlex.gt-md="25%">
+        <div fxFlex="100%" fxFlex.gt-sm="100%" fxFlex.gt-md="25%" fxFlex.gt-md="25%">
             <mat-form-field appearance="outline" style="width: 100%;">
               <mat-label>Path Prefix</mat-label>
               <input matInput type="text" 
@@ -101,19 +99,19 @@
               <mat-option *ngFor="let option of pathPrefixInputAutocompleteOptions" [value]="option.value">{{option.name}}</mat-option>
             </mat-autocomplete>
         </div>
-        <div fxFlex="100%" fxFlex.gt-sm="50%" fxFlex.gt-md="25%" fxFlex.gt-md="25%">
+        <div fxFlex="100%" fxFlex.gt-sm="33%" fxFlex.gt-md="25%" fxFlex.gt-md="25%">
             <mat-form-field appearance="outline" style="width: 100%;">
               <mat-label>Path Account</mat-label>
               <input matInput type="number" [(ngModel)]="pathAccount" placeholder="0" required/>
             </mat-form-field>
         </div>
-        <div fxFlex="100%" fxFlex.gt-sm="50%" fxFlex.gt-md="25%" fxFlex.gt-md="25%">
+        <div fxFlex="100%" fxFlex.gt-sm="33%" fxFlex.gt-md="25%" fxFlex.gt-md="25%">
             <mat-form-field appearance="outline" style="width: 100%;">
               <mat-label>Path Change</mat-label>
               <input matInput type="number" [(ngModel)]="pathChange"  placeholder="0" required/>
             </mat-form-field>
         </div>
-        <div fxFlex="100%" fxFlex.gt-sm="50%" fxFlex.gt-md="25%" fxFlex.gt-md="25%">
+        <div fxFlex="100%" fxFlex.gt-sm="33%" fxFlex.gt-md="25%" fxFlex.gt-md="25%">
             <mat-form-field appearance="outline" style="width: 100%;">
               <mat-label>Path Index</mat-label>
               <input matInput type="number" [(ngModel)]="pathIndex" placeholder="0" required/>
@@ -192,10 +190,10 @@
           <span class="bold">BIP32 xpriv:</span>
           <pre>{{result.rootXpriv}}</pre>
         </div>
-        <div *ngIf="result.rootXpriv">
+        <!--div *ngIf="result.rootXpriv">
           <span class="bold">BIP32 xpub:</span>
           <pre>{{result.rootXpub}}</pre>
-        </div>
+        </div-->
         <div *ngIf="result.rootWif">
           <span class="bold">WIF:</span>
           <pre>{{result.rootWif}}</pre>
@@ -244,7 +242,7 @@
                 <br />
                 wif: {{address.wif}}
                 <br /> 
-                lastCheckTimestamp: {{address.lastCheckTimestamp | date: 'yyyy-mm-ddThh:mm:ss'}}
+                lastCheckTimestamp: {{address.lastCheckTimestamp | date: 'yyyy-mm-ddThh:mm:ss'}}<br />
               </td>
               <td mat-footer-cell *matFooterCellDef></td>
             </ng-container>
