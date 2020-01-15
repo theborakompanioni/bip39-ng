@@ -99,7 +99,8 @@ export class MainFrontComponent implements OnInit {
 
   result: any;
   mnemonicArray: Array<string>;
-  searchFieldValue: string;
+  searchInputValue: string;
+  passphraseInputValue: string;
 
   pathAccount = 0;
   pathChange = 0;
@@ -135,7 +136,8 @@ export class MainFrontComponent implements OnInit {
     private formBuilder: FormBuilder,
     private dataInfoService: DataInfoServiceService) {
     this.mnemonicArray = [];
-    this.searchFieldValue = '';
+    this.searchInputValue = '';
+    this.passphraseInputValue = '';
   }
 
   buildPath() {
@@ -147,20 +149,20 @@ export class MainFrontComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.searchInputChangedSubject.pipe(
-      throttleTime(100)
-    ).subscribe(searchFieldValue => {
-      this.searchFieldValue = searchFieldValue;
-      this.mnemonicInputChangedSubject.next(searchFieldValue);
-    });
-
     this.mnemonicInputChangedSubject.pipe(
     ).subscribe(mnemonic => {
       console.log('onChangeMnemonic');
       this.mnemonicArray = mnemonic.split(' ');
-      this.searchFieldValue = mnemonic;
+      this.searchInputValue = mnemonic;
 
       this.generateResult(mnemonic);
+    });
+
+    this.searchInputChangedSubject.pipe(
+      throttleTime(100)
+    ).subscribe(searchFieldValue => {
+      this.searchInputValue = searchFieldValue;
+      this.mnemonicInputChangedSubject.next(searchFieldValue);
     });
 
     // if query param "?q=<query>" is present, apply it as search term
@@ -188,7 +190,7 @@ export class MainFrontComponent implements OnInit {
     of(1).pipe(
       delay(300),
       map(foo => {
-        const seed = Bip39.mnemonicToSeedSync(mnemonic);
+        const seed = Bip39.mnemonicToSeedSync(mnemonic, this.passphraseInputValue);
         const root = Bip32.fromSeed(seed);
 
         const rootXpriv = root.toBase58();

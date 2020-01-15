@@ -39,7 +39,7 @@
       <div fxFlex="100%" fxFlex.gt-sm="80%" fxFlex.gt-md="70%" fxFlex.gt-md="50%">
           <mat-form-field appearance="outline" style="width: 100%;">
             <mat-label>Search</mat-label>
-            <input matInput [(ngModel)]="searchFieldValue" (keyup.enter)="onChangeSearchInput($event.target.value)" />
+            <input matInput [(ngModel)]="searchInputValue" (keyup.enter)="onChangeSearchInput($event.target.value)" />
             <mat-spinner matSuffix *ngIf="loading" diameter="15" style="margin: auto 10px 4px 10px;"></mat-spinner>
           </mat-form-field>
       </div>
@@ -47,7 +47,7 @@
     
     <div style="text-align: center;">
       <p>
-        <button mat-raised-button (click)="!loading && onChangeSearchInput(searchFieldValue)">
+        <button mat-raised-button (click)="!loading && onChangeSearchInput(searchInputValue)">
           <i matPrefix class="material-icons">search</i>
           Balance Search
         </button>
@@ -65,47 +65,62 @@
       </p>
     </div>
 
-    <mat-card *ngIf="displayDetailedSettings">
-      <mat-card-header>
-        <mat-card-title>BIP32 path settings</mat-card-title>
-        <mat-card-subtitle></mat-card-subtitle>
-      </mat-card-header>
-      <div fxLayout="row wrap" fxLayoutAlign="center center" >
-      <div fxFlex="100%" fxFlex.gt-sm="50%" fxFlex.gt-md="25%" fxFlex.gt-md="25%">
-          <mat-form-field appearance="outline" style="width: 100%;">
-            <mat-label>Path Prefix</mat-label>
-            <input matInput type="text" 
-            pattern="m/((\d)+'?/)*"
-            placeholder="m/44'/0'/"
-            required
-            [(ngModel)]="pathPrefix" 
-            [matAutocomplete]="pathPrefixInputAutocomplete" />
-            <mat-hint>BIP32 path prefix (pattern <code>m/purpose'/coin_type'/)</code></mat-hint>
-          </mat-form-field>
+    <div *ngIf="displayDetailedSettings">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>Passphrase settings</mat-card-title>
+          <mat-card-subtitle></mat-card-subtitle>
+        </mat-card-header>
+        <mat-form-field appearance="outline" style="width: 100%;">
+          <mat-label>Passphrase</mat-label>
+          <input matInput type="text"
+          placeholder="correct horse battery staple"
+          [(ngModel)]="passphraseInputValue" />
+          <mat-hint></mat-hint>
+        </mat-form-field>
+      </mat-card>
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>BIP32 path settings</mat-card-title>
+          <mat-card-subtitle></mat-card-subtitle>
+        </mat-card-header>
+        <div fxLayout="row wrap" fxLayoutAlign="center center" >
+        <div fxFlex="100%" fxFlex.gt-sm="50%" fxFlex.gt-md="25%" fxFlex.gt-md="25%">
+            <mat-form-field appearance="outline" style="width: 100%;">
+              <mat-label>Path Prefix</mat-label>
+              <input matInput type="text" 
+              pattern="m/((\d)+'?/)*"
+              placeholder="m/44'/0'/"
+              required
+              [(ngModel)]="pathPrefix" 
+              [matAutocomplete]="pathPrefixInputAutocomplete" />
+              <mat-hint>BIP32 path prefix (pattern <code>m/purpose'/coin_type'/)</code></mat-hint>
+            </mat-form-field>
 
-          <mat-autocomplete #pathPrefixInputAutocomplete="matAutocomplete">
-            <mat-option *ngFor="let option of pathPrefixInputAutocompleteOptions" [value]="option.value">{{option.name}}</mat-option>
-          </mat-autocomplete>
-      </div>
-      <div fxFlex="100%" fxFlex.gt-sm="50%" fxFlex.gt-md="25%" fxFlex.gt-md="25%">
-          <mat-form-field appearance="outline" style="width: 100%;">
-            <mat-label>Path Account</mat-label>
-            <input matInput type="number" [(ngModel)]="pathAccount" placeholder="0" required/>
-          </mat-form-field>
-      </div>
-      <div fxFlex="100%" fxFlex.gt-sm="50%" fxFlex.gt-md="25%" fxFlex.gt-md="25%">
-          <mat-form-field appearance="outline" style="width: 100%;">
-            <mat-label>Path Change</mat-label>
-            <input matInput type="number" [(ngModel)]="pathChange"  placeholder="0" required/>
-          </mat-form-field>
-      </div>
-      <div fxFlex="100%" fxFlex.gt-sm="50%" fxFlex.gt-md="25%" fxFlex.gt-md="25%">
-          <mat-form-field appearance="outline" style="width: 100%;">
-            <mat-label>Path Index</mat-label>
-            <input matInput type="number" [(ngModel)]="pathIndex" placeholder="0" required/>
-          </mat-form-field>
-      </div></div>
-    </mat-card>
+            <mat-autocomplete #pathPrefixInputAutocomplete="matAutocomplete">
+              <mat-option *ngFor="let option of pathPrefixInputAutocompleteOptions" [value]="option.value">{{option.name}}</mat-option>
+            </mat-autocomplete>
+        </div>
+        <div fxFlex="100%" fxFlex.gt-sm="50%" fxFlex.gt-md="25%" fxFlex.gt-md="25%">
+            <mat-form-field appearance="outline" style="width: 100%;">
+              <mat-label>Path Account</mat-label>
+              <input matInput type="number" [(ngModel)]="pathAccount" placeholder="0" required/>
+            </mat-form-field>
+        </div>
+        <div fxFlex="100%" fxFlex.gt-sm="50%" fxFlex.gt-md="25%" fxFlex.gt-md="25%">
+            <mat-form-field appearance="outline" style="width: 100%;">
+              <mat-label>Path Change</mat-label>
+              <input matInput type="number" [(ngModel)]="pathChange"  placeholder="0" required/>
+            </mat-form-field>
+        </div>
+        <div fxFlex="100%" fxFlex.gt-sm="50%" fxFlex.gt-md="25%" fxFlex.gt-md="25%">
+            <mat-form-field appearance="outline" style="width: 100%;">
+              <mat-label>Path Index</mat-label>
+              <input matInput type="number" [(ngModel)]="pathIndex" placeholder="0" required/>
+            </mat-form-field>
+        </div></div>
+      </mat-card>
+    </div>
     
     <div style="text-align: center; margin-bottom: 3rem"></div>
 
