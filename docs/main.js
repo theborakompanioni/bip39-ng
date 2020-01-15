@@ -115,7 +115,6 @@ var __importDefault = (undefined && undefined.__importDefault) || function (mod)
 
 
 var routes = [
-    { path: '', redirectTo: '/', pathMatch: 'full' },
     { path: '', loadChildren: './main/main.module#MainModule' },
     { path: _config_app_config__WEBPACK_IMPORTED_MODULE_2__["AppConfig"].routes.error404, component: _core_error404_error_404_component__WEBPACK_IMPORTED_MODULE_3__["Error404Component"] },
     // otherwise redirect to 404

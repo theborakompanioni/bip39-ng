@@ -26700,6 +26700,7 @@ var __importDefault = (undefined && undefined.__importDefault) || function (mod)
 
 
 
+
 function buf2hex(buffer) {
     return Array.prototype.map.call(new Uint8Array(buffer), function (x) { return ('00' + x.toString(16)).slice(-2); }).join('');
 }
@@ -26749,8 +26750,9 @@ function findLastIntegerInString(val) {
     return null;
 }
 var MainFrontComponent = /** @class */ (function () {
-    function MainFrontComponent(router, formBuilder, dataInfoService) {
+    function MainFrontComponent(router, activatedRoute, formBuilder, dataInfoService) {
         this.router = router;
+        this.activatedRoute = activatedRoute;
         this.formBuilder = formBuilder;
         this.dataInfoService = dataInfoService;
         // path : = m / purpose' / coin_type' / account' / change / address_index
@@ -26801,6 +26803,8 @@ var MainFrontComponent = /** @class */ (function () {
             _this.searchFieldValue = mnemonic;
             _this.generateResult(mnemonic);
         });
+        // if query param "?q=<query>" is present, apply it as search term
+        this.activatedRoute.queryParamMap.pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["filter"])(function (val) { return val.has('q'); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["map"])(function (val) { return val.get('q'); })).subscribe(function (q) { return _this.onChangeSearchInput(q); });
     };
     MainFrontComponent.prototype.onChangeSearchInput = function (mnemonic) {
         this.searchInputChangedSubject.next(mnemonic);
@@ -26814,7 +26818,7 @@ var MainFrontComponent = /** @class */ (function () {
         var _this = this;
         this.loading = true;
         this.result = null;
-        Object(rxjs__WEBPACK_IMPORTED_MODULE_9__["of"])(1).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["throttleTime"])(10), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["delay"])(300), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["map"])(function (foo) {
+        Object(rxjs__WEBPACK_IMPORTED_MODULE_9__["of"])(1).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["delay"])(300), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["map"])(function (foo) {
             var seed = bip39__WEBPACK_IMPORTED_MODULE_7__["mnemonicToSeedSync"](mnemonic);
             var root = bip32__WEBPACK_IMPORTED_MODULE_6__["fromSeed"](seed);
             var rootXpriv = root.toBase58();
@@ -26877,6 +26881,7 @@ var MainFrontComponent = /** @class */ (function () {
     };
     MainFrontComponent.ctorParameters = function () { return [
         { type: _angular_router__WEBPACK_IMPORTED_MODULE_2__["Router"] },
+        { type: _angular_router__WEBPACK_IMPORTED_MODULE_2__["ActivatedRoute"] },
         { type: _angular_forms__WEBPACK_IMPORTED_MODULE_1__["FormBuilder"] },
         { type: _core_shared_data_info_service_service__WEBPACK_IMPORTED_MODULE_4__["DataInfoServiceService"] }
     ]; };
@@ -26887,6 +26892,7 @@ var MainFrontComponent = /** @class */ (function () {
             styles: [__importDefault(__webpack_require__(/*! ./main-front.component.scss */ "./src/app/main/main-front/main-front.component.scss")).default]
         }),
         __metadata("design:paramtypes", [_angular_router__WEBPACK_IMPORTED_MODULE_2__["Router"],
+            _angular_router__WEBPACK_IMPORTED_MODULE_2__["ActivatedRoute"],
             _angular_forms__WEBPACK_IMPORTED_MODULE_1__["FormBuilder"],
             _core_shared_data_info_service_service__WEBPACK_IMPORTED_MODULE_4__["DataInfoServiceService"]])
     ], MainFrontComponent);
