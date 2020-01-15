@@ -6,6 +6,8 @@ import { Router } from '@angular/router';
 import { Subject } from 'rxjs/Subject';
 import { DataInfoServiceService } from '../../core/shared/data-info-service.service';
 import { HttpClient } from '@angular/common/http';
+import { ActivatedRoute } from '@angular/router';
+
 
 
 import * as Bitcoin from 'bitcoinjs-lib';
@@ -56,7 +58,7 @@ function getAddress(path: string, node: Bip32.BIP32Interface, network?: any): st
     return p2wpkhAddress(node, network);
   }
 
-  return  p2pkhAddress(node, network);
+  return p2pkhAddress(node, network);
 }
 
 function buildPath(prefix: string, account: number, change: number, index: number) {
@@ -129,6 +131,7 @@ export class MainFrontComponent implements OnInit {
   addressesDisplayedColumns = ['info', 'received', 'balance']; // ['path', 'address', 'wif', 'received', 'balance', 'lastCheckedTimestamp'];
 
   constructor(private router: Router,
+    private activatedRoute: ActivatedRoute,
     private formBuilder: FormBuilder,
     private dataInfoService: DataInfoServiceService) {
     this.mnemonicArray = [];
@@ -159,6 +162,12 @@ export class MainFrontComponent implements OnInit {
 
       this.generateResult(mnemonic);
     });
+
+    // if query param "?q=<query>" is present, apply it as search term
+    this.activatedRoute.queryParamMap.pipe(
+      filter(val => val.has('q')),
+      map(val => val.get('q')),
+    ).subscribe(q => this.onChangeSearchInput(q));
   }
 
   onChangeSearchInput(mnemonic: string) {
@@ -177,7 +186,6 @@ export class MainFrontComponent implements OnInit {
     this.result = null;
 
     of(1).pipe(
-      throttleTime(10),
       delay(300),
       map(foo => {
         const seed = Bip39.mnemonicToSeedSync(mnemonic);
