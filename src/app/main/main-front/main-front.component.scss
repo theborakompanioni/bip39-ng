@@ -9,10 +9,18 @@
   text-align: center;
 }
 
-.i-am-feeling-lucky-button {
-  padding: 1.3rem 2rem;
+.mat-raised-button.i-am-feeling-lucky-button {
+  padding: 1rem;
   font-size: 2rem;
-  margin: 1rem 1rem 3rem 1rem;
+  margin: 1rem 1rem 3rem 1rem !important;
+}
+
+@media (max-width: 680px) {
+  .mat-raised-button.i-am-feeling-lucky-button {
+    padding: 1rem;
+    font-size: 1.5rem;
+    margin: 1rem 1rem 2rem 1rem !important;
+  }
 }
 
 .container .mat-input-element:disabled {

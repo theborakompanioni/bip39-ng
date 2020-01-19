@@ -1,7 +1,7 @@
 <header>
     <nav>
-        <div fxFlex fxLayout="row" fxLayout.xs="column" fxLayoutAlign="center center">
-            <div fxFlex>
+        <div fxFlex fxLayout="row" fxLayout.xs="row" fxLayoutAlign="center center">
+            <div fxFlex="grow">
                 <a mat-raised-button *ngFor="let item of menuItems" routerLink="{{item.link}}">
                     {{item.name | uppercase}}
                 </a>

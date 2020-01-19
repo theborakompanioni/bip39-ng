@@ -107,6 +107,10 @@ snack-bar-container {
   background: $grey !important;
 }
 
+.mat-raised-button {
+  margin: calculateRem(2px) !important;
+}
+
 .mat-dialog-container {
   background: $primary--color;
   color: $secondary--color;
