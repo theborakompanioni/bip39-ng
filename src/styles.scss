@@ -9,6 +9,15 @@ code {
   font-family: monospace;
 }
 
+ul {
+  list-style: circle;
+  padding-left: 2rem;
+}
+ol {
+  list-style: decimal; /* decimal-leading-zero; */
+  padding-left: 2rem;
+}
+
 a, .cp {
   cursor: pointer;
 }
