@@ -7,6 +7,7 @@ import {SharedModule} from '../shared/modules/shared.module';
 
 import {MainFrontComponent} from './main-front/main-front.component';
 import {MainFaqComponent, ScrollToTopButtonComponent} from './main-faq/main-faq.component';
+import {MainWordlistComponent} from './main-wordlist/main-wordlist.component';
 import {MainComponent} from './main.component';
 
 @NgModule({
@@ -22,6 +23,7 @@ import {MainComponent} from './main.component';
     MainFrontComponent,
     MainFaqComponent,
     ScrollToTopButtonComponent,
+    MainWordlistComponent,
   ],
   entryComponents: [
   ],

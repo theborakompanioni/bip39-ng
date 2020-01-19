@@ -6,7 +6,9 @@ export let APP_CONFIG = new InjectionToken('app.config');
 
 export const AppConfig: IAppConfig = {
   routes: {
+    home: '',
     faq: 'faq',
+    wordlist: 'wordlist',
     error404: '404'
   },
   endpoints: {

@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 
 import { MainFrontComponent } from './main-front/main-front.component';
 import { MainFaqComponent } from './main-faq/main-faq.component';
+import { MainWordlistComponent } from './main-wordlist/main-wordlist.component';
 import { MainComponent } from './main.component';
 
 const mainRoutes: Routes = [
@@ -12,6 +13,7 @@ const mainRoutes: Routes = [
     children: [
       { path: '', component: MainFrontComponent },
       { path: 'faq', component: MainFaqComponent },
+      { path: 'wordlist', component: MainWordlistComponent },
     ]
   }
 ];

@@ -92,13 +92,13 @@ function findLastIntegerInString(val: string): number | null {
 })
 
 export class MainFrontComponent implements OnInit {
-  SEARCH_QUERY_PARAM_NAME = 'q';
-  PASSPHRASE_QUERY_PARAM_NAME = 'p';
+  private SEARCH_QUERY_PARAM_NAME = 'q';
+  private PASSPHRASE_QUERY_PARAM_NAME = 'p';
 
   // path : = m / purpose' / coin_type' / account' / change / address_index
-  pathPrefixBip44 = `m/44'/0'/`; // addresses 1xxx
-  pathPrefixBip49 = `m/49'/0'/`; // addresses 3xxx
-  pathPrefixBip84 = `m/84'/0'/`; // addresses bc1xxx
+  private pathPrefixBip44 = `m/44'/0'/`; // addresses 1xxx
+  private pathPrefixBip49 = `m/49'/0'/`; // addresses 3xxx
+  private pathPrefixBip84 = `m/84'/0'/`; // addresses bc1xxx
 
   result: any;
 
@@ -131,7 +131,6 @@ export class MainFrontComponent implements OnInit {
   feelingLuckyCounterClicked = 0;
   loading = false;
 
-  wordlist: string = Bip39.getDefaultWordlist();
   displayDetailedSettings = false;
   addressesDisplayedColumns = ['info', 'received', 'balance']; // ['path', 'address', 'wif', 'received', 'balance', 'lastCheckedTimestamp'];
 
