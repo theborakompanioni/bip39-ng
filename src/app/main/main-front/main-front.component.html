@@ -42,24 +42,27 @@
       </div>
     </div>
     
-    <div style="text-align: center;">
-      <p>
-        <button mat-raised-button (click)="!loading && buttonSearchClicked()">
-          <i matPrefix class="material-icons">search</i>
-          Balance Search
-        </button>
-        <span>&nbsp;</span>
-        <button mat-raised-button color="primary" (click)="!loading && buttonIamFeelingLuckyClicked()">
-          <span>I'm feeling lucky!</span>
-        </button>
-      </p>
-      <p>
-        <button mat-button (click)="displayDetailedSettings = !displayDetailedSettings">
+    <div  fxLayout="row" fxLayoutAlign="center center" style="margin-bottom: 2rem;">
+      <div fxFlex="0 1 auto" fxFlex.gt-sm="0 1 auto">
+        <button class="settings-button" mat-button (click)="displayDetailedSettings = !displayDetailedSettings">
           <i class="material-icons">
               settings_applications
           </i>
         </button>
-      </p>
+      </div>
+      <div fxFlex="0 1 auto" fxFlex.gt-sm="0 1 auto" >
+        <button class="search-button" mat-raised-button (click)="!loading && buttonSearchClicked()">
+          <i matPrefix class="material-icons">search</i>
+          Balance Search
+        </button>
+      </div>
+      <div fxFlex="0 1 auto" fxFlex.gt-sm="0 1 auto" *ngIf="feelingLuckyCounterClicked > 3">
+        <button class="i-am-feeling-lucky-button-small" 
+              mat-raised-button color="primary" 
+              (click)="!loading && buttonIamFeelingLuckyClicked()">
+          <span>I'm feeling lucky!</span>
+        </button>
+      </div>
     </div>
 
     <div *ngIf="displayDetailedSettings" fxLayout="row wrap">
@@ -83,51 +86,47 @@
           <mat-card-subtitle></mat-card-subtitle>
         </mat-card-header>
         <div fxLayout="row wrap" fxLayoutAlign="center center" >
-        <div fxFlex="100%" fxFlex.gt-sm="100%" fxFlex.gt-md="25%" fxFlex.gt-md="25%">
-            <mat-form-field appearance="outline" style="width: 100%;">
-              <mat-label>Path Prefix</mat-label>
-              <input matInput type="text" 
-              pattern="m/((\d)+'?/)*"
-              placeholder="m/44'/0'/"
-              required
-              [(ngModel)]="pathPrefix" 
-              [matAutocomplete]="pathPrefixInputAutocomplete" />
-              <mat-hint>BIP32 path prefix (pattern <code>m/purpose'/coin_type'/)</code></mat-hint>
-            </mat-form-field>
+          <div fxFlex="100%" fxFlex.gt-sm="100%" fxFlex.gt-md="25%" fxFlex.gt-md="25%">
+              <mat-form-field appearance="outline" style="width: 100%;">
+                <mat-label>Path Prefix</mat-label>
+                <input matInput type="text" 
+                pattern="m/((\d)+'?/)*"
+                placeholder="m/44'/0'/"
+                required
+                [(ngModel)]="pathPrefix" 
+                [matAutocomplete]="pathPrefixInputAutocomplete" />
+                <mat-hint>BIP32 path prefix (pattern <code>m/purpose'/coin_type'/)</code></mat-hint>
+              </mat-form-field>
 
-            <mat-autocomplete #pathPrefixInputAutocomplete="matAutocomplete">
-              <mat-option *ngFor="let option of pathPrefixInputAutocompleteOptions" [value]="option.value">{{option.name}}</mat-option>
-            </mat-autocomplete>
+              <mat-autocomplete #pathPrefixInputAutocomplete="matAutocomplete">
+                <mat-option *ngFor="let option of pathPrefixInputAutocompleteOptions" [value]="option.value">{{option.name}}</mat-option>
+              </mat-autocomplete>
+          </div>
+          <div fxFlex="100%" fxFlex.gt-sm="33%" fxFlex.gt-md="25%" fxFlex.gt-md="25%">
+              <mat-form-field appearance="outline" style="width: 100%;">
+                <mat-label>Path Account</mat-label>
+                <input matInput type="number" [(ngModel)]="pathAccount" placeholder="0" required/>
+              </mat-form-field>
+          </div>
+          <div fxFlex="100%" fxFlex.gt-sm="33%" fxFlex.gt-md="25%" fxFlex.gt-md="25%">
+              <mat-form-field appearance="outline" style="width: 100%;">
+                <mat-label>Path Change</mat-label>
+                <input matInput type="number" [(ngModel)]="pathChange"  placeholder="0" required/>
+              </mat-form-field>
+          </div>
+          <div fxFlex="100%" fxFlex.gt-sm="33%" fxFlex.gt-md="25%" fxFlex.gt-md="25%">
+              <mat-form-field appearance="outline" style="width: 100%;">
+                <mat-label>Path Index</mat-label>
+                <input matInput type="number" [(ngModel)]="pathIndex" placeholder="0" required/>
+              </mat-form-field>
+          </div>
         </div>
-        <div fxFlex="100%" fxFlex.gt-sm="33%" fxFlex.gt-md="25%" fxFlex.gt-md="25%">
-            <mat-form-field appearance="outline" style="width: 100%;">
-              <mat-label>Path Account</mat-label>
-              <input matInput type="number" [(ngModel)]="pathAccount" placeholder="0" required/>
-            </mat-form-field>
-        </div>
-        <div fxFlex="100%" fxFlex.gt-sm="33%" fxFlex.gt-md="25%" fxFlex.gt-md="25%">
-            <mat-form-field appearance="outline" style="width: 100%;">
-              <mat-label>Path Change</mat-label>
-              <input matInput type="number" [(ngModel)]="pathChange"  placeholder="0" required/>
-            </mat-form-field>
-        </div>
-        <div fxFlex="100%" fxFlex.gt-sm="33%" fxFlex.gt-md="25%" fxFlex.gt-md="25%">
-            <mat-form-field appearance="outline" style="width: 100%;">
-              <mat-label>Path Index</mat-label>
-              <input matInput type="number" [(ngModel)]="pathIndex" placeholder="0" required/>
-            </mat-form-field>
-        </div></div>
       </mat-card>
     </div>
     
-    <div style="text-align: center; margin-bottom: 3rem"></div>
+    <div id="search-result-spacer-top"></div>
 
     <div *ngIf="result">
-      <mat-form-field class="full-width" appearance="fill" style="text-align: center;" *ngIf="result.address">
-        <mat-label>Address</mat-label>
-        <input style="font-size: 150%" matInput type="text" placeholder="" [value]="result.address" disabled/>
-        <a href="https://www.blockchain.com/btc/address/{{result.address}}" target="_blank">https://www.blockchain.com/btc/address/{{result.address}}</a>
-      </mat-form-field>
 
       <div *ngIf="result.error">
         <p style="background-color: red; padding: 1em;">{{ result.error }}</p>
@@ -147,9 +146,15 @@
           <code>{{result.balance}} satoshis</code>
         </span>
       </p>
-    </div>
 
-    <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
+      <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
+
+      <mat-form-field class="full-width" appearance="fill" style="text-align: center;" *ngIf="result.address">
+        <mat-label>Address</mat-label>
+        <input style="font-size: 150%" matInput type="text" placeholder="" [value]="result.address" disabled/>
+        <a href="https://www.blockchain.com/btc/address/{{result.address}}" target="_blank">view on block explorer</a>
+      </mat-form-field>
+    </div>
 
     <div *ngIf="result" [hidden]="loading">
       <mat-card style="margin: 1em;">

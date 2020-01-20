@@ -215,7 +215,6 @@ export class MainFrontComponent implements OnInit {
     this.result = null;
 
     of(1).pipe(
-      delay(300),
       map(foo => {
         const seed = Bip39.mnemonicToSeedSync(mnemonic, this.passphraseInputValue);
         const root = Bip32.fromSeed(seed);
@@ -262,8 +261,8 @@ export class MainFrontComponent implements OnInit {
           rootXpriv: rootXpriv,
           rootXpub: rootXpub,
 
-          addresses: addresses,
           address: addresses.length > 0 ? addresses[0].address : null,
+          addresses: addresses,
 
           balance: null,
           received: null
@@ -272,6 +271,7 @@ export class MainFrontComponent implements OnInit {
         return result;
       }),
       tap(result => this.result = result),
+      delay(300),
       // fetch addresses balances and received by until reveived <= 0
       concatMap(result => from(result.addresses as NgNode[]).pipe(
           concatMap(val => this.dataInfoService.fetchReceivedByAddress(val.address).pipe(

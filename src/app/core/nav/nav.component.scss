@@ -39,18 +39,11 @@
       img {
         vertical-align: middle;
       }
-
-      #today {
-        font-size: 0.7rem;
-      }
     }
   }
 }
 
 @media (max-width: 807px) {
-  #today {
-    width: 50%;
-  }
 }
 
 @media (max-width: 680px) {
@@ -62,17 +55,8 @@
       position: relative;
 
       nav {
-        height: 7rem;
+        height: 4rem;
         display: flex;
-        padding: 0.2rem 0.2rem 0;
-
-        > div {
-          margin-top: 1rem;
-        }
-
-        #today {
-          margin-top: 1rem;
-        }
       }
     }
   }

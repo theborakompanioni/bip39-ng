@@ -1,12 +1,12 @@
 @import "mixins";
 
 
-.container {
-  margin: 0 1rem;
-}
-
 .container h1 {
   text-align: center;
+}
+
+#search-result-spacer-top {
+  margin-bottom: 3rem;
 }
 
 .mat-raised-button.i-am-feeling-lucky-button {
@@ -16,10 +16,20 @@
 }
 
 @media (max-width: 680px) {
+
+  .container h1 {
+    font-size: calculateRem(16px);
+    line-height: 1;
+  }
+
+  #search-result-spacer-top {
+    display: none;
+  }
+
   .mat-raised-button.i-am-feeling-lucky-button {
-    padding: 1rem;
-    font-size: 1.5rem;
-    margin: 1rem 1rem 2rem 1rem !important;
+    padding: 0.5rem;
+    font-size: 1.2rem;
+    margin: 0.5rem 0.5rem 1rem 0.5rem !important;
   }
 }
 
