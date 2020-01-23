@@ -12,17 +12,22 @@ import * as Bip32 from 'bip32';
 import * as Bip39 from 'bip39';
 import { filter, tap, map, take, delay, throttleTime, takeWhile, takeLast, reduce, endWith, concatMap } from 'rxjs/operators';
 import { of, from } from 'rxjs';
+import { pathToFileURL } from 'url';
 
+type Timestamp = number;
 type HexString = string;
 type Mnemonic = string;
 type BitcoinAddress = string;
 type Satoshi = number;
-type Timestamp = number;
+type Bip39Path = string;
 
+function isValidBip32Path(value: string): boolean {
+  return value.match(/^(m\/)?(\d+'?\/)*\d+'?$/) !== null;
+}
 
 interface NgBip32HdNodeLegacy {
   readonly root: Bip32.BIP32Interface;
-  readonly path: string;
+  readonly path: Bip39Path;
   readonly publicKey: HexString;
   readonly privateKey: HexString;
   readonly xpriv: string;
@@ -37,56 +42,144 @@ interface NgBip32HdNodeLegacy {
   error?: Error;
 }
 
-interface AddressView {
+interface NgBip32HdAddress {
   readonly address: BitcoinAddress;
+}
 
+class NgBip32HdAddressView {
   received?: Satoshi;
   balance?: Satoshi;
   lastCheckTimestamp?: Timestamp;
   error?: Error;
+
+  constructor(public readonly _address: NgBip32HdAddress) {
+
+  }
 }
 
 interface NgBip32HdNode {
-    readonly root: Bip32.BIP32Interface;
-    readonly path: string;
+    readonly _self: Bip32.BIP32Interface;
+
+    readonly path: Bip39Path;
     readonly publicKey: HexString;
     readonly privateKey: HexString;
     readonly xpriv: string;
     readonly xpub: string;
     readonly wif: string;
 
-    readonly addresses: AddressView[];
-    readonly nodes: NgBip32HdNode[];
+    readonly addresses: NgBip32HdAddress[];
+
+    readonly childNodes: NgBip32HdNode[];
 }
 
-class NgBip32HdNodeView {
-  balance: () => Satoshi = () => {
-    const selfBalance = this._node.addresses.map(it => it.balance).reduce((prev, curr) => prev + curr);
-    const nodesBlanace = this.nodes().map(it => it.balance()).reduce((prev, curr) => prev + curr);
-    return selfBalance + nodesBlanace;
-  }
-  received: () => Satoshi = () => {
-    const selfReceived = this._node.addresses.map(it => it.received).reduce((prev, curr) => prev + curr);
-    const nodesReceived = this.nodes().map(it => it.received()).reduce((prev, curr) => prev + curr);
-    return selfReceived + nodesReceived;
-  }
-  errors: () => Error[] = () => this._node.addresses.filter(it => !!it.error).map(it => it.error);
-  nodes: () => NgBip32HdNodeView[] = () => this._node.nodes.map(it => new NgBip32HdNodeView(it));
 
+function _newNodeInternal(node: Bip32.BIP32Interface, path: Bip39Path): NgBip32HdNode {
+  return {
+    _self: node,
+    path: path,
+    publicKey: '0x' + buf2hex(node.publicKey),
+    privateKey: '0x' + buf2hex(node.privateKey),
+    xpriv: node.toBase58(),
+    xpub: node.neutered().toBase58(),
+    wif: node.toWIF(),
+    addresses: [ {
+        address: p2pkhAddress(node)
+      }, {
+        address: segwitAdddress(node)
+      }, {
+        address: p2wpkhAddress(node)
+      }
+    ],
+    childNodes: []
+  };
+}
+
+/*
+function _newNodeViewInternal(node: Bip32.BIP32Interface, path: Bip39Path): NgBip32HdNodeView {
+  return new NgBip32HdNodeView(_newNodeInternal(node, path));
+}*/
+
+class NgBip32HdNodeView {
+  public readonly addresses: NgBip32HdAddressView[];
+  public childNodes: NgBip32HdNodeView[];
 
   constructor(public readonly _node: NgBip32HdNode) {
+    this.addresses = _node.addresses.map(it => new NgBip32HdAddressView(it));
+    this.childNodes = _node.childNodes.map(it => new NgBip32HdNodeView(it));
+  }
 
+  errors(): Error[] {
+    return this.addresses.filter(it => !!it.error).map(it => it.error);
+  }
+
+  balance(): Satoshi {
+    const selfBalance = this.addresses.map(it => it.balance).reduce((prev, curr) => prev + curr);
+    const nodesBlanace = this.childNodes.map(it => it.balance()).reduce((prev, curr) => prev + curr);
+    return selfBalance + nodesBlanace;
+  }
+
+  received(): Satoshi {
+    const selfReceived = this.addresses.map(it => it.received).reduce((prev, curr) => prev + curr);
+    const nodesReceived = this.childNodes.map(it => it.received()).reduce((prev, curr) => prev + curr);
+    return selfReceived + nodesReceived;
+  }
+
+  private findNodeByPath(path: Bip39Path): NgBip32HdNodeView | undefined {
+    const nodes = this.childNodes
+      .filter(it => it._node.path === path);
+    
+    return nodes.length > 0 ? nodes[0]: undefined;
+  }
+
+  public hasNodeWithPath(path: Bip39Path): boolean {
+    return this.findNodeByPath(path) !== undefined;
+  }
+
+  private newNodeView(path: Bip39Path) {
+    if (!isValidBip32Path(path)) {
+      throw new Error('invalid bip32 path');
+    }
+
+    return new NgBip32HdNodeView(_newNodeInternal(this._node._self, path))
+  }
+
+  get(path: Bip39Path): NgBip32HdNodeView {
+    if (this.hasNodeWithPath(path)) {
+      return this.findNodeByPath(path);
+    }
+    
+    const newNode = _newNodeInternal(this._node._self, path)
+
+    this._node.childNodes.push(newNode);
+    this.childNodes.push(new NgBip32HdNodeView(newNode));
+
+    return this.findNodeByPath(path);
   }
 }
 
 class NgBip32HdRootView {
-  root: () => NgBip32HdNodeView = () => new NgBip32HdNodeView(this._root);
+  public readonly root: NgBip32HdNodeView;
+  private readonly seed: Buffer;
 
-  hasValidMnemonic: () => boolean = () => Bip39.validateMnemonic(this.mnemonic);
+  constructor(public readonly mnemonic: Mnemonic, private readonly passphrase?) {
+    this.seed = Bip39.mnemonicToSeedSync(mnemonic, passphrase);
 
-  constructor(public readonly mnemonic: Mnemonic, public readonly _root: NgBip32HdNode) {
-
+    const rootNode = Bip32.fromSeed(this.seed);
+    this.root = new NgBip32HdNodeView(_newNodeInternal(rootNode, 'm'));
   }
+
+  hasValidMnemonic(): boolean {
+    return Bip39.validateMnemonic(this.mnemonic);
+  }
+
+  get(path: Bip39Path): NgBip32HdNodeView {
+    if (!isValidBip32Path(path)) {
+      throw new Error('invalid bip32 path');
+    }
+
+    return this.root.get(path);
+  }
+
 }
 
 function buf2hex(buffer) { // buffer is an ArrayBuffer
@@ -274,6 +367,29 @@ export class MainFrontComponent implements OnInit {
 
     of(1).pipe(
       map(foo => {
+        const wallet = new NgBip32HdRootView(mnemonic, this.passphraseInputValue);
+
+        //private pathPrefixBip44 = `m/44'/0'/`; // addresses 1xxx
+        //private pathPrefixBip49 = `m/49'/0'/`; // addresses 3xxx
+        //private pathPrefixBip84 = `m/84'/0'/`; // addresses bc1xxx
+
+        wallet.get(`m/0/0/0`);
+        wallet.get(`m/44'/0'`);
+        wallet.get(`m/49'/0'`);
+        wallet.get(`m/84'/0'`);
+
+        return wallet;
+      })
+    ).subscribe(result => {
+      console.log('wallet created');
+    }, error => {
+      console.log('wallet error');  
+    }, () => {
+      console.log('wallet finished');
+    });
+
+    of(1).pipe(
+      map(foo => {
         const seed = Bip39.mnemonicToSeedSync(mnemonic, this.passphraseInputValue);
         const root = Bip32.fromSeed(seed);
 
@@ -286,29 +402,10 @@ export class MainFrontComponent implements OnInit {
         const currentIndex = findLastIntegerInString(path) || 0;
 
         const addresses: NgBip32HdNodeLegacy[] = [];
-        const addressesNew: NgBip32HdNodeView[] = [];
         for (let i = currentIndex; i <= 20; i++) {
           const iPath = this.buildPathWithIndex(i);
           const iChild = root.derivePath(iPath);
           const iAddress = generateAddressFn(iPath)(iChild);
-
-          const addressResultNew = new NgBip32HdNodeView({
-            root: iChild,
-            path: iPath,
-            publicKey: '0x' + buf2hex(iChild.publicKey),
-            privateKey: '0x' + buf2hex(iChild.privateKey),
-            xpriv: iChild.toBase58(),
-            xpub: iChild.neutered().toBase58(),
-            wif: iChild.toWIF(),
-            addresses: [{
-              address: iAddress,
-              error: null,
-              received: 0,
-              balance: 0,
-              lastCheckTimestamp: null,
-            }],
-            nodes: []
-          });
 
           const addressResult: NgBip32HdNodeLegacy = {
             root: iChild,
@@ -325,7 +422,6 @@ export class MainFrontComponent implements OnInit {
             lastCheckTimestamp: null,
           };
           addresses.push(addressResult);
-          addressesNew.push(addressResultNew);
         }
 
         const result = {
@@ -341,7 +437,6 @@ export class MainFrontComponent implements OnInit {
 
           address: addresses.length > 0 ? addresses[0].address : null,
           addresses: addresses,
-          addressesNew: addressesNew,
 
           balance: null,
           received: null
@@ -367,22 +462,6 @@ export class MainFrontComponent implements OnInit {
           map(x => result),
           endWith(result)
         )),
-      concatMap(result => from(result.addressesNew as NgBip32HdNodeView[]).pipe(
-        concatMap(addressesNew => from(addressesNew._node.addresses as AddressView[])),
-        concatMap(addressView => this.dataInfoService.fetchReceivedByAddress(addressView.address).pipe(
-          tap(received => addressView.received = received),
-          tap(x => addressView.lastCheckTimestamp = new Date().getTime()),
-          map(x => addressView)
-        )),
-        takeWhile(addressView => addressView.received > 0),
-        tap(addressView => console.log('take ' + addressView.address + ' because reveiced > 0: ' + addressView.received)),
-        concatMap(addressView => this.dataInfoService.fetchAddressBalance(addressView.address).pipe(
-          tap(balance => addressView.balance = balance),
-          map(x => addressView)
-        )),
-        map(x => result),
-        endWith(result)
-      )),
       takeLast(1),
       concatMap(result => from(result.addresses as NgBip32HdNodeLegacy[]).pipe(
         filter(val => val.received > 0),
