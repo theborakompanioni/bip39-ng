@@ -7,58 +7,116 @@ import { Subject } from 'rxjs/Subject';
 import { DataInfoServiceService } from '../../core/shared/data-info-service.service';
 import { HttpClient } from '@angular/common/http';
 
-
-
 import * as Bitcoin from 'bitcoinjs-lib';
 import * as Bip32 from 'bip32';
 import * as Bip39 from 'bip39';
 import { filter, tap, map, take, delay, throttleTime, takeWhile, takeLast, reduce, endWith, concatMap } from 'rxjs/operators';
 import { of, from } from 'rxjs';
 
-interface NgNode {
-    root: Bip32.BIP32Interface;
-    address: string;
-    path: string;
-    publicKey: string;
-    privateKey: string;
-    xpriv: string;
-    xpub: string;
-    wif: string;
-    error: any;
-    received: number;
-    balance: number;
-    lastCheckTimestamp: number; // last time the node was checked
+type HexString = string;
+type Mnemonic = string;
+type BitcoinAddress = string;
+type Satoshi = number;
+type Timestamp = number;
+
+
+interface NgBip32HdNodeLegacy {
+  readonly root: Bip32.BIP32Interface;
+  readonly path: string;
+  readonly publicKey: HexString;
+  readonly privateKey: HexString;
+  readonly xpriv: string;
+  readonly xpub: string;
+  readonly wif: string;
+
+  readonly address: BitcoinAddress;
+
+  received?: Satoshi;
+  balance?: Satoshi;
+  lastCheckTimestamp?: Timestamp;
+  error?: Error;
+}
+
+interface AddressView {
+  readonly address: BitcoinAddress;
+
+  received?: Satoshi;
+  balance?: Satoshi;
+  lastCheckTimestamp?: Timestamp;
+  error?: Error;
+}
+
+interface NgBip32HdNode {
+    readonly root: Bip32.BIP32Interface;
+    readonly path: string;
+    readonly publicKey: HexString;
+    readonly privateKey: HexString;
+    readonly xpriv: string;
+    readonly xpub: string;
+    readonly wif: string;
+
+    readonly addresses: AddressView[];
+    readonly nodes: NgBip32HdNode[];
+}
+
+class NgBip32HdNodeView {
+  balance: () => Satoshi = () => {
+    const selfBalance = this._node.addresses.map(it => it.balance).reduce((prev, curr) => prev + curr);
+    const nodesBlanace = this.nodes().map(it => it.balance()).reduce((prev, curr) => prev + curr);
+    return selfBalance + nodesBlanace;
+  }
+  received: () => Satoshi = () => {
+    const selfReceived = this._node.addresses.map(it => it.received).reduce((prev, curr) => prev + curr);
+    const nodesReceived = this.nodes().map(it => it.received()).reduce((prev, curr) => prev + curr);
+    return selfReceived + nodesReceived;
+  }
+  errors: () => Error[] = () => this._node.addresses.filter(it => !!it.error).map(it => it.error);
+  nodes: () => NgBip32HdNodeView[] = () => this._node.nodes.map(it => new NgBip32HdNodeView(it));
+
+
+  constructor(public readonly _node: NgBip32HdNode) {
+
+  }
+}
+
+class NgBip32HdRootView {
+  root: () => NgBip32HdNodeView = () => new NgBip32HdNodeView(this._root);
+
+  hasValidMnemonic: () => boolean = () => Bip39.validateMnemonic(this.mnemonic);
+
+  constructor(public readonly mnemonic: Mnemonic, public readonly _root: NgBip32HdNode) {
+
+  }
 }
 
 function buf2hex(buffer) { // buffer is an ArrayBuffer
   return Array.prototype.map.call(new Uint8Array(buffer), x => ('00' + x.toString(16)).slice(-2)).join('');
 }
 
-function p2pkhAddress(node: any, network?: any): string {
+function p2pkhAddress(node: any, network?: any): BitcoinAddress {
   return Bitcoin.payments.p2pkh({ pubkey: node.publicKey, network }).address!;
 }
-function segwitAdddress(node: any, network?: any): string {
+function segwitAdddress(node: any, network?: any): BitcoinAddress {
   return Bitcoin.payments.p2sh({
     redeem: Bitcoin.payments.p2wpkh({ pubkey: node.publicKey })
   }).address!;
 }
-function p2wpkhAddress(node: any, network?: any): string {
+function p2wpkhAddress(node: any, network?: any): BitcoinAddress {
   return Bitcoin.payments.p2wpkh({ pubkey: node.publicKey, network }).address!;
 }
-
-function getAddress(path: string, node: Bip32.BIP32Interface, network?: any): string {
+function generateAddressFn(path: string, defaultFn?: (node, network?) => BitcoinAddress): (node, network?) => BitcoinAddress {
   if (path.substr(0, `m/44'/`.length) === `m/44'/`) {
-    return p2pkhAddress(node, network);
+    return p2pkhAddress;
   }
   if (path.substr(0, `m/49'/`.length) === `m/49'/`) {
-    return segwitAdddress(node, network);
+    return segwitAdddress;
   }
 
   if (path.substr(0, `m/84'/`.length) === `m/84'/`) {
-    return p2wpkhAddress(node, network);
+    return p2wpkhAddress;
   }
 
-  return p2pkhAddress(node, network);
+  return defaultFn ? defaultFn : p2pkhAddress;
 }
 
 function buildPath(prefix: string, account: number, change: number, index: number) {
@@ -227,13 +285,32 @@ export class MainFrontComponent implements OnInit {
         const path = this.buildPathWithIndex(this.pathIndex);
         const currentIndex = findLastIntegerInString(path) || 0;
 
-        const addresses: NgNode[] = [];
+        const addresses: NgBip32HdNodeLegacy[] = [];
+        const addressesNew: NgBip32HdNodeView[] = [];
         for (let i = currentIndex; i <= 20; i++) {
           const iPath = this.buildPathWithIndex(i);
           const iChild = root.derivePath(iPath);
-          const iAddress = getAddress(iPath, iChild);
+          const iAddress = generateAddressFn(iPath)(iChild);
 
-          const addressResult = {
+          const addressResultNew = new NgBip32HdNodeView({
+            root: iChild,
+            path: iPath,
+            publicKey: '0x' + buf2hex(iChild.publicKey),
+            privateKey: '0x' + buf2hex(iChild.privateKey),
+            xpriv: iChild.toBase58(),
+            xpub: iChild.neutered().toBase58(),
+            wif: iChild.toWIF(),
+            addresses: [{
+              address: iAddress,
+              error: null,
+              received: 0,
+              balance: 0,
+              lastCheckTimestamp: null,
+            }],
+            nodes: []
+          });
+
+          const addressResult: NgBip32HdNodeLegacy = {
             root: iChild,
             address: iAddress,
             path: iPath,
@@ -248,6 +325,7 @@ export class MainFrontComponent implements OnInit {
             lastCheckTimestamp: null,
           };
           addresses.push(addressResult);
+          addressesNew.push(addressResultNew);
         }
 
         const result = {
@@ -263,6 +341,7 @@ export class MainFrontComponent implements OnInit {
 
           address: addresses.length > 0 ? addresses[0].address : null,
           addresses: addresses,
+          addressesNew: addressesNew,
 
           balance: null,
           received: null
@@ -273,7 +352,7 @@ export class MainFrontComponent implements OnInit {
       tap(result => this.result = result),
       delay(300),
       // fetch addresses balances and received by until reveived <= 0
-      concatMap(result => from(result.addresses as NgNode[]).pipe(
+      concatMap(result => from(result.addresses as NgBip32HdNodeLegacy[]).pipe(
           concatMap(val => this.dataInfoService.fetchReceivedByAddress(val.address).pipe(
             tap(received => val.received = received),
             tap(x => val.lastCheckTimestamp = new Date().getTime()),
@@ -288,8 +367,24 @@ export class MainFrontComponent implements OnInit {
           map(x => result),
           endWith(result)
         )),
+      concatMap(result => from(result.addressesNew as NgBip32HdNodeView[]).pipe(
+        concatMap(addressesNew => from(addressesNew._node.addresses as AddressView[])),
+        concatMap(addressView => this.dataInfoService.fetchReceivedByAddress(addressView.address).pipe(
+          tap(received => addressView.received = received),
+          tap(x => addressView.lastCheckTimestamp = new Date().getTime()),
+          map(x => addressView)
+        )),
+        takeWhile(addressView => addressView.received > 0),
+        tap(addressView => console.log('take ' + addressView.address + ' because reveiced > 0: ' + addressView.received)),
+        concatMap(addressView => this.dataInfoService.fetchAddressBalance(addressView.address).pipe(
+          tap(balance => addressView.balance = balance),
+          map(x => addressView)
+        )),
+        map(x => result),
+        endWith(result)
+      )),
       takeLast(1),
-      concatMap(result => from(result.addresses as NgNode[]).pipe(
+      concatMap(result => from(result.addresses as NgBip32HdNodeLegacy[]).pipe(
         filter(val => val.received > 0),
         map(val => val.received),
         reduce((acc, curr) => acc + curr, 0),
@@ -300,7 +395,7 @@ export class MainFrontComponent implements OnInit {
       takeLast(1),
       tap(result => this.result = result),
       delay(1300),
-      concatMap(result => from(result.addresses as NgNode[]).pipe(
+      concatMap(result => from(result.addresses as NgBip32HdNodeLegacy[]).pipe(
         filter(val => val.balance > 0),
         map(val => val.balance),
         reduce((acc, curr) => acc + curr, 0),

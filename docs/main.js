@@ -127,7 +127,8 @@ var AppRoutingModule = /** @class */ (function () {
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["NgModule"])({
             imports: [
                 _angular_router__WEBPACK_IMPORTED_MODULE_1__["RouterModule"].forRoot(routes, {
-                // onSameUrlNavigation: 'reload'
+                    // onSameUrlNavigation: 'reload'
+                    enableTracing: false
                 })
             ],
             exports: [

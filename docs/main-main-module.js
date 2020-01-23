@@ -26713,6 +26713,35 @@ var __importDefault = (undefined && undefined.__importDefault) || function (mod)
 
 
 
+var NgBip32HdNodeView = /** @class */ (function () {
+    function NgBip32HdNodeView(_node) {
+        var _this = this;
+        this._node = _node;
+        this.balance = function () {
+            var selfBalance = _this._node.addresses.map(function (it) { return it.balance; }).reduce(function (prev, curr) { return prev + curr; });
+            var nodesBlanace = _this.nodes().map(function (it) { return it.balance(); }).reduce(function (prev, curr) { return prev + curr; });
+            return selfBalance + nodesBlanace;
+        };
+        this.received = function () {
+            var selfReceived = _this._node.addresses.map(function (it) { return it.received; }).reduce(function (prev, curr) { return prev + curr; });
+            var nodesReceived = _this.nodes().map(function (it) { return it.received(); }).reduce(function (prev, curr) { return prev + curr; });
+            return selfReceived + nodesReceived;
+        };
+        this.errors = function () { return _this._node.addresses.filter(function (it) { return !!it.error; }).map(function (it) { return it.error; }); };
+        this.nodes = function () { return _this._node.nodes.map(function (it) { return new NgBip32HdNodeView(it); }); };
+    }
+    return NgBip32HdNodeView;
+}());
+var NgBip32HdRootView = /** @class */ (function () {
+    function NgBip32HdRootView(mnemonic, _root) {
+        var _this = this;
+        this.mnemonic = mnemonic;
+        this._root = _root;
+        this.root = function () { return new NgBip32HdNodeView(_this._root); };
+        this.hasValidMnemonic = function () { return bip39__WEBPACK_IMPORTED_MODULE_7__["validateMnemonic"](_this.mnemonic); };
+    }
+    return NgBip32HdRootView;
+}());
 function buf2hex(buffer) {
     return Array.prototype.map.call(new Uint8Array(buffer), function (x) { return ('00' + x.toString(16)).slice(-2); }).join('');
 }
@@ -26727,17 +26756,17 @@ function segwitAdddress(node, network) {
 function p2wpkhAddress(node, network) {
     return bitcoinjs_lib__WEBPACK_IMPORTED_MODULE_5__["payments"].p2wpkh({ pubkey: node.publicKey, network: network }).address;
 }
-function getAddress(path, node, network) {
+function generateAddressFn(path, defaultFn) {
     if (path.substr(0, "m/44'/".length) === "m/44'/") {
-        return p2pkhAddress(node, network);
+        return p2pkhAddress;
     }
     if (path.substr(0, "m/49'/".length) === "m/49'/") {
-        return segwitAdddress(node, network);
+        return segwitAdddress;
     }
     if (path.substr(0, "m/84'/".length) === "m/84'/") {
-        return p2wpkhAddress(node, network);
+        return p2wpkhAddress;
     }
-    return p2pkhAddress(node, network);
+    return defaultFn ? defaultFn : p2pkhAddress;
 }
 function buildPath(prefix, account, change, index) {
     if (prefix && Number.isInteger(account) && Number.isInteger(change) && Number.isInteger(index)) {
@@ -26861,10 +26890,28 @@ var MainFrontComponent = /** @class */ (function () {
             var path = _this.buildPathWithIndex(_this.pathIndex);
             var currentIndex = findLastIntegerInString(path) || 0;
             var addresses = [];
+            var addressesNew = [];
             for (var i = currentIndex; i <= 20; i++) {
                 var iPath = _this.buildPathWithIndex(i);
                 var iChild = root.derivePath(iPath);
-                var iAddress = getAddress(iPath, iChild);
+                var iAddress = generateAddressFn(iPath)(iChild);
+                var addressResultNew = new NgBip32HdNodeView({
+                    root: iChild,
+                    path: iPath,
+                    publicKey: '0x' + buf2hex(iChild.publicKey),
+                    privateKey: '0x' + buf2hex(iChild.privateKey),
+                    xpriv: iChild.toBase58(),
+                    xpub: iChild.neutered().toBase58(),
+                    wif: iChild.toWIF(),
+                    addresses: [{
+                            address: iAddress,
+                            error: null,
+                            received: 0,
+                            balance: 0,
+                            lastCheckTimestamp: null,
+                        }],
+                    nodes: []
+                });
                 var addressResult = {
                     root: iChild,
                     address: iAddress,
@@ -26880,6 +26927,7 @@ var MainFrontComponent = /** @class */ (function () {
                     lastCheckTimestamp: null,
                 };
                 addresses.push(addressResult);
+                addressesNew.push(addressResultNew);
             }
             var result = {
                 mneomincIsValid: bip39__WEBPACK_IMPORTED_MODULE_7__["validateMnemonic"](mnemonic),
@@ -26892,13 +26940,14 @@ var MainFrontComponent = /** @class */ (function () {
                 rootXpub: rootXpub,
                 address: addresses.length > 0 ? addresses[0].address : null,
                 addresses: addresses,
+                addressesNew: addressesNew,
                 balance: null,
                 received: null
             };
             return result;
         }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(function (result) { return _this.result = result; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["delay"])(300), 
         // fetch addresses balances and received by until reveived <= 0
-        Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["concatMap"])(function (result) { return Object(rxjs__WEBPACK_IMPORTED_MODULE_9__["from"])(result.addresses).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["concatMap"])(function (val) { return _this.dataInfoService.fetchReceivedByAddress(val.address).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(function (received) { return val.received = received; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(function (x) { return val.lastCheckTimestamp = new Date().getTime(); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["map"])(function (x) { return val; })); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["takeWhile"])(function (val) { return val.received > 0; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(function (val) { return console.log('take ' + val.address + ' because reveiced > 0: ' + val.received); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["concatMap"])(function (val) { return _this.dataInfoService.fetchAddressBalance(val.address).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(function (balance) { return val.balance = balance; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["map"])(function (x) { return val; })); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["map"])(function (x) { return result; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["endWith"])(result)); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["takeLast"])(1), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["concatMap"])(function (result) { return Object(rxjs__WEBPACK_IMPORTED_MODULE_9__["from"])(result.addresses).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["filter"])(function (val) { return val.received > 0; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["map"])(function (val) { return val.received; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["reduce"])(function (acc, curr) { return acc + curr; }, 0), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(function (totalReceived) { return result.received = totalReceived; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["map"])(function (x) { return result; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["endWith"])(result)); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["takeLast"])(1), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(function (result) { return _this.result = result; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["delay"])(1300), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["concatMap"])(function (result) { return Object(rxjs__WEBPACK_IMPORTED_MODULE_9__["from"])(result.addresses).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["filter"])(function (val) { return val.balance > 0; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["map"])(function (val) { return val.balance; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["reduce"])(function (acc, curr) { return acc + curr; }, 0), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(function (totalBalance) { return result.balance = totalBalance; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["map"])(function (x) { return result; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["endWith"])(result)); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["takeLast"])(1)).subscribe(function (result) {
+        Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["concatMap"])(function (result) { return Object(rxjs__WEBPACK_IMPORTED_MODULE_9__["from"])(result.addresses).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["concatMap"])(function (val) { return _this.dataInfoService.fetchReceivedByAddress(val.address).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(function (received) { return val.received = received; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(function (x) { return val.lastCheckTimestamp = new Date().getTime(); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["map"])(function (x) { return val; })); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["takeWhile"])(function (val) { return val.received > 0; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(function (val) { return console.log('take ' + val.address + ' because reveiced > 0: ' + val.received); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["concatMap"])(function (val) { return _this.dataInfoService.fetchAddressBalance(val.address).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(function (balance) { return val.balance = balance; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["map"])(function (x) { return val; })); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["map"])(function (x) { return result; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["endWith"])(result)); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["concatMap"])(function (result) { return Object(rxjs__WEBPACK_IMPORTED_MODULE_9__["from"])(result.addressesNew).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["concatMap"])(function (addressesNew) { return Object(rxjs__WEBPACK_IMPORTED_MODULE_9__["from"])(addressesNew._node.addresses); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["concatMap"])(function (addressView) { return _this.dataInfoService.fetchReceivedByAddress(addressView.address).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(function (received) { return addressView.received = received; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(function (x) { return addressView.lastCheckTimestamp = new Date().getTime(); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["map"])(function (x) { return addressView; })); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["takeWhile"])(function (addressView) { return addressView.received > 0; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(function (addressView) { return console.log('take ' + addressView.address + ' because reveiced > 0: ' + addressView.received); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["concatMap"])(function (addressView) { return _this.dataInfoService.fetchAddressBalance(addressView.address).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(function (balance) { return addressView.balance = balance; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["map"])(function (x) { return addressView; })); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["map"])(function (x) { return result; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["endWith"])(result)); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["takeLast"])(1), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["concatMap"])(function (result) { return Object(rxjs__WEBPACK_IMPORTED_MODULE_9__["from"])(result.addresses).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["filter"])(function (val) { return val.received > 0; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["map"])(function (val) { return val.received; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["reduce"])(function (acc, curr) { return acc + curr; }, 0), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(function (totalReceived) { return result.received = totalReceived; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["map"])(function (x) { return result; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["endWith"])(result)); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["takeLast"])(1), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(function (result) { return _this.result = result; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["delay"])(1300), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["concatMap"])(function (result) { return Object(rxjs__WEBPACK_IMPORTED_MODULE_9__["from"])(result.addresses).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["filter"])(function (val) { return val.balance > 0; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["map"])(function (val) { return val.balance; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["reduce"])(function (acc, curr) { return acc + curr; }, 0), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(function (totalBalance) { return result.balance = totalBalance; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["map"])(function (x) { return result; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["endWith"])(result)); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["takeLast"])(1)).subscribe(function (result) {
             _this.result = result;
             console.log('subscribe');
         }, function (error) {

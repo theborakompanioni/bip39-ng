@@ -21,14 +21,14 @@ export class DataInfoServiceService {
 
   constructor(
     private blockchainInfo: BlockchainInfoServiceService,
-    private blockstreemInfo: BlockstreamInfoServiceService) {
+    private blockstreamInfo: BlockstreamInfoServiceService) {
   }
 
   public fetchReceivedByAddress(address: string): Observable<number> {
-    return this.blockstreemInfo.fetchReceivedByAddress(address);
+    return this.blockstreamInfo.fetchReceivedByAddress(address);
   }
 
   public fetchAddressBalance(address: string): Observable<number> {
-    return this.blockstreemInfo.fetchAddressBalance(address);
+    return this.blockstreamInfo.fetchAddressBalance(address);
   }
 }
