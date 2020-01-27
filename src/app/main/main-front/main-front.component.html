@@ -38,7 +38,7 @@
      
       <div fxFlex="100%" fxFlex.gt-sm="32%" fxFlex.gt-md="24%" fxFlex.gt-md="16.5%" *ngFor="let node of wallet.root.childNodes">
         <span>
-          {{ node._node.path }} {{ node.balance() }}
+          {{ node._node.path }} {{ node.balance() }} {{ node.received() }}
         </span>
       </div>
     </div>
