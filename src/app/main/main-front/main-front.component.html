@@ -34,12 +34,26 @@
 
 
     <div *ngIf="wallet">
-      <h1>foo  {{ wallet.root.balance() }}</h1>
+      <div>
+        <h2>root</h2>
+        <p>
+          Balance: {{ wallet.root.balance() }}<br />
+          Received: {{ wallet.root.received() }}
+        </p>
+      </div>
      
-      <div fxFlex="100%" fxFlex.gt-sm="32%" fxFlex.gt-md="24%" fxFlex.gt-md="16.5%" *ngFor="let node of wallet.root.childNodes">
-        <span>
-          {{ node._node.path }} {{ node.balance() }} {{ node.received() }}
-        </span>
+      <div fxLayout="row wrap" fxLayoutAlign="center center">
+        <div fxFlex="100%" fxFlex.gt-sm="32%" fxFlex.gt-md="24%" fxFlex.gt-md="16.5%" *ngFor="let node of wallet.root.childNodes">
+          <span>
+            <h3>{{ node._node.path }}</h3><br />
+            Balance: {{ node.balance() }}<br />
+            Received: {{ node.received() }}<br />
+            Child Node Count: {{ node.childNodes.length }}<br />
+            <ul>
+              <li *ngFor="let child of node.childNodes">{{ child._node.path }}: {{child._node.addresses.length}} addresses</li>
+            </ul>
+          </span>
+        </div>
       </div>
     </div>
 

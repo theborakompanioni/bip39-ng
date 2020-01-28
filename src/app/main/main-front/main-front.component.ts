@@ -10,9 +10,9 @@ import { HttpClient } from '@angular/common/http';
 import * as Bitcoin from 'bitcoinjs-lib';
 import * as Bip32 from 'bip32';
 import * as Bip39 from 'bip39';
-import { filter, tap, map, take, defaultIfEmpty, first, throttleTime, takeWhile, takeLast, 
+import { filter, tap, map, take, defaultIfEmpty, first, last, throttleTime, takeWhile, takeLast,
   reduce, endWith, concatMap, catchError } from 'rxjs/operators';
-import { Observable, of, from, forkJoin, onErrorResumeNext } from 'rxjs';
+import { Observable, concat, of, from, forkJoin, onErrorResumeNext } from 'rxjs';
 import { pathToFileURL } from 'url';
 import { TagContentType } from '@angular/compiler';
 import { onErrorResumeNextStatic } from 'rxjs/internal/operators/onErrorResumeNext';
@@ -97,6 +97,23 @@ interface NgBip32HdNode {
 
 
 function _newNodeInternal(node: Bip32.BIP32Interface, path: Bip39Path): NgBip32HdNode {
+  const defaultAddressGenerationFun = (n) => [p2pkhAddress(n), segwitAdddress(n), p2wpkhAddress(node)];
+
+  return _newNodeInternalWithAddressGenerationStrategy(node, path, (n, p) => {
+    const addresses  = generateAddressArrayFn(path, defaultAddressGenerationFun)(node);
+
+    return addresses.map(val => {
+      return {
+        address: val
+      };
+    });
+  });
+}
+
+type AddressGenerationStrategy = (node: Bip32.BIP32Interface, path: Bip39Path) => NgBip32HdAddress[];
+function _newNodeInternalWithAddressGenerationStrategy(node: Bip32.BIP32Interface,
+   path: Bip39Path,
+   addressGen: AddressGenerationStrategy): NgBip32HdNode {
   console.log('create new node with path ' + path);
   return {
     _self: node,
@@ -106,14 +123,7 @@ function _newNodeInternal(node: Bip32.BIP32Interface, path: Bip39Path): NgBip32H
     xpriv: node.toBase58(),
     xpub: node.neutered().toBase58(),
     wif: node.toWIF(),
-    addresses: [ {
-        address: p2pkhAddress(node)
-      }, {
-        address: segwitAdddress(node)
-      }, {
-        address: p2wpkhAddress(node)
-      }
-    ],
+    addresses: addressGen(node, path),
     childNodes: []
   };
 }
@@ -122,6 +132,7 @@ function _newNodeInternal(node: Bip32.BIP32Interface, path: Bip39Path): NgBip32H
 function _newNodeViewInternal(node: Bip32.BIP32Interface, path: Bip39Path): NgBip32HdNodeView {
   return new NgBip32HdNodeView(_newNodeInternal(node, path));
 }*/
+type ContinueScanningPredicate = (value: NgBip32HdNodeView, index: number) => boolean;
 
 class NgBip32HdNodeView {
   public readonly addresses: NgBip32HdAddressView[];
@@ -137,14 +148,28 @@ class NgBip32HdNodeView {
   }
 
   balance(): Satoshi {
-    const selfBalance = this.addresses.map(it => it.balance).reduce((prev, curr) => prev + curr, 0);
-    const nodesBlanace = this.childNodes.map(it => it.balance()).reduce((prev, curr) => prev + curr, 0);
+    const selfBalance = this.addresses
+      .map(it => it.balance)
+      .filter(val => !!val)
+      .reduce((prev, curr) => prev + curr, 0);
+
+    const nodesBlanace = this.childNodes
+      .map(it => it.balance())
+      .reduce((prev, curr) => prev + curr, 0);
+
     return selfBalance + nodesBlanace;
   }
 
   received(): Satoshi {
-    const selfReceived = this.addresses.map(it => it.received).reduce((prev, curr) => prev + curr, 0);
-    const nodesReceived = this.childNodes.map(it => it.received()).reduce((prev, curr) => prev + curr, 0);
+    const selfReceived = this.addresses
+      .map(it => it.received)
+      .filter(val => !!val)
+      .reduce((prev, curr) => prev + curr, 0);
+
+    const nodesReceived = this.childNodes
+      .map(it => it.received())
+      .reduce((prev, curr) => prev + curr, 0);
+
     return selfReceived + nodesReceived;
   }
 
@@ -195,13 +220,27 @@ class NgBip32HdNodeView {
   }
 
   public scanAddressesBalances(dataInfoService: DataInfoServiceService): Observable<NgBip32HdNodeView>  {
-    return this._scanAddressesBalancesRecursive(dataInfoService, this);
+    return this._scanAddressesBalancesRecursiveWithPredicate(dataInfoService, this, childNode => true);
   }
 
   private _scanAddressesBalancesRecursive(dataInfoService: DataInfoServiceService,
                                           nodeView: NgBip32HdNodeView): Observable<NgBip32HdNodeView> {
-    return of(nodeView).pipe(
-      tap(node => console.log(`1 now fetching for ${node._node.path}`)),
+      return this._scanAddressesBalancesRecursiveWithPredicate(dataInfoService, nodeView, childNode => childNode.received() > 0);
+  }
+
+  private _scanAddressesBalancesRecursiveWithPredicate(dataInfoService: DataInfoServiceService,
+                                          nodeView: NgBip32HdNodeView,
+                                          predicate: ContinueScanningPredicate): Observable<NgBip32HdNodeView> {
+
+    const recursiveScanOfChildNodes = from(nodeView.childNodes).pipe(
+        concatMap(childNode => this._scanAddressesBalancesRecursive(dataInfoService, childNode)),
+        takeWhile(predicate),
+        endWith(nodeView),
+        last()
+    );
+
+    const selfScan = of(nodeView).pipe(
+      tap(node => console.log(`start fetching for path ${node._node.path}`)),
       concatMap(node => from(node.addresses).pipe(
         tap(addressView => console.log(`fetchReceivedByAddress for ${node._node.path} and address ${addressView._address.address}`)),
         concatMap(addressView => dataInfoService.fetchReceivedByAddress(addressView._address.address).pipe(
@@ -215,10 +254,8 @@ class NgBip32HdNodeView {
           }, error => console.log(`error while scanning ${node._node.path}: ${error}`)),
         )),
         map(addressView => node),
-        endWith(nodeView),
       )),
-      takeLast(1),
-      tap(node => console.log(`2 now fetching for ${node._node.path}`)),
+      last(),
       concatMap(node => from(node.addresses).pipe(
         tap(addressView => addressView.balance = addressView.received === 0 ? 0 : null),
         filter(addressView => addressView.received > 0),
@@ -235,19 +272,12 @@ class NgBip32HdNodeView {
         map(addressView => node),
         endWith(nodeView),
       )),
-      takeLast(1),
-      tap(node => console.log(`3 now fetching for ${node._node.path}`)),
-      concatMap(node => forkJoin([
-        of(node),
-        from(node.childNodes).pipe(
-          tap(childNode => console.log(`scaaaaaaaaaning ${childNode._node.path} has balance := ${childNode.received()}`)),
-          concatMap(childNode => this._scanAddressesBalancesRecursive(dataInfoService, childNode)),
-          tap(childNode => console.log(`------------------ after scanning ${childNode._node.path} has balance := ${childNode.received()}`)),
-          takeWhile(childNode => childNode.received() > 0),
-          // first(childNode => (childNode.received() === 0)),
-        )
-      ])),
-      map(([parent, ]) => parent)
+      last(),
+      tap(node => console.log(`end fetching for path ${node._node.path} (received: ${node.received()}, balance: ${node.balance()})`)),
+    );
+
+    return concat(recursiveScanOfChildNodes, selfScan).pipe(
+      last()
     );
   }
 
@@ -310,6 +340,21 @@ function generateAddressFn(path: string, defaultFn?: (node, network?) => Bitcoin
   }
 
   return defaultFn ? defaultFn : p2pkhAddress;
+}
+
+function generateAddressArrayFn(path: string, defaultFn?: (node, network?) => BitcoinAddress[]): (node, network?) => BitcoinAddress[] {
+  if (path.substr(0, `m/44'/`.length) === `m/44'/`) {
+    return (node, network?) => [p2pkhAddress(node, network)];
+  }
+  if (path.substr(0, `m/49'/`.length) === `m/49'/`) {
+    return (node, network?) => [segwitAdddress(node, network)];
+  }
+
+  if (path.substr(0, `m/84'/`.length) === `m/84'/`) {
+    return (node, network?) => [p2wpkhAddress(node, network)];
+  }
+
+  return defaultFn ? defaultFn : (node, network?) => [p2wpkhAddress(node, network)];
 }
 
 function buildPath(prefix: string, account: number, change: number, index: number) {
@@ -476,15 +521,15 @@ export class MainFrontComponent implements OnInit {
         // private pathPrefixBip49 = `m/49'/0'/`; // addresses 3xxx
         // private pathPrefixBip84 = `m/84'/0'/`; // addresses bc1xxx
 
-        // wallet.get(`m/0/0/0`);
-        // wallet.get(`m/44'/0'`);
-        // wallet.get(`m/49'/0'`);
-        // wallet.get(`m/84'/0'`);
-
-        for (let i = 0; i < 7; i++) {
-          // wallet.get(`m/44'/0'/0'/0`).getIndex(i);
-          // wallet.get(`m/49'/0'/0'/0`).getIndex(i);
+        for (let i = 0; i < 10; i++) {
+          // see https://github.com/dan-da/hd-wallet-derive/blob/master/doc/wallet-bip32-path-presets.md
+          wallet.get(`m/0'/0`).getOrCreateNextIndex();
+          wallet.get(`m/44'/0'/0'/0`).getOrCreateNextIndex();
+          wallet.get(`m/44'/0'/0'/1`).getOrCreateNextIndex();
+          wallet.get(`m/49'/0'/0'/0`).getOrCreateNextIndex();
+          wallet.get(`m/49'/0'/0'/1`).getOrCreateNextIndex();
           wallet.get(`m/84'/0'/0'/0`).getOrCreateNextIndex();
+          wallet.get(`m/84'/0'/0'/1`).getOrCreateNextIndex();
         }
 
         return wallet;
@@ -497,6 +542,7 @@ export class MainFrontComponent implements OnInit {
     ).subscribe(result => {
       console.log('wallet created');
       this.wallet = result;
+      window['wallet'] = result;
     }, error => {
       console.log('wallet error');
     }, () => {
