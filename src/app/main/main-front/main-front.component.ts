@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Injector, Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material';
 import { AppConfig } from '../../config/app.config';
@@ -6,6 +6,8 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { Subject } from 'rxjs/Subject';
 import { DataInfoServiceService } from '../../core/shared/data-info-service.service';
 import { HttpClient } from '@angular/common/http';
+import { Pipe, PipeTransform } from '@angular/core';
+import { CurrencyPipe } from '@angular/common';
 
 import * as Bitcoin from 'bitcoinjs-lib';
 import * as Bip32 from 'bip32';
@@ -138,13 +140,26 @@ class NgBip32HdNodeView {
   public readonly addresses: NgBip32HdAddressView[];
   public childNodes: NgBip32HdNodeView[];
 
-  constructor(private readonly _root, public readonly _node: NgBip32HdNode) {
+  constructor(private readonly _root: Bip32.BIP32Interface, public readonly _node: NgBip32HdNode) {
     this.addresses = _node.addresses.map(it => new NgBip32HdAddressView(it));
     this.childNodes = _node.childNodes.map(it => new NgBip32HdNodeView(_root, it));
   }
 
   errors(): Error[] {
     return this.addresses.filter(it => !!it.error).map(it => it.error);
+  }
+
+  selfBalance(): Satoshi {
+    return this.addresses
+      .map(it => it.balance)
+      .filter(val => !!val)
+      .reduce((prev, curr) => prev + curr, 0);
+  }
+
+  nodesBlanace(): Satoshi {
+    return this.childNodes
+    .map(it => it.balance())
+    .reduce((prev, curr) => prev + curr, 0);
   }
 
   balance(): Satoshi {
@@ -157,20 +172,24 @@ class NgBip32HdNodeView {
       .map(it => it.balance())
       .reduce((prev, curr) => prev + curr, 0);
 
-    return selfBalance + nodesBlanace;
+    return this.selfBalance() + this.nodesBlanace();
   }
 
-  received(): Satoshi {
-    const selfReceived = this.addresses
+  selfReceived() {
+    return this.addresses
       .map(it => it.received)
       .filter(val => !!val)
       .reduce((prev, curr) => prev + curr, 0);
+  }
 
-    const nodesReceived = this.childNodes
+  nodesReceived(): Satoshi {
+    return this.childNodes
       .map(it => it.received())
       .reduce((prev, curr) => prev + curr, 0);
+  }
 
-    return selfReceived + nodesReceived;
+  received(): Satoshi {
+    return this.selfReceived() + this.nodesReceived();
   }
 
   public hasNodeWithPath(path: Bip39Path): boolean {
@@ -219,8 +238,92 @@ class NgBip32HdNodeView {
     return this.getOrCreateIndex(currentIndex + 1);
   }
 
-  public scanAddressesBalances(dataInfoService: DataInfoServiceService): Observable<NgBip32HdNodeView>  {
-    return this._scanAddressesBalancesRecursiveWithPredicate(dataInfoService, this, childNode => true);
+}
+
+@Pipe({
+    name: 'bitcoin'
+})
+export class BitcoinPipe implements PipeTransform {
+  private readonly currencyPipe: CurrencyPipe;
+
+  constructor (injector: Injector) {
+    this.currencyPipe = injector.get(CurrencyPipe);
+  }
+
+  transform(value: number, valueType?: string, displayType?: string): string {
+    const _valueType = valueType && valueType === 'btc' ? 'btc' : 'sat';
+    const _displayType = displayType && displayType === 'sat' ? 'sat' : 'btc';
+
+    const displayBitcoin = _displayType === 'btc';
+
+    const isSatToBtc = _valueType === 'sat' && _displayType === 'btc';
+    const isBtcToSat = _valueType === 'btc' && _displayType === 'sat';
+
+    let _value = value;
+    if (isSatToBtc) {
+      _value = value / 100_000_000;
+    }
+    if (isBtcToSat) {
+      _value = value / 100_000_000;
+    }
+
+    const symbol = displayBitcoin ? '₿' : 'sat';
+    const digitInfo = displayBitcoin ? '1.0-8' : '1.0-0';
+    return this.currencyPipe.transform(_value, 'XBT', symbol, digitInfo);
+  }
+}
+
+class NgBip32HdWalletView {
+  public readonly root: NgBip32HdNodeView;
+  private readonly seed: Buffer;
+
+  constructor(public readonly mnemonic: Mnemonic, passphrase?,
+              private readonly dataInfoService?: DataInfoServiceService) {
+    this.seed = Bip39.mnemonicToSeedSync(mnemonic, passphrase);
+
+    const rootNode = Bip32.fromSeed(this.seed);
+    this.root = new NgBip32HdNodeView(rootNode, _newNodeInternal(rootNode, 'm'));
+  }
+
+  hasValidMnemonic(): boolean {
+    return Bip39.validateMnemonic(this.mnemonic);
+  }
+
+  get(path: Bip39Path): NgBip32HdNodeView {
+    if (!isValidBip32Path(path)) {
+      throw new Error('invalid bip32 path');
+    }
+
+    return this.root._getOrCreateBySubpath(path.substr(2, path.length));
+  }
+
+  public scanNextChildNode(node: NgBip32HdNodeView) {
+    this.scanBalanceOfNode(node.getOrCreateNextIndex())
+      .subscribe();
+  }
+
+  public findNodesWithBalanceGreaterZero(): NgBip32HdNodeView[] {
+    return this.findNodesRecursive(this.root, (node) => node.selfBalance() > 0);
+  }
+
+  private findNodesWithReceivedGreaterZero(): NgBip32HdNodeView[] {
+    return this.findNodesRecursive(this.root, (node) => node.selfReceived() > 0);
+  }
+
+  private findNodesRecursive(node: NgBip32HdNodeView, predicate: (node: NgBip32HdNodeView) => boolean): NgBip32HdNodeView[] {
+    const nodesWithBalance = node.childNodes
+      .map(childNode => this.findNodesRecursive(childNode, predicate))
+      .reduce((prev, curr) => prev.concat(curr), []);
+
+    return (predicate(node) ? [node] : []).concat(nodesWithBalance);
+  }
+
+  public scanBalances(): Observable<NgBip32HdNodeView>  {
+    return this._scanAddressesBalancesRecursiveWithPredicate(this.dataInfoService, this.root, childNode => true);
+  }
+
+  public scanBalanceOfNode(nodeView: NgBip32HdNodeView): Observable<NgBip32HdNodeView>  {
+    return this._scanAddressesBalancesRecursiveWithPredicate(this.dataInfoService, nodeView, childNode => true);
   }
 
   private _scanAddressesBalancesRecursive(dataInfoService: DataInfoServiceService,
@@ -279,36 +382,6 @@ class NgBip32HdNodeView {
     return concat(recursiveScanOfChildNodes, selfScan).pipe(
       last()
     );
-  }
-
-}
-class NgBip32HdRootView {
-  public readonly root: NgBip32HdNodeView;
-  private readonly seed: Buffer;
-
-  constructor(public readonly mnemonic: Mnemonic,
-      private readonly passphrase?,
-      private readonly dataInfoService?: DataInfoServiceService) {
-    this.seed = Bip39.mnemonicToSeedSync(mnemonic, passphrase);
-
-    const rootNode = Bip32.fromSeed(this.seed);
-    this.root = new NgBip32HdNodeView(rootNode, _newNodeInternal(rootNode, 'm'));
-  }
-
-  hasValidMnemonic(): boolean {
-    return Bip39.validateMnemonic(this.mnemonic);
-  }
-
-  get(path: Bip39Path): NgBip32HdNodeView {
-    if (!isValidBip32Path(path)) {
-      throw new Error('invalid bip32 path');
-    }
-
-    return this.root._getOrCreateBySubpath(path.substr(2, path.length));
-  }
-
-  scanAddressesBalances() {
-    return this.root.scanAddressesBalances(this.dataInfoService);
   }
 }
 
@@ -398,7 +471,7 @@ export class MainFrontComponent implements OnInit {
   private pathPrefixBip84 = `m/84'/0'/`; // addresses bc1xxx
 
   result: any;
-  wallet: NgBip32HdRootView;
+  wallet: NgBip32HdWalletView;
 
   mnemonicArray: Array<string>;
   searchInputValue: string;
@@ -515,37 +588,41 @@ export class MainFrontComponent implements OnInit {
 
     of(1).pipe(
       map(foo => {
-        const wallet = new NgBip32HdRootView(mnemonic, this.passphraseInputValue, this.dataInfoService);
+        const wallet = new NgBip32HdWalletView(mnemonic, this.passphraseInputValue, this.dataInfoService);
 
         // private pathPrefixBip44 = `m/44'/0'/`; // addresses 1xxx
         // private pathPrefixBip49 = `m/49'/0'/`; // addresses 3xxx
         // private pathPrefixBip84 = `m/84'/0'/`; // addresses bc1xxx
 
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 3; i++) {
           // see https://github.com/dan-da/hd-wallet-derive/blob/master/doc/wallet-bip32-path-presets.md
-          wallet.get(`m/0'/0`).getOrCreateNextIndex();
           wallet.get(`m/44'/0'/0'/0`).getOrCreateNextIndex();
           wallet.get(`m/44'/0'/0'/1`).getOrCreateNextIndex();
           wallet.get(`m/49'/0'/0'/0`).getOrCreateNextIndex();
           wallet.get(`m/49'/0'/0'/1`).getOrCreateNextIndex();
           wallet.get(`m/84'/0'/0'/0`).getOrCreateNextIndex();
           wallet.get(`m/84'/0'/0'/1`).getOrCreateNextIndex();
+          wallet.get(`m/0'/0`).getOrCreateNextIndex();
         }
 
         return wallet;
       }),
-      concatMap(result => result.scanAddressesBalances().pipe(
-        map(x => result),
-        endWith(result)
+      concatMap(wallet => wallet.scanBalances().pipe(
+        map(x => wallet),
+        endWith(wallet)
       )),
       takeLast(1),
-    ).subscribe(result => {
+    ).subscribe(wallet => {
       console.log('wallet created');
-      this.wallet = result;
-      window['wallet'] = result;
+      this.wallet = wallet;
+
+      // TODO: remove after feature is finished (only for debugging purposes)
+      window['wallet'] = wallet;
     }, error => {
+      this.loading = false;
       console.log('wallet error');
     }, () => {
+      this.loading = false;
       console.log('wallet finished');
     });
 

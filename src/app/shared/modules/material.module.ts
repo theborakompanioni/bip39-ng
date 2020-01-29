@@ -14,6 +14,10 @@ import {
   MatSnackBarModule,
   MatTooltipModule,
   MatTableModule,
+  MatChipsModule,
+  MatBadgeModule,
+  MatTreeModule,
+  MatExpansionModule
 } from '@angular/material';
 import {NgModule} from '@angular/core';
 
@@ -34,6 +38,10 @@ import {NgModule} from '@angular/core';
     MatListModule,
     MatDialogModule,
     MatTableModule,
+    MatChipsModule,
+    MatBadgeModule,
+    MatTreeModule,
+    MatExpansionModule
   ],
   exports: [
     MatButtonModule,
@@ -51,6 +59,10 @@ import {NgModule} from '@angular/core';
     MatListModule,
     MatDialogModule,
     MatTableModule,
+    MatChipsModule,
+    MatBadgeModule,
+    MatTreeModule,
+    MatExpansionModule
   ],
 })
 

@@ -32,31 +32,6 @@
       </div>
     </div>
 
-
-    <div *ngIf="wallet">
-      <div>
-        <h2>root</h2>
-        <p>
-          Balance: {{ wallet.root.balance() }}<br />
-          Received: {{ wallet.root.received() }}
-        </p>
-      </div>
-     
-      <div fxLayout="row wrap" fxLayoutAlign="center center">
-        <div fxFlex="100%" fxFlex.gt-sm="32%" fxFlex.gt-md="24%" fxFlex.gt-md="16.5%" *ngFor="let node of wallet.root.childNodes">
-          <span>
-            <h3>{{ node._node.path }}</h3><br />
-            Balance: {{ node.balance() }}<br />
-            Received: {{ node.received() }}<br />
-            Child Node Count: {{ node.childNodes.length }}<br />
-            <ul>
-              <li *ngFor="let child of node.childNodes">{{ child._node.path }}: {{child._node.addresses.length}} addresses</li>
-            </ul>
-          </span>
-        </div>
-      </div>
-    </div>
-
     <div fxLayout="row wrap" fxLayoutAlign="center center">
       <div fxFlex="100%" fxFlex.gt-sm="80%" fxFlex.gt-md="70%" fxFlex.gt-md="50%">
           <mat-form-field appearance="outline" style="width: 100%;">
@@ -151,35 +126,49 @@
     
     <div id="search-result-spacer-top"></div>
 
-    <div *ngIf="result">
 
-      <div *ngIf="result.error">
-        <p style="background-color: red; padding: 1em;">{{ result.error }}</p>
-        <p style="background-color: red; padding: 1em;">{{ result.error.message }}</p>
+    <div *ngIf="wallet">
+
+      <div *ngIf="wallet.error">
+        <p style="background-color: red; padding: 1em;">{{ wallet.error }}</p>
+        <p style="background-color: red; padding: 1em;">{{ wallet.error.message }}</p>
       </div>
 
-      <p style="text-align: center; font-size: 1.5em; margin: 1em; line-height: normal;" *ngIf="result.received !== undefined">
-        <span *ngIf="result.received === 0">Address never received anything.</span>
-        <span *ngIf="result.received > 0">Found address with
-          <code>received > 0</code>
+      <p style="text-align: center; font-size: 1.5em; margin: 1em; line-height: normal;">
+        <span *ngIf="wallet.root.received() === 0">Addresses never received anything.</span>
+        <span *ngIf="wallet.root.received() > 0">Found addresses with
+          <code>received > 0</code> ({{ wallet.root.received() | bitcoin}})
         </span>
       </p>
 
-      <p style="text-align: center; font-size: 3em; margin: 1em; line-height: normal;" *ngIf="result.balance !== undefined">
-        <span *ngIf="result.balance === 0">Balance is 0 :(</span>
-        <span *ngIf="result.balance > 0">Found address with
-          <code>{{result.balance}} satoshis</code>
+      <p style="text-align: center; font-size: 3em; margin: 1em; line-height: normal;">
+        <span *ngIf="wallet.root.balance() === 0">Balance is 0 :(</span>
+        <span *ngIf="wallet.root.balance() > 0">Found addresses with
+          <code>{{wallet.root.balance() | bitcoin}}</code>
         </span>
       </p>
 
-      <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
-
-      <mat-form-field class="full-width" appearance="fill" style="text-align: center;" *ngIf="result.address">
-        <mat-label>Address</mat-label>
-        <input style="font-size: 150%" matInput type="text" placeholder="" [value]="result.address" disabled/>
-        <a href="https://www.blockchain.com/btc/address/{{result.address}}" target="_blank">view on block explorer</a>
-      </mat-form-field>
     </div>
+
+    <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
+
+
+    <div *ngIf="wallet">
+        <div fxLayout="row wrap" fxLayoutAlign="center center">
+          <div fxFlex="100%" fxFlex.gt-sm="50%" fxFlex.gt-md="50%" fxFlex.gt-md="50%" *ngFor="let node of wallet.findNodesWithReceivedGreaterZero()">
+
+                <div *ngFor="let addressView of node.addresses">
+                  Balance: {{ addressView.balance | bitcoin}}<br />
+                  Received:{{ addressView.received | bitcoin}} 
+                  <mat-form-field class="full-width" appearance="fill" style="text-align: center;">
+                    <mat-label>Address</mat-label>
+                    <input style="font-size: 150%" matInput type="text" placeholder="" [value]="addressView._address.address" disabled/>
+                    <a href="https://www.blockchain.com/btc/address/{{addressView._address.address}}" target="_blank">view on block explorer</a>
+                  </mat-form-field>
+                </div>
+          </div>
+        </div>
+      </div>
 
     <div *ngIf="result" [hidden]="loading">
       <mat-card style="margin: 1em;">
@@ -258,6 +247,7 @@
       </mat-card>
     </div>
 
+    
     <div *ngIf="result" [hidden]="loading || result.addresses === undefined" class="more-addresses-container">
       <mat-card style="margin: 1em;">
         <h3>More Addresses</h3>
@@ -315,6 +305,45 @@
       </mat-card>
 
     </div>
+
+
+     
+    <div *ngIf="wallet">
+      <div fxLayout="row wrap" fxLayoutAlign="center center">
+          <div fxFlex="100%" fxFlex.gt-sm="100%" fxFlex.gt-md="100%" fxFlex.gt-md="100%" *ngFor="let node of wallet.root.childNodes">
+            <mat-expansion-panel>
+                <mat-expansion-panel-header>
+                  <mat-panel-title>
+                      {{ node._node.path }}
+                  </mat-panel-title>
+                  <mat-panel-description>
+                    <mat-chip-list>
+                        <mat-chip>Total Balance: {{ node.balance() | bitcoin}}</mat-chip>
+                        <mat-chip>Total Received: {{ node.received() | bitcoin}}</mat-chip>
+                        <mat-chip>Child Node Count: {{ node.childNodes.length | number}}</mat-chip>
+                    </mat-chip-list>
+                      
+                  </mat-panel-description>
+                </mat-expansion-panel-header>
+
+                <div *ngFor="let child of node.childNodes">
+                    <div *ngFor="let addressView of child.addresses">
+                      Balance: {{ addressView.balance | bitcoin}}<br />
+                      Received:{{ addressView.received | bitcoin}} 
+                      <mat-form-field class="full-width" appearance="fill" style="text-align: center;">
+                        <mat-label>Address ({{ child._node.path }}) </mat-label>
+                        <input style="font-size: 100%" matInput type="text" placeholder="" [value]="addressView._address.address" disabled/>
+                        <a href="https://www.blockchain.com/btc/address/{{addressView._address.address}}" target="_blank">view on block explorer</a>
+                      </mat-form-field>
+                    </div>
+                </div>
+              
+              <button mat-button (click)="wallet.scanNextChildNode(node)">Scan more addresses</button>
+
+            </mat-expansion-panel>
+          </div>
+        </div>
+      </div>
   </div>
 
 </div>
