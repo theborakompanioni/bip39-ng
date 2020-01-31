@@ -66,7 +66,7 @@
     </div>
 
     <div *ngIf="displayDetailedSettings" fxLayout="row wrap">
-      <mat-card fxFlex="100%" style="margin-bottom: 10px">
+      <mat-card fxFlex="100%" fxFlex.gt-sm="70%" style="margin-bottom: 10px">
         <mat-card-header>
           <mat-card-title>Passphrase settings</mat-card-title>
           <mat-card-subtitle></mat-card-subtitle>
@@ -77,6 +77,21 @@
           placeholder="correct horse battery staple"
           [(ngModel)]="passphraseInputValue" />
           <mat-hint></mat-hint>
+        </mat-form-field>
+      </mat-card>
+      <mat-card fxFlex="100%"fxFlex.gt-sm="30%" style="margin-bottom: 10px">
+        <mat-card-header>
+          <mat-card-title>Network settings</mat-card-title>
+          <mat-card-subtitle></mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-form-field  appearance="outline" style="width: 100%;">
+          <mat-label>Network</mat-label>
+          <mat-select [(ngModel)]="networkInputValue" name="network">
+            <mat-option *ngFor="let network of networkInputSelectOptions" [value]="network.value">
+              {{network.name}}
+            </mat-option>
+          </mat-select>
         </mat-form-field>
       </mat-card>
 

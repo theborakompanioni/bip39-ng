@@ -24,11 +24,11 @@ export class DataInfoServiceService {
     private blockstreamInfo: BlockstreamInfoServiceService) {
   }
 
-  public fetchReceivedByAddress(address: string): Observable<number> {
-    return this.blockstreamInfo.fetchReceivedByAddress(address);
+  public fetchReceivedByAddress(address: string, options: any = {}): Observable<number> {
+    return this.blockstreamInfo.fetchReceivedByAddress(address, options);
   }
 
-  public fetchAddressBalance(address: string): Observable<number> {
-    return this.blockstreamInfo.fetchAddressBalance(address);
+  public fetchAddressBalance(address: string, options: any = {}): Observable<number> {
+    return this.blockstreamInfo.fetchAddressBalance(address, options);
   }
 }

@@ -99,10 +99,14 @@ interface NgBip32HdNode {
 
 
 function _newNodeInternal(node: Bip32.BIP32Interface, path: Bip39Path): NgBip32HdNode {
-  const defaultAddressGenerationFun = (n) => [p2pkhAddress(n), segwitAdddress(n), p2wpkhAddress(node)];
+  const defaultAddressGenerationFun = (n, network) => [
+    p2pkhAddress(n, network),
+    segwitAdddress(n, network),
+    p2wpkhAddress(n, network)
+  ];
 
   return _newNodeInternalWithAddressGenerationStrategy(node, path, (n, p) => {
-    const addresses  = generateAddressArrayFn(path, defaultAddressGenerationFun)(node);
+    const addresses  = generateAddressArrayFn(p, defaultAddressGenerationFun)(n, n.network);
 
     return addresses.map(val => {
       return {
@@ -278,10 +282,11 @@ class NgBip32HdWalletView {
   private readonly seed: Buffer;
 
   constructor(public readonly mnemonic: Mnemonic, passphrase?,
+              private readonly network: Bitcoin.Network = Bitcoin.networks.bitcoin,
               private readonly dataInfoService?: DataInfoServiceService) {
     this.seed = Bip39.mnemonicToSeedSync(mnemonic, passphrase);
 
-    const rootNode = Bip32.fromSeed(this.seed);
+    const rootNode = Bip32.fromSeed(this.seed, this.network);
     this.root = new NgBip32HdNodeView(rootNode, _newNodeInternal(rootNode, 'm'));
   }
 
@@ -342,11 +347,15 @@ class NgBip32HdWalletView {
         last()
     );
 
+    const options = {
+      testnet: nodeView._node._self.network === Bitcoin.networks.testnet
+    };
+
     const selfScan = of(nodeView).pipe(
       tap(node => console.log(`start fetching for path ${node._node.path}`)),
       concatMap(node => from(node.addresses).pipe(
         tap(addressView => console.log(`fetchReceivedByAddress for ${node._node.path} and address ${addressView._address.address}`)),
-        concatMap(addressView => dataInfoService.fetchReceivedByAddress(addressView._address.address).pipe(
+        concatMap(addressView => dataInfoService.fetchReceivedByAddress(addressView._address.address, options).pipe(
           tap(
             received => addressView.received = received as Satoshi,
             error => addressView.error = error,
@@ -363,7 +372,7 @@ class NgBip32HdWalletView {
         tap(addressView => addressView.balance = addressView.received === 0 ? 0 : null),
         filter(addressView => addressView.received > 0),
         tap(addressView => console.log(`fetchAddressBalance for ${node._node.path} and address ${addressView._address.address}`)),
-        concatMap(addressView => dataInfoService.fetchAddressBalance(addressView._address.address).pipe(
+        concatMap(addressView => dataInfoService.fetchAddressBalance(addressView._address.address, options).pipe(
           tap(balance => {
             addressView.balance = balance as Satoshi;
             addressView.lastCheckTimestamp = new Date().getTime();
@@ -390,15 +399,16 @@ function buf2hex(buffer) { // buffer is an ArrayBuffer
 }
 
 function p2pkhAddress(node: any, network?: any): BitcoinAddress {
-  return Bitcoin.payments.p2pkh({ pubkey: node.publicKey, network }).address!;
+  return Bitcoin.payments.p2pkh({ pubkey: node.publicKey, network: network }).address!;
 }
 function segwitAdddress(node: any, network?: any): BitcoinAddress {
   return Bitcoin.payments.p2sh({
-    redeem: Bitcoin.payments.p2wpkh({ pubkey: node.publicKey })
+    redeem: Bitcoin.payments.p2wpkh({ pubkey: node.publicKey, network: network }),
+    network: network
   }).address!;
 }
 function p2wpkhAddress(node: any, network?: any): BitcoinAddress {
-  return Bitcoin.payments.p2wpkh({ pubkey: node.publicKey, network }).address!;
+  return Bitcoin.payments.p2wpkh({ pubkey: node.publicKey, network: network }).address!;
 }
 function generateAddressFn(path: string, defaultFn?: (node, network?) => BitcoinAddress): (node, network?) => BitcoinAddress {
   if (path.substr(0, `m/44'/`.length) === `m/44'/`) {
@@ -462,13 +472,13 @@ function findLastIntegerInString(val: string): number | null {
 })
 
 export class MainFrontComponent implements OnInit {
-  private SEARCH_QUERY_PARAM_NAME = 'q';
-  private PASSPHRASE_QUERY_PARAM_NAME = 'p';
+  private readonly SEARCH_QUERY_PARAM_NAME = 'q';
+  private readonly PASSPHRASE_QUERY_PARAM_NAME = 'p';
 
   // path : = m / purpose' / coin_type' / account' / change / address_index
-  private pathPrefixBip44 = `m/44'/0'/`; // addresses 1xxx
-  private pathPrefixBip49 = `m/49'/0'/`; // addresses 3xxx
-  private pathPrefixBip84 = `m/84'/0'/`; // addresses bc1xxx
+  private readonly pathPrefixBip44 = `m/44'/0'/`; // addresses 1xxx
+  private readonly pathPrefixBip49 = `m/49'/0'/`; // addresses 3xxx
+  private readonly pathPrefixBip84 = `m/84'/0'/`; // addresses bc1xxx
 
   result: any;
   wallet: NgBip32HdWalletView;
@@ -476,6 +486,17 @@ export class MainFrontComponent implements OnInit {
   mnemonicArray: Array<string>;
   searchInputValue: string;
   passphraseInputValue: string;
+  networkInputValue: Bitcoin.Network = Bitcoin.networks.bitcoin;
+
+  readonly networkInputSelectOptions = [{
+    value: Bitcoin.networks.bitcoin,
+    name: `mainnet`
+  }, {
+    value: Bitcoin.networks.testnet,
+    name: `testnet`
+  }
+];
+
 
   pathAccount = 0;
   pathChange = 0;
@@ -483,7 +504,7 @@ export class MainFrontComponent implements OnInit {
 
   pathPrefix = `${this.pathPrefixBip44}`;
 
-  pathPrefixInputAutocompleteOptions = [{
+  readonly pathPrefixInputAutocompleteOptions = [{
       value: this.pathPrefixBip44,
       name: this.pathPrefixBip44 + ' (BIP44)'
     }, {
@@ -503,7 +524,8 @@ export class MainFrontComponent implements OnInit {
   loading = false;
 
   displayDetailedSettings = false;
-  addressesDisplayedColumns = ['info', 'received', 'balance']; // ['path', 'address', 'wif', 'received', 'balance', 'lastCheckedTimestamp'];
+  readonly addressesDisplayedColumns = ['info', 'received', 'balance'];
+  // ['path', 'address', 'wif', 'received', 'balance', 'lastCheckedTimestamp'];
 
   constructor(private router: Router,
     private activatedRoute: ActivatedRoute,
@@ -588,7 +610,7 @@ export class MainFrontComponent implements OnInit {
 
     of(1).pipe(
       map(foo => {
-        const wallet = new NgBip32HdWalletView(mnemonic, this.passphraseInputValue, this.dataInfoService);
+        const wallet = new NgBip32HdWalletView(mnemonic, this.passphraseInputValue, this.networkInputValue, this.dataInfoService);
 
         // private pathPrefixBip44 = `m/44'/0'/`; // addresses 1xxx
         // private pathPrefixBip49 = `m/49'/0'/`; // addresses 3xxx
@@ -603,6 +625,7 @@ export class MainFrontComponent implements OnInit {
           wallet.get(`m/84'/0'/0'/0`).getOrCreateNextIndex();
           wallet.get(`m/84'/0'/0'/1`).getOrCreateNextIndex();
           wallet.get(`m/0'/0`).getOrCreateNextIndex();
+          wallet.get(`m/0`).getOrCreateNextIndex();
         }
 
         return wallet;
@@ -620,7 +643,7 @@ export class MainFrontComponent implements OnInit {
       window['wallet'] = wallet;
     }, error => {
       this.loading = false;
-      console.log('wallet error');
+      console.error(error);
     }, () => {
       this.loading = false;
       console.log('wallet finished');

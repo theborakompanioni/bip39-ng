@@ -41,8 +41,8 @@ export class BlockstreamInfoServiceService {
   constructor(private httpClient: HttpClient) {
   }
 
-  public address(address: string): Observable<AddressResponse> {
-    const url = `https://blockstream.info/api/address/${address}`;
+  public address(address: string, options: any = {}): Observable<AddressResponse> {
+    const url = `https://blockstream.info/${options.testnet ? 'testnet/' : '/'}api/address/${address}`;
 
     return this.httpClient.get(url).pipe(
       map(val => <AddressResponse>val)
@@ -67,8 +67,8 @@ export class BlockstreamInfoServiceService {
     }
     */
   }
-  public utxo(address: string): Observable<Array<Utxo>> {
-    const url = `https://blockstream.info/api/address/${address}/utxo`;
+  public utxo(address: string, options: any = {}): Observable<Array<Utxo>> {
+    const url = `https://blockstream.info/${options.testnet ? 'testnet/' : '/'}api/address/${address}/utxo`;
 
     return this.httpClient.get(url).pipe(
       map(val => <Array<Utxo>>val)
@@ -88,17 +88,17 @@ export class BlockstreamInfoServiceService {
      */
   }
 
-  public fetchReceivedByAddress(address: string): Observable<number>  {
+  public fetchReceivedByAddress(address: string, options: any = {}): Observable<number>  {
     // -> returns Observable<satoshi value>
-    return this.address(address).pipe(
+    return this.address(address, options).pipe(
       map(val => val.chain_stats),
       map(val => val.funded_txo_sum)
     );
   }
 
-  public fetchAddressBalance(address: string): Observable<number> {
+  public fetchAddressBalance(address: string, options: any = {}): Observable<number> {
     // -> returns Observable<satoshi value>
-    return this.utxo(address).pipe(
+    return this.utxo(address, options).pipe(
       map(val => val.reduce((acc, currVal) => acc + currVal.value, 0)),
     );
   }
