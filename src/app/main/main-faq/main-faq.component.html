@@ -74,8 +74,24 @@
           <code>""</code> (empty input)
         </a></li>
         <li><a [routerLink]="['/']"
+          [queryParams]="{q: ' '}">
+          <code>" "</code> (whitespace)
+        </a></li>
+        <li><a [routerLink]="['/']"
           [queryParams]="{q: '1'}">
           <code>"1"</code>
+        </a></li>
+        <li><a [routerLink]="['/']"
+          [queryParams]="{q: 'satoshi'}">
+          <code>"satoshi"</code>
+        </a></li>
+        <li><a [routerLink]="['/']"
+          [queryParams]="{q: '1qay2wsx3edc'}">
+          <code>"1qay2wsx3edc"</code>
+        </a></li>
+        <li><a [routerLink]="['/']"
+          [queryParams]="{q: '1qaz2wsx3edc'}">
+          <code>"1qaz2wsx3edc"</code>
         </a></li>
         <li><a [routerLink]="['/']"
           [queryParams]="{q: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon'}">
