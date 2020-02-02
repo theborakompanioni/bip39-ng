@@ -13,7 +13,7 @@ import * as Bitcoin from 'bitcoinjs-lib';
 import * as Bip32 from 'bip32';
 import * as Bip39 from 'bip39';
 import { filter, tap, map, take, defaultIfEmpty, first, last, throttleTime, takeWhile, takeLast,
-  reduce, endWith, concatMap, catchError } from 'rxjs/operators';
+  reduce, endWith, concatMap, catchError, flatMap } from 'rxjs/operators';
 import { Observable, concat, of, from, forkJoin, onErrorResumeNext } from 'rxjs';
 import { pathToFileURL } from 'url';
 import { TagContentType } from '@angular/compiler';
@@ -294,7 +294,7 @@ class NgBip32HdWalletView {
     return Bip39.validateMnemonic(this.mnemonic);
   }
 
-  get(path: Bip39Path): NgBip32HdNodeView {
+  getOrCreateNode(path: Bip39Path): NgBip32HdNodeView {
     if (!isValidBip32Path(path)) {
       throw new Error('invalid bip32 path');
     }
@@ -401,28 +401,16 @@ function buf2hex(buffer) { // buffer is an ArrayBuffer
 function p2pkhAddress(node: any, network?: any): BitcoinAddress {
   return Bitcoin.payments.p2pkh({ pubkey: node.publicKey, network: network }).address!;
 }
+
 function segwitAdddress(node: any, network?: any): BitcoinAddress {
   return Bitcoin.payments.p2sh({
     redeem: Bitcoin.payments.p2wpkh({ pubkey: node.publicKey, network: network }),
     network: network
   }).address!;
 }
+
 function p2wpkhAddress(node: any, network?: any): BitcoinAddress {
   return Bitcoin.payments.p2wpkh({ pubkey: node.publicKey, network: network }).address!;
-}
-function generateAddressFn(path: string, defaultFn?: (node, network?) => BitcoinAddress): (node, network?) => BitcoinAddress {
-  if (path.substr(0, `m/44'/`.length) === `m/44'/`) {
-    return p2pkhAddress;
-  }
-  if (path.substr(0, `m/49'/`.length) === `m/49'/`) {
-    return segwitAdddress;
-  }
-
-  if (path.substr(0, `m/84'/`.length) === `m/84'/`) {
-    return p2wpkhAddress;
-  }
-
-  return defaultFn ? defaultFn : p2pkhAddress;
 }
 
 function generateAddressArrayFn(path: string, defaultFn?: (node, network?) => BitcoinAddress[]): (node, network?) => BitcoinAddress[] {
@@ -618,23 +606,34 @@ export class MainFrontComponent implements OnInit {
 
         for (let i = 0; i < 3; i++) {
           // see https://github.com/dan-da/hd-wallet-derive/blob/master/doc/wallet-bip32-path-presets.md
-          wallet.get(`m/44'/0'/0'/0`).getOrCreateNextIndex();
-          wallet.get(`m/44'/0'/0'/1`).getOrCreateNextIndex();
-          wallet.get(`m/49'/0'/0'/0`).getOrCreateNextIndex();
-          wallet.get(`m/49'/0'/0'/1`).getOrCreateNextIndex();
-          wallet.get(`m/84'/0'/0'/0`).getOrCreateNextIndex();
-          wallet.get(`m/84'/0'/0'/1`).getOrCreateNextIndex();
-          wallet.get(`m/0'/0`).getOrCreateNextIndex();
-          wallet.get(`m/0`).getOrCreateNextIndex();
+          wallet.getOrCreateNode(`m/44'/0'/0'/0`).getOrCreateNextIndex();
+          // wallet.getOrCreateNode(`m/44'/0'/0'/1`).getOrCreateNextIndex();
+          wallet.getOrCreateNode(`m/49'/0'/0'/0`).getOrCreateNextIndex();
+          // wallet.getOrCreateNode(`m/49'/0'/0'/1`).getOrCreateNextIndex();
+          wallet.getOrCreateNode(`m/84'/0'/0'/0`).getOrCreateNextIndex();
+          // wallet.getOrCreateNode(`m/84'/0'/0'/1`).getOrCreateNextIndex();
+          wallet.getOrCreateNode(`m/0'/0`).getOrCreateNextIndex();
+          wallet.getOrCreateNode(`m/0`).getOrCreateNextIndex();
         }
 
         return wallet;
       }),
       concatMap(wallet => wallet.scanBalances().pipe(
         map(x => wallet),
-        endWith(wallet)
+        endWith(wallet),
+        takeLast(1),
       )),
-      takeLast(1),
+      // add all "change" accounts if "default node"s received is > 0
+      concatMap(wallet => from(wallet.root.childNodes).pipe(
+        filter(node => node.received() > 0),
+        filter(node => node._node.path.match(/(\/0)$/).length > 0),
+        map(node => node._node.path.replace(/(\/0)$/, '/1')),
+        map(path => wallet.getOrCreateNode(path).getOrCreateNextIndex()),
+        flatMap(changeNode => wallet.scanBalanceOfNode(changeNode)),
+        map(x => wallet),
+        endWith(wallet),
+        takeLast(1),
+      ))
     ).subscribe(wallet => {
       console.log('wallet created');
       this.wallet = wallet;

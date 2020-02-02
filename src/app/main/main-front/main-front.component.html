@@ -1,364 +1,358 @@
 <div class="container mat-typography">
   <h1>Generate random Bitcoin address and see if you are a winner</h1>
-
-  <div>    
-    <div fxLayout="row wrap" fxLayoutAlign="center center">
-      <div fxFlex="100%" fxFlex.gt-sm="80%" fxFlex.gt-md="70%" fxFlex.gt-md="50%"  style="text-align: center" >
-        
-        <div *ngIf="!(feelingLuckyCounterClicked > 3)" >
-          <button mat-raised-button color="primary"
-          (click)="buttonIamFeelingLuckyClicked()" 
-          class="i-am-feeling-lucky-button" 
-          [disabled]="loading">
-            <span *ngIf="feelingLuckyCounterClicked === 0">I'm feeling lucky!</span>
-            <span *ngIf="feelingLuckyCounterClicked === 1">Try again!</span>
-            <span *ngIf="feelingLuckyCounterClicked === 2">And again!</span>
-            <span *ngIf="feelingLuckyCounterClicked === 3">And again ...</span>
-            <span *ngIf="feelingLuckyCounterClicked > 3">Try again!</span>
-          </button>
-        </div>
-
-        <div *ngIf="feelingLuckyCounterClicked > 3">
-          <mat-card style="margin: 1em;">
-            <p style="font-size: 1.2em; line-height: normal;">
-              You have had your fair chance today.
-              <a routerLink="/faq" fragment="faq-1">It won't get any better</a>. Do not get blinded by trying to get rich quick. Learn how Bitcoin works and try your
-              best to integrate it in the real world. Bitcoin needs adoption. Maybe you are able to use it in you next project?
-              Talk and share your knowledge with others. Spread the word.
-            </p>
-          </mat-card>
-        </div>
-        
-      </div>
-    </div>
-
-    <div fxLayout="row wrap" fxLayoutAlign="center center">
-      <div fxFlex="100%" fxFlex.gt-sm="80%" fxFlex.gt-md="70%" fxFlex.gt-md="50%">
-          <mat-form-field appearance="outline" style="width: 100%;">
-            <mat-label>Search</mat-label>
-            <input matInput [(ngModel)]="searchInputValue" (keyup.enter)="onChangeSearchInput($event.target.value)" />
-            <mat-spinner matSuffix *ngIf="loading" diameter="15" style="margin: auto 10px 4px 10px;"></mat-spinner>
-          </mat-form-field>
-      </div>
-    </div>
-    
-    <div  fxLayout="row" fxLayoutAlign="center center" style="margin-bottom: 2rem;">
-      <div fxFlex="0 1 auto" fxFlex.gt-sm="0 1 auto">
-        <button class="settings-button" mat-button (click)="displayDetailedSettings = !displayDetailedSettings">
-          <i class="material-icons">
-              settings_applications
-          </i>
+  
+  <div fxLayout="row wrap" fxLayoutAlign="center center">
+    <div fxFlex="100%" fxFlex.gt-sm="80%" fxFlex.gt-md="70%" fxFlex.gt-md="50%"  style="text-align: center" >
+      
+      <div *ngIf="!(feelingLuckyCounterClicked > 3)" >
+        <button mat-raised-button color="primary"
+        (click)="buttonIamFeelingLuckyClicked()" 
+        class="i-am-feeling-lucky-button" 
+        [disabled]="loading">
+          <span *ngIf="feelingLuckyCounterClicked === 0">I'm feeling lucky!</span>
+          <span *ngIf="feelingLuckyCounterClicked === 1">Try again!</span>
+          <span *ngIf="feelingLuckyCounterClicked === 2">And again!</span>
+          <span *ngIf="feelingLuckyCounterClicked === 3">And again ...</span>
+          <span *ngIf="feelingLuckyCounterClicked > 3">Try again!</span>
         </button>
       </div>
-      <div fxFlex="0 1 auto" fxFlex.gt-sm="0 1 auto" >
-        <button class="search-button" mat-raised-button (click)="!loading && buttonSearchClicked()">
-          <i matPrefix class="material-icons">search</i>
-          Balance Search
-        </button>
-      </div>
-      <div fxFlex="0 1 auto" fxFlex.gt-sm="0 1 auto" *ngIf="feelingLuckyCounterClicked > 3">
-        <button class="i-am-feeling-lucky-button-small" 
-              mat-raised-button color="primary" 
-              (click)="!loading && buttonIamFeelingLuckyClicked()">
-          <span>I'm feeling lucky!</span>
-        </button>
-      </div>
-    </div>
 
-    <div *ngIf="displayDetailedSettings" fxLayout="row wrap">
-      <mat-card fxFlex="100%" fxFlex.gt-sm="70%" style="margin-bottom: 10px">
-        <mat-card-header>
-          <mat-card-title>Passphrase settings</mat-card-title>
-          <mat-card-subtitle></mat-card-subtitle>
-        </mat-card-header>
+      <div *ngIf="feelingLuckyCounterClicked > 3">
+        <mat-card style="margin: 1em;">
+          <p style="font-size: 1.2em; line-height: normal;">
+            You have had your fair chance today.
+            <a routerLink="/faq" fragment="faq-1">It won't get any better</a>. Do not get blinded by trying to get rich quick. Learn how Bitcoin works and try your
+            best to integrate it in the real world. Bitcoin needs adoption. Maybe you are able to use it in you next project?
+            Talk and share your knowledge with others. Spread the word.
+          </p>
+        </mat-card>
+      </div>
+      
+    </div>
+  </div>
+
+  <div fxLayout="row wrap" fxLayoutAlign="center center">
+    <div fxFlex="100%" fxFlex.gt-sm="80%" fxFlex.gt-md="70%" fxFlex.gt-md="50%">
         <mat-form-field appearance="outline" style="width: 100%;">
-          <mat-label>Passphrase</mat-label>
-          <input matInput type="text"
-          placeholder="correct horse battery staple"
-          [(ngModel)]="passphraseInputValue" />
-          <mat-hint></mat-hint>
+          <mat-label>Search</mat-label>
+          <input matInput [(ngModel)]="searchInputValue" (keyup.enter)="onChangeSearchInput($event.target.value)" />
+          <mat-spinner matSuffix *ngIf="loading" diameter="15" style="margin: auto 10px 4px 10px;"></mat-spinner>
         </mat-form-field>
-      </mat-card>
-      <mat-card fxFlex="100%"fxFlex.gt-sm="30%" style="margin-bottom: 10px">
-        <mat-card-header>
-          <mat-card-title>Network settings</mat-card-title>
-          <mat-card-subtitle></mat-card-subtitle>
-        </mat-card-header>
+    </div>
+  </div>
+  
+  <div  fxLayout="row" fxLayoutAlign="center center" style="margin-bottom: 2rem;">
+    <div fxFlex="0 1 auto" fxFlex.gt-sm="0 1 auto">
+      <button class="settings-button" mat-button (click)="displayDetailedSettings = !displayDetailedSettings">
+        <i class="material-icons">
+            settings_applications
+        </i>
+      </button>
+    </div>
+    <div fxFlex="0 1 auto" fxFlex.gt-sm="0 1 auto" >
+      <button class="search-button" mat-raised-button (click)="!loading && buttonSearchClicked()">
+        <i matPrefix class="material-icons">search</i>
+        Balance Search
+      </button>
+    </div>
+    <div fxFlex="0 1 auto" fxFlex.gt-sm="0 1 auto" *ngIf="feelingLuckyCounterClicked > 3">
+      <button class="i-am-feeling-lucky-button-small" 
+            mat-raised-button color="primary" 
+            (click)="!loading && buttonIamFeelingLuckyClicked()">
+        <span>I'm feeling lucky!</span>
+      </button>
+    </div>
+  </div>
 
-        <mat-form-field  appearance="outline" style="width: 100%;">
-          <mat-label>Network</mat-label>
-          <mat-select [(ngModel)]="networkInputValue" name="network">
-            <mat-option *ngFor="let network of networkInputSelectOptions" [value]="network.value">
-              {{network.name}}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-      </mat-card>
+  <div *ngIf="displayDetailedSettings" fxLayout="row wrap">
+    <mat-card fxFlex="100%" fxFlex.gt-sm="70%" style="margin-bottom: 10px">
+      <mat-card-header>
+        <mat-card-title>Passphrase settings</mat-card-title>
+        <mat-card-subtitle></mat-card-subtitle>
+      </mat-card-header>
+      <mat-form-field appearance="outline" style="width: 100%;">
+        <mat-label>Passphrase</mat-label>
+        <input matInput type="text"
+        placeholder="correct horse battery staple"
+        [(ngModel)]="passphraseInputValue" />
+        <mat-hint></mat-hint>
+      </mat-form-field>
+    </mat-card>
+    <mat-card fxFlex="100%"fxFlex.gt-sm="30%" style="margin-bottom: 10px">
+      <mat-card-header>
+        <mat-card-title>Network settings</mat-card-title>
+        <mat-card-subtitle></mat-card-subtitle>
+      </mat-card-header>
 
-      <mat-card fxFlex="100%">
-        <mat-card-header>
-          <mat-card-title>BIP32 path settings</mat-card-title>
-          <mat-card-subtitle></mat-card-subtitle>
-        </mat-card-header>
-        <div fxLayout="row wrap" fxLayoutAlign="center center" >
-          <div fxFlex="100%" fxFlex.gt-sm="100%" fxFlex.gt-md="25%" fxFlex.gt-md="25%">
-              <mat-form-field appearance="outline" style="width: 100%;">
-                <mat-label>Path Prefix</mat-label>
-                <input matInput type="text" 
-                pattern="m/((\d)+'?/)*"
-                placeholder="m/44'/0'/"
-                required
-                [(ngModel)]="pathPrefix" 
-                [matAutocomplete]="pathPrefixInputAutocomplete" />
-                <mat-hint>BIP32 path prefix (pattern <code>m/purpose'/coin_type'/)</code></mat-hint>
-              </mat-form-field>
+      <mat-form-field  appearance="outline" style="width: 100%;">
+        <mat-label>Network</mat-label>
+        <mat-select [(ngModel)]="networkInputValue" name="network">
+          <mat-option *ngFor="let network of networkInputSelectOptions" [value]="network.value">
+            {{network.name}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </mat-card>
 
-              <mat-autocomplete #pathPrefixInputAutocomplete="matAutocomplete">
-                <mat-option *ngFor="let option of pathPrefixInputAutocompleteOptions" [value]="option.value">{{option.name}}</mat-option>
-              </mat-autocomplete>
-          </div>
-          <div fxFlex="100%" fxFlex.gt-sm="33%" fxFlex.gt-md="25%" fxFlex.gt-md="25%">
-              <mat-form-field appearance="outline" style="width: 100%;">
-                <mat-label>Path Account</mat-label>
-                <input matInput type="number" [(ngModel)]="pathAccount" placeholder="0" required/>
-              </mat-form-field>
-          </div>
-          <div fxFlex="100%" fxFlex.gt-sm="33%" fxFlex.gt-md="25%" fxFlex.gt-md="25%">
-              <mat-form-field appearance="outline" style="width: 100%;">
-                <mat-label>Path Change</mat-label>
-                <input matInput type="number" [(ngModel)]="pathChange"  placeholder="0" required/>
-              </mat-form-field>
-          </div>
-          <div fxFlex="100%" fxFlex.gt-sm="33%" fxFlex.gt-md="25%" fxFlex.gt-md="25%">
-              <mat-form-field appearance="outline" style="width: 100%;">
-                <mat-label>Path Index</mat-label>
-                <input matInput type="number" [(ngModel)]="pathIndex" placeholder="0" required/>
-              </mat-form-field>
-          </div>
+    <mat-card fxFlex="100%">
+      <mat-card-header>
+        <mat-card-title>BIP32 path settings</mat-card-title>
+        <mat-card-subtitle></mat-card-subtitle>
+      </mat-card-header>
+      <div fxLayout="row wrap" fxLayoutAlign="center center" >
+        <div fxFlex="100%" fxFlex.gt-sm="100%" fxFlex.gt-md="25%" fxFlex.gt-md="25%">
+            <mat-form-field appearance="outline" style="width: 100%;">
+              <mat-label>Path Prefix</mat-label>
+              <input matInput type="text" 
+              pattern="m/((\d)+'?/)*"
+              placeholder="m/44'/0'/"
+              required
+              [(ngModel)]="pathPrefix" 
+              [matAutocomplete]="pathPrefixInputAutocomplete" />
+              <mat-hint>BIP32 path prefix (pattern <code>m/purpose'/coin_type'/)</code></mat-hint>
+            </mat-form-field>
+
+            <mat-autocomplete #pathPrefixInputAutocomplete="matAutocomplete">
+              <mat-option *ngFor="let option of pathPrefixInputAutocompleteOptions" [value]="option.value">{{option.name}}</mat-option>
+            </mat-autocomplete>
         </div>
-      </mat-card>
-    </div>
-    
-    <div id="search-result-spacer-top"></div>
-
-
-    <div *ngIf="wallet">
-
-      <div *ngIf="wallet.error">
-        <p style="background-color: red; padding: 1em;">{{ wallet.error }}</p>
-        <p style="background-color: red; padding: 1em;">{{ wallet.error.message }}</p>
-      </div>
-
-      <p style="text-align: center; font-size: 1.5em; margin: 1em; line-height: normal;">
-        <span *ngIf="wallet.root.received() === 0">Addresses never received anything.</span>
-        <span *ngIf="wallet.root.received() > 0">Found addresses with
-          <code>received > 0</code> ({{ wallet.root.received() | bitcoin}})
-        </span>
-      </p>
-
-      <p style="text-align: center; font-size: 3em; margin: 1em; line-height: normal;">
-        <span *ngIf="wallet.root.balance() === 0">Balance is 0 :(</span>
-        <span *ngIf="wallet.root.balance() > 0">Found addresses with
-          <code>{{wallet.root.balance() | bitcoin}}</code>
-        </span>
-      </p>
-
-    </div>
-
-    <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
-
-
-    <div *ngIf="wallet">
-        <div fxLayout="row wrap" fxLayoutAlign="center center">
-          <div fxFlex="100%" fxFlex.gt-sm="50%" fxFlex.gt-md="50%" fxFlex.gt-md="50%" *ngFor="let node of wallet.findNodesWithReceivedGreaterZero()">
-
-                <div *ngFor="let addressView of node.addresses">
-                  Balance: {{ addressView.balance | bitcoin}}<br />
-                  Received:{{ addressView.received | bitcoin}} 
-                  <mat-form-field class="full-width" appearance="fill" style="text-align: center;">
-                    <mat-label>Address</mat-label>
-                    <input style="font-size: 150%" matInput type="text" placeholder="" [value]="addressView._address.address" disabled/>
-                    <a href="https://www.blockchain.com/btc/address/{{addressView._address.address}}" target="_blank">view on block explorer</a>
-                  </mat-form-field>
-                </div>
-          </div>
+        <div fxFlex="100%" fxFlex.gt-sm="33%" fxFlex.gt-md="25%" fxFlex.gt-md="25%">
+            <mat-form-field appearance="outline" style="width: 100%;">
+              <mat-label>Path Account</mat-label>
+              <input matInput type="number" [(ngModel)]="pathAccount" placeholder="0" required/>
+            </mat-form-field>
+        </div>
+        <div fxFlex="100%" fxFlex.gt-sm="33%" fxFlex.gt-md="25%" fxFlex.gt-md="25%">
+            <mat-form-field appearance="outline" style="width: 100%;">
+              <mat-label>Path Change</mat-label>
+              <input matInput type="number" [(ngModel)]="pathChange"  placeholder="0" required/>
+            </mat-form-field>
+        </div>
+        <div fxFlex="100%" fxFlex.gt-sm="33%" fxFlex.gt-md="25%" fxFlex.gt-md="25%">
+            <mat-form-field appearance="outline" style="width: 100%;">
+              <mat-label>Path Index</mat-label>
+              <input matInput type="number" [(ngModel)]="pathIndex" placeholder="0" required/>
+            </mat-form-field>
         </div>
       </div>
+    </mat-card>
+  </div>
+  
+  <div id="search-result-spacer-top"></div>
 
-    <div *ngIf="result" [hidden]="loading">
-      <mat-card style="margin: 1em;">
-        <h3>Search</h3>
-        <div *ngIf="result.mnemonic">
-            <span class="bold">Results for search term:</span> 
-            <pre>{{result.mnemonic}}</pre>
-        </div>
-        <div *ngIf="result.path">
-          <p>
-            <span class="bold">Path (BIP44):</span> {{result.path}}
-            (see <a href="https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki">BIP44</a>)
-          </p>
-          <p style="display: none">
-            See <a href="https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki">BIP32</a> and 
-            <a href="https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki">BIP39</a>, 
-            <a href="https://github.com/bitcoin/bips/blob/master/bip-0049.mediawiki">BIP49</a>, 
-            <a href="https://github.com/bitcoin/bips/blob/master/bip-0084.mediawiki">BIP84</a>.
-          </p>
-        </div>
-        <div *ngIf="result.address">
-          <span class="bold">Address:</span>
-          <pre>{{result.address}}</pre>
-        </div>
-      </mat-card>
+
+  <div *ngIf="wallet">
+
+    <div *ngIf="wallet.error">
+      <p style="background-color: red; padding: 1em;">{{ wallet.error }}</p>
+      <p style="background-color: red; padding: 1em;">{{ wallet.error.message }}</p>
     </div>
 
+    <p style="text-align: center; font-size: 1.5em; margin: 1em; line-height: normal;">
+      <span *ngIf="wallet.root.received() === 0">Addresses never received anything.</span>
+      <span *ngIf="wallet.root.received() > 0">Found addresses with
+        <code>received > 0</code> ({{ wallet.root.received() | bitcoin}})
+      </span>
+    </p>
+
+    <p style="text-align: center; font-size: 3em; margin: 1em; line-height: normal;">
+      <span *ngIf="wallet.root.balance() === 0">Balance is 0 :(</span>
+      <span *ngIf="wallet.root.balance() > 0">Found addresses with
+        <code>{{wallet.root.balance() | bitcoin}}</code>
+      </span>
+    </p>
+
+  </div>
+
+  <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
 
 
-    <div *ngIf="result" [hidden]="loading">
-      <mat-card style="margin: 1em;">
-        <h3>Wallet Information</h3>
-        <div *ngIf="result.seedHex">
-          <span class="bold">Seed:</span>
-          <pre>{{result.seedHex}}</pre>
-        </div>
-        <div *ngIf="result.rootXpriv">
-          <span class="bold">BIP32 xpriv:</span>
-          <pre>{{result.rootXpriv}}</pre>
-        </div>
-        <!--div *ngIf="result.rootXpriv">
-          <span class="bold">BIP32 xpub:</span>
-          <pre>{{result.rootXpub}}</pre>
-        </div-->
-        <div *ngIf="result.rootWif">
-          <span class="bold">WIF:</span>
-          <pre>{{result.rootWif}}</pre>
-          <p>
-            See <a href="https://en.bitcoin.it/wiki/Wallet_import_format">Wallet Import Format wiki page on en.bitcoin.it</a> 
-            for more information.
-          </p>
-        </div>
-        <div *ngIf="result.masterPrivateKey">
-          <span class="bold">Master Private Key:</span>
-          <pre>{{result.masterPrivateKey}}</pre>
-        </div>
-      </mat-card>
-    </div>
-
-    <div *ngIf="result" [hidden]="loading || result.mnemonic === undefined">
-      <mat-card style="margin: 1em;">
-        <h3>Private Key Mnemonic</h3>
-        <div class="word-input-container" fxLayout="row wrap" *ngIf="!result.mneomincIsValid">
-          Input is not a valid BIP39 mnemonic seed.
-        </div>
-        <div class="word-input-container" fxLayout="row wrap" *ngIf="result.mneomincIsValid">
-          <div fxFlex="100%" fxFlex.gt-sm="32%" fxFlex.gt-md="24%" fxFlex.gt-md="16.5%" *ngFor="let i of [0,1,2,3,4,5,6,7,8,9,10,11]">
-            <span>
-              <mat-form-field class="example-form-field-{{i}}" appearance="fill">
-                <mat-label>Word {{i+1}}</mat-label>
-                <input matInput type="text" placeholder="Word {{i+1}}" [value]="mnemonicArray[i]" disabled/>
-              </mat-form-field>
-            </span>
-          </div>
-        </div>
-      </mat-card>
-    </div>
-
-    
-    <div *ngIf="result" [hidden]="loading || result.addresses === undefined" class="more-addresses-container">
-      <mat-card style="margin: 1em;">
-        <h3>More Addresses</h3>
-        <div *ngIf="result.addresses && result.addresses.length > 0">
-          <table mat-table [dataSource]="result.addresses" class="full-width">
-            <ng-container matColumnDef="info">
-              <th mat-header-cell *matHeaderCellDef> info </th>
-              <td mat-cell *matCellDef="let address"> 
-                path: {{address.path}}
-                <br />
-                address: <a href="https://www.blockchain.com/btc/address/{{address.address}}" target="_blank">{{address.address}}</a>
-                <br />
-                wif: {{address.wif}}
-                <br /> 
-                lastCheckTimestamp: {{address.lastCheckTimestamp | date: 'yyyy-mm-ddThh:mm:ss'}}<br />
-              </td>
-              <td mat-footer-cell *matFooterCellDef></td>
-            </ng-container>
-            <ng-container matColumnDef="path">
-              <th mat-header-cell *matHeaderCellDef> path </th>
-              <td mat-cell *matCellDef="let address"> {{address.path}} </td>
-              <td mat-footer-cell *matFooterCellDef></td>
-            </ng-container>
-            <ng-container matColumnDef="address">
-              <th mat-header-cell *matHeaderCellDef> address </th>
-              <td mat-cell *matCellDef="let address"> {{address.address}} </td>
-              <td mat-footer-cell *matFooterCellDef></td>
-            </ng-container>
-            <ng-container matColumnDef="wif">
-              <th mat-header-cell *matHeaderCellDef> wif </th>
-              <td mat-cell *matCellDef="let address"> {{address.wif}} </td>
-              <td mat-footer-cell *matFooterCellDef></td>
-            </ng-container>
-            <ng-container matColumnDef="received">
-              <th mat-header-cell *matHeaderCellDef> received </th>
-              <td mat-cell *matCellDef="let address"> {{address.received}} </td>
-              <td mat-footer-cell *matFooterCellDef> <strong>total received</strong><br />{{result.received}}</td>
-            </ng-container>
-            <ng-container matColumnDef="balance">
-              <th mat-header-cell *matHeaderCellDef> balance </th>
-              <td mat-cell *matCellDef="let address"> {{address.balance}} </td>
-              <td mat-footer-cell *matFooterCellDef> <strong>total balance</strong><br/>{{result.balance}}</td>
-            </ng-container>
-            <ng-container matColumnDef="lastCheckedTimestamp">
-              <th mat-header-cell *matHeaderCellDef> lastCheckedTimestamp </th>
-              <td mat-cell *matCellDef="let address"> {{address.lastCheckedTimestamp | date: 'yyyy-mm-ddThh:mm:ss'}} </td>
-              <td mat-footer-cell *matFooterCellDef></td>
-            </ng-container>
-
-            <tr mat-header-row *matHeaderRowDef="addressesDisplayedColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: addressesDisplayedColumns;"></tr>
-            <tr mat-footer-row *matFooterRowDef="addressesDisplayedColumns; sticky: true"></tr>
-          </table>
-        </div>
-      </mat-card>
-
-    </div>
-
-
-     
-    <div *ngIf="wallet">
+  <div *ngIf="wallet">
       <div fxLayout="row wrap" fxLayoutAlign="center center">
-          <div fxFlex="100%" fxFlex.gt-sm="100%" fxFlex.gt-md="100%" fxFlex.gt-md="100%" *ngFor="let node of wallet.root.childNodes">
-            <mat-expansion-panel>
-                <mat-expansion-panel-header>
-                  <mat-panel-title>
-                      {{ node._node.path }}
-                  </mat-panel-title>
-                  <mat-panel-description>
-                    <mat-chip-list>
-                        <mat-chip>Total Balance: {{ node.balance() | bitcoin}}</mat-chip>
-                        <mat-chip>Total Received: {{ node.received() | bitcoin}}</mat-chip>
-                        <mat-chip>Child Node Count: {{ node.childNodes.length | number}}</mat-chip>
-                    </mat-chip-list>
-                      
-                  </mat-panel-description>
-                </mat-expansion-panel-header>
+        <div fxFlex="100%" fxFlex.gt-sm="50%" fxFlex.gt-md="50%" fxFlex.gt-md="50%" *ngFor="let node of wallet.findNodesWithReceivedGreaterZero()">
 
-                <div *ngFor="let child of node.childNodes">
-                    <div *ngFor="let addressView of child.addresses">
-                      Balance: {{ addressView.balance | bitcoin}}<br />
-                      Received:{{ addressView.received | bitcoin}} 
-                      <mat-form-field class="full-width" appearance="fill" style="text-align: center;">
-                        <mat-label>Address ({{ child._node.path }}) </mat-label>
-                        <input style="font-size: 100%" matInput type="text" placeholder="" [value]="addressView._address.address" disabled/>
-                        <a href="https://www.blockchain.com/btc/address/{{addressView._address.address}}" target="_blank">view on block explorer</a>
-                      </mat-form-field>
-                    </div>
-                </div>
-              
-              <button mat-button (click)="wallet.scanNextChildNode(node)">Scan more addresses</button>
-
-            </mat-expansion-panel>
-          </div>
+              <div *ngFor="let addressView of node.addresses">
+                Balance: {{ addressView.balance | bitcoin}}<br />
+                Received:{{ addressView.received | bitcoin}} 
+                <mat-form-field class="full-width" appearance="fill" style="text-align: center;">
+                  <mat-label>Address</mat-label>
+                  <input style="font-size: 150%" matInput type="text" placeholder="" [value]="addressView._address.address" disabled/>
+                  <a href="https://www.blockchain.com/btc/address/{{addressView._address.address}}" target="_blank">view on block explorer</a>
+                </mat-form-field>
+              </div>
         </div>
       </div>
+    </div>
+
+  <div *ngIf="result" [hidden]="loading">
+    <mat-card style="margin: 1em;">
+      <h3>Search</h3>
+      <div *ngIf="result.mnemonic">
+          <span class="bold">Results for search term:</span> 
+          <pre>{{result.mnemonic}}</pre>
+      </div>
+      <div *ngIf="result.path">
+        <p>
+          <span class="bold">Path (BIP44):</span> {{result.path}}
+          (see <a href="https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki">BIP44</a>)
+        </p>
+        <p style="display: none">
+          See <a href="https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki">BIP32</a> and 
+          <a href="https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki">BIP39</a>, 
+          <a href="https://github.com/bitcoin/bips/blob/master/bip-0049.mediawiki">BIP49</a>, 
+          <a href="https://github.com/bitcoin/bips/blob/master/bip-0084.mediawiki">BIP84</a>.
+        </p>
+      </div>
+      <div *ngIf="result.address">
+        <span class="bold">Address:</span>
+        <pre>{{result.address}}</pre>
+      </div>
+    </mat-card>
+  </div>
+
+
+
+  <div *ngIf="result" [hidden]="loading">
+    <mat-card style="margin: 1em;">
+      <h3>Wallet Information</h3>
+      <div *ngIf="result.seedHex">
+        <span class="bold">Seed:</span>
+        <pre>{{result.seedHex}}</pre>
+      </div>
+      <div *ngIf="result.rootXpriv">
+        <span class="bold">BIP32 xpriv:</span>
+        <pre>{{result.rootXpriv}}</pre>
+      </div>
+      <!--div *ngIf="result.rootXpriv">
+        <span class="bold">BIP32 xpub:</span>
+        <pre>{{result.rootXpub}}</pre>
+      </div-->
+      <div *ngIf="result.rootWif">
+        <span class="bold">WIF:</span>
+        <pre>{{result.rootWif}}</pre>
+        <p>
+          See <a href="https://en.bitcoin.it/wiki/Wallet_import_format">Wallet Import Format wiki page on en.bitcoin.it</a> 
+          for more information.
+        </p>
+      </div>
+      <div *ngIf="result.masterPrivateKey">
+        <span class="bold">Master Private Key:</span>
+        <pre>{{result.masterPrivateKey}}</pre>
+      </div>
+    </mat-card>
+  </div>
+
+  <div *ngIf="result" [hidden]="loading || result.mnemonic === undefined">
+    <mat-card style="margin: 1em;">
+      <h3>Private Key Mnemonic</h3>
+      <div class="word-input-container" fxLayout="row wrap" *ngIf="!result.mneomincIsValid">
+        Input is not a valid BIP39 mnemonic seed.
+      </div>
+      <div class="word-input-container" fxLayout="row wrap" *ngIf="result.mneomincIsValid">
+        <div fxFlex="100%" fxFlex.gt-sm="32%" fxFlex.gt-md="24%" fxFlex.gt-md="16.5%" *ngFor="let i of [0,1,2,3,4,5,6,7,8,9,10,11]">
+          <span>
+            <mat-form-field class="example-form-field-{{i}}" appearance="fill">
+              <mat-label>Word {{i+1}}</mat-label>
+              <input matInput type="text" placeholder="Word {{i+1}}" [value]="mnemonicArray[i]" disabled/>
+            </mat-form-field>
+          </span>
+        </div>
+      </div>
+    </mat-card>
+  </div>
+
+  
+  <div *ngIf="result" [hidden]="loading || result.addresses === undefined" class="more-addresses-container">
+    <mat-card style="margin: 1em;">
+      <h3>More Addresses</h3>
+      <div *ngIf="result.addresses && result.addresses.length > 0">
+        <table mat-table [dataSource]="result.addresses" class="full-width">
+          <ng-container matColumnDef="info">
+            <th mat-header-cell *matHeaderCellDef> info </th>
+            <td mat-cell *matCellDef="let address"> 
+              path: {{address.path}}
+              <br />
+              address: <a href="https://www.blockchain.com/btc/address/{{address.address}}" target="_blank">{{address.address}}</a>
+              <br />
+              wif: {{address.wif}}
+              <br /> 
+              lastCheckTimestamp: {{address.lastCheckTimestamp | date: 'yyyy-mm-ddThh:mm:ss'}}<br />
+            </td>
+            <td mat-footer-cell *matFooterCellDef></td>
+          </ng-container>
+          <ng-container matColumnDef="path">
+            <th mat-header-cell *matHeaderCellDef> path </th>
+            <td mat-cell *matCellDef="let address"> {{address.path}} </td>
+            <td mat-footer-cell *matFooterCellDef></td>
+          </ng-container>
+          <ng-container matColumnDef="address">
+            <th mat-header-cell *matHeaderCellDef> address </th>
+            <td mat-cell *matCellDef="let address"> {{address.address}} </td>
+            <td mat-footer-cell *matFooterCellDef></td>
+          </ng-container>
+          <ng-container matColumnDef="wif">
+            <th mat-header-cell *matHeaderCellDef> wif </th>
+            <td mat-cell *matCellDef="let address"> {{address.wif}} </td>
+            <td mat-footer-cell *matFooterCellDef></td>
+          </ng-container>
+          <ng-container matColumnDef="received">
+            <th mat-header-cell *matHeaderCellDef> received </th>
+            <td mat-cell *matCellDef="let address"> {{address.received}} </td>
+            <td mat-footer-cell *matFooterCellDef> <strong>total received</strong><br />{{result.received}}</td>
+          </ng-container>
+          <ng-container matColumnDef="balance">
+            <th mat-header-cell *matHeaderCellDef> balance </th>
+            <td mat-cell *matCellDef="let address"> {{address.balance}} </td>
+            <td mat-footer-cell *matFooterCellDef> <strong>total balance</strong><br/>{{result.balance}}</td>
+          </ng-container>
+          <ng-container matColumnDef="lastCheckedTimestamp">
+            <th mat-header-cell *matHeaderCellDef> lastCheckedTimestamp </th>
+            <td mat-cell *matCellDef="let address"> {{address.lastCheckedTimestamp | date: 'yyyy-mm-ddThh:mm:ss'}} </td>
+            <td mat-footer-cell *matFooterCellDef></td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="addressesDisplayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: addressesDisplayedColumns;"></tr>
+          <tr mat-footer-row *matFooterRowDef="addressesDisplayedColumns; sticky: true"></tr>
+        </table>
+      </div>
+    </mat-card>
+
+  </div>
+
+
+    
+  <div *ngIf="wallet">
+    <mat-tab-group mat-stretch-tabs>
+      <mat-tab *ngFor="let node of wallet.root.childNodes">
+        <ng-template mat-tab-label>
+          <mat-icon class="example-tab-icon">thumb_up</mat-icon>
+          {{ node._node.path }} ({{ node.received() | bitcoin}})
+        </ng-template>
+
+        <ul>
+            <li>Total Balance: {{ node.balance() | bitcoin}}</li>
+            <li>Total Received: {{ node.received() | bitcoin}}</li>
+            <li>Child Node Count: {{ node.childNodes.length | number}}</li>
+        </ul>
+
+        <div *ngFor="let child of node.childNodes">
+          WIF: {{ child._node.wif }}<br />
+          <div *ngFor="let addressView of child.addresses">
+            Balance: {{ addressView.balance | bitcoin}}<br />
+            Received:{{ addressView.received | bitcoin}} 
+            <mat-form-field class="full-width" appearance="fill" style="text-align: center;">
+              <mat-label>Address ({{ child._node.path }}) </mat-label>
+              <input style="font-size: 100%" matInput type="text" placeholder="" [value]="addressView._address.address" disabled/>
+              <a href="https://www.blockchain.com/btc/address/{{addressView._address.address}}" target="_blank">view on block explorer</a>
+            </mat-form-field>
+          </div>
+        </div>
+    
+        <button mat-button (click)="wallet.scanNextChildNode(node)">Scan more addresses</button>
+        
+      </mat-tab>
+    </mat-tab-group>
   </div>
 
 </div>
