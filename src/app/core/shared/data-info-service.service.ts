@@ -12,6 +12,7 @@ export interface AddressInfo {
   total_received: number;
   total_sent: number;
   final_balance: number;
+  latest_tx_block_time: number;
 }
 
 @Injectable({
@@ -30,5 +31,9 @@ export class DataInfoServiceService {
 
   public fetchAddressBalance(address: string, options: any = {}): Observable<number> {
     return this.blockstreamInfo.fetchAddressBalance(address, options);
+  }
+
+  public fetchAddressInfo(address: string, options: any = {}): Observable<AddressInfo> {
+    return this.blockstreamInfo.fetchAddressInfo(address, options);
   }
 }

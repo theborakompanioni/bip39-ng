@@ -4,7 +4,7 @@ import { MatDialog } from '@angular/material';
 import { AppConfig } from '../../config/app.config';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Subject } from 'rxjs/Subject';
-import { DataInfoServiceService } from '../../core/shared/data-info-service.service';
+import { AddressInfo, DataInfoServiceService } from '../../core/shared/data-info-service.service';
 import { HttpClient } from '@angular/common/http';
 import { Pipe, PipeTransform } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
@@ -54,6 +54,7 @@ interface NgBip32HdAddress {
 class NgBip32HdAddressView {
   received?: Satoshi;
   balance?: Satoshi;
+  info?: AddressInfo;
   lastCheckTimestamp?: Timestamp;
   error?: Error;
 
@@ -167,15 +168,6 @@ class NgBip32HdNodeView {
   }
 
   balance(): Satoshi {
-    const selfBalance = this.addresses
-      .map(it => it.balance)
-      .filter(val => !!val)
-      .reduce((prev, curr) => prev + curr, 0);
-
-    const nodesBlanace = this.childNodes
-      .map(it => it.balance())
-      .reduce((prev, curr) => prev + curr, 0);
-
     return this.selfBalance() + this.nodesBlanace();
   }
 
