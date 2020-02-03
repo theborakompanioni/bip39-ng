@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { filter, tap, map, flatMap, delay, throttleTime } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
-import { AddressInfo } from './data-info-service.service';
+import { AddressInfo } from '../../wallet/core/wallet';
 
 interface MultiaddrResponse {
   addresses: AddressInfo[];
@@ -16,7 +16,7 @@ interface MultiaddrResponse {
 })
 export class BlockchainInfoServiceService {
 
-  constructor(private httpClient: HttpClient) {
+  constructor(private readonly httpClient: HttpClient) {
   }
 
   /**

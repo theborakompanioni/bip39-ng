@@ -5,15 +5,7 @@ import { Observable, of } from 'rxjs';
 import { BlockchainInfoServiceService } from './blockchain-info-service.service';
 import { BlockstreamInfoServiceService } from './blockstream-info-service.service';
 
-
-export interface AddressInfo {
-  address: string;
-  n_tx: number;
-  total_received: number;
-  total_sent: number;
-  final_balance: number;
-  latest_tx_block_time: number;
-}
+import { AddressInfo } from '../../wallet/core/wallet';
 
 @Injectable({
   providedIn: 'root'

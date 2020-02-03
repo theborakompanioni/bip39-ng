@@ -1,10 +1,10 @@
 
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { filter, tap, map, concatMap, delay, throttleTime, endWith } from 'rxjs/operators';
+import { filter, tap, map, concatMap, endWith } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
 
-import { AddressInfo } from './data-info-service.service';
+import { AddressInfo } from '../../wallet/core/wallet';
 
 interface Stats {
   funded_txo_count: number;
@@ -57,11 +57,56 @@ interface TxStatus {
 })
 export class BlockstreamInfoServiceService {
 
-  constructor(private httpClient: HttpClient) {
+  constructor(private readonly httpClient: HttpClient) {
+  }
+
+  private baseUrl(options: any = {}) {
+    return `https://blockstream.info/${options.testnet ? 'testnet' : ''}`;
+  }
+
+  public fetchReceivedByAddress(address: string, options: any = {}): Observable<number>  {
+    // -> returns Observable<satoshi value>
+    return this.address(address, options).pipe(
+      map(val => val.chain_stats),
+      map(val => val.funded_txo_sum)
+    );
+  }
+
+  public fetchAddressBalance(address: string, options: any = {}): Observable<number> {
+    // -> returns Observable<satoshi value>
+    return this.utxo(address, options).pipe(
+      map(val => val.reduce((acc, currVal) => acc + currVal.value, 0)),
+    );
+  }
+
+  public fetchAddressInfo(address: string, options: any = {}): Observable<AddressInfo> {
+    return this.address(address, options).pipe(
+      map(val => {
+        const totalReceived = val.chain_stats.funded_txo_sum + val.mempool_stats.funded_txo_sum;
+        const totalSent = val.chain_stats.funded_txo_sum + val.mempool_stats.funded_txo_sum;
+        return {
+          address: address,
+          n_tx: val.chain_stats.tx_count + val.mempool_stats.tx_count,
+          total_received: totalReceived,
+          total_sent: totalSent,
+          final_balance: totalReceived - totalSent,
+          latest_tx_block_time: null
+        } as AddressInfo;
+      }),
+      concatMap(val => of(address).pipe(
+        filter(x => val.total_received > 0),
+        concatMap(x => this.txs(address)),
+        filter(txs => txs.length > 0),
+        map(txs => txs[0]),
+        tap(latestTx => val.latest_tx_block_time = latestTx.status.block_time),
+        map(x => val),
+        endWith(val)
+      ))
+    );
   }
 
   public address(address: string, options: any = {}): Observable<AddressResponse> {
-    const url = `https://blockstream.info/${options.testnet ? 'testnet/' : '/'}api/address/${address}`;
+    const url = `${this.baseUrl(options)}/api/address/${address}`;
 
     return this.httpClient.get(url).pipe(
       map(val => <AddressResponse>val)
@@ -86,8 +131,9 @@ export class BlockstreamInfoServiceService {
     }
     */
   }
+
   public utxo(address: string, options: any = {}): Observable<Array<Utxo>> {
-    const url = `https://blockstream.info/${options.testnet ? 'testnet/' : '/'}api/address/${address}/utxo`;
+    const url = `${this.baseUrl(options)}/api/address/${address}/utxo`;
 
     return this.httpClient.get(url).pipe(
       map(val => <Array<Utxo>>val)
@@ -108,7 +154,7 @@ export class BlockstreamInfoServiceService {
   }
 
   public txs(address: string, options: any = {}): Observable<Array<Tx>> {
-    const url = `https://blockstream.info/${options.testnet ? 'testnet/' : '/'}api/address/${address}/txs`;
+    const url = `${this.baseUrl(options)}/api/address/${address}/txs`;
 
     return this.httpClient.get(url).pipe(
       map(val => <Array<Tx>>val)
@@ -163,46 +209,5 @@ export class BlockstreamInfoServiceService {
       }
     ]
   */
-  }
-
-  public fetchReceivedByAddress(address: string, options: any = {}): Observable<number>  {
-    // -> returns Observable<satoshi value>
-    return this.address(address, options).pipe(
-      map(val => val.chain_stats),
-      map(val => val.funded_txo_sum)
-    );
-  }
-
-  public fetchAddressBalance(address: string, options: any = {}): Observable<number> {
-    // -> returns Observable<satoshi value>
-    return this.utxo(address, options).pipe(
-      map(val => val.reduce((acc, currVal) => acc + currVal.value, 0)),
-    );
-  }
-
-  public fetchAddressInfo(address: string, options: any = {}): Observable<AddressInfo> {
-    return this.address(address, options).pipe(
-      map(val => {
-        const totalReceived = val.chain_stats.funded_txo_sum + val.mempool_stats.funded_txo_sum;
-        const totalSent = val.chain_stats.funded_txo_sum + val.mempool_stats.funded_txo_sum;
-        return {
-          address: address,
-          n_tx: val.chain_stats.tx_count + val.mempool_stats.tx_count,
-          total_received: totalReceived,
-          total_sent: totalSent,
-          final_balance: totalReceived - totalSent,
-          latest_tx_block_time: null
-        } as AddressInfo;
-      }),
-      concatMap(val => of(address).pipe(
-        filter(x => val.total_received > 0),
-        concatMap(x => this.txs(address)),
-        filter(txs => txs.length > 0),
-        map(txs => txs[0]),
-        tap(latestTx => val.latest_tx_block_time = latestTx.status.block_time),
-        map(x => val),
-        endWith(val)
-      ))
-    );
   }
 }
