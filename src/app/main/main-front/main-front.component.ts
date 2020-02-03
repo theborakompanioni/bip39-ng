@@ -283,6 +283,10 @@ class NgBip32HdWalletView {
     this.root = new NgBip32HdNodeView(rootNode, _newNodeInternal(rootNode, 'm'));
   }
 
+  seedHex(): HexString {
+    return  '0x' + buf2hex(this.seed);
+  }
+
   hasValidMnemonic(): boolean {
     return Bip39.validateMnemonic(this.mnemonic);
   }
@@ -298,6 +302,16 @@ class NgBip32HdWalletView {
   public scanNextChildNode(node: NgBip32HdNodeView) {
     this.scanBalanceOfNode(node.getOrCreateNextIndex())
       .subscribe();
+  }
+
+  public findAllAddresses(): NgBip32HdAddressView[] {
+    return this.findAllNodes()
+      .map(node => node.addresses)
+      .reduce((prev, curr) => prev.concat(curr), []);
+  }
+
+  public findAllNodes(): NgBip32HdNodeView[] {
+    return this.findNodesRecursive(this.root, (node) => true);
   }
 
   public findNodesWithBalanceGreaterZero(): NgBip32HdNodeView[] {
@@ -347,6 +361,24 @@ class NgBip32HdWalletView {
     const selfScan = of(nodeView).pipe(
       tap(node => console.log(`start fetching for path ${node._node.path}`)),
       concatMap(node => from(node.addresses).pipe(
+        tap(addressView => console.log(`fetchAddressInfo for ${node._node.path} and address ${addressView._address.address}`)),
+        concatMap(addressView => dataInfoService.fetchAddressInfo(addressView._address.address, options).pipe(
+          tap(
+            info => {
+              addressView.received = info.total_received as Satoshi;
+              addressView.balance = info.final_balance as Satoshi;
+              addressView.info = info;
+            }, error => addressView.error = error,
+            () => addressView.lastCheckTimestamp = new Date().getTime()
+          ),
+          tap(received => {
+            console.log(`${node._node.path} and address ${addressView._address.address} received ${received}`);
+          }, error => console.log(`error while scanning ${node._node.path}: ${error}`)),
+        )),
+        map(addressView => node),
+      )),
+      last(),
+      /*concatMap(node => from(node.addresses).pipe(
         tap(addressView => console.log(`fetchReceivedByAddress for ${node._node.path} and address ${addressView._address.address}`)),
         concatMap(addressView => dataInfoService.fetchReceivedByAddress(addressView._address.address, options).pipe(
           tap(
@@ -377,7 +409,7 @@ class NgBip32HdWalletView {
         map(addressView => node),
         endWith(nodeView),
       )),
-      last(),
+      last(),*/
       tap(node => console.log(`end fetching for path ${node._node.path} (received: ${node.received()}, balance: ${node.balance()})`)),
     );
 
@@ -463,6 +495,7 @@ export class MainFrontComponent implements OnInit {
 
   result: any;
   wallet: NgBip32HdWalletView;
+  searchDuration: number;
 
   mnemonicArray: Array<string>;
   searchInputValue: string;
@@ -589,6 +622,9 @@ export class MainFrontComponent implements OnInit {
     this.loading = true;
     this.result = null;
     this.wallet = null;
+    this.searchDuration = null;
+
+    const now = Date.now();
 
     of(1).pipe(
       map(foo => {
@@ -643,9 +679,12 @@ export class MainFrontComponent implements OnInit {
       }
     }, error => {
       this.loading = false;
+      this.searchDuration = Date.now() - now;
+
       console.error(error);
     }, () => {
       this.loading = false;
+      this.searchDuration = Date.now() - now;
       console.log('wallet finished');
     });
 
