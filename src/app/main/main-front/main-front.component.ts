@@ -1,6 +1,7 @@
 import { Injector, Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { AppConfig } from '../../config/app.config';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Subject } from 'rxjs/Subject';
@@ -507,10 +508,11 @@ export class MainFrontComponent implements OnInit {
   readonly addressesDisplayedColumns = ['info', 'received', 'balance'];
   // ['path', 'address', 'wif', 'received', 'balance', 'lastCheckedTimestamp'];
 
-  constructor(private router: Router,
-    private activatedRoute: ActivatedRoute,
-    private formBuilder: FormBuilder,
-    private dataInfoService: DataInfoServiceService) {
+  constructor(private readonly router: Router,
+    private readonly _snackBar: MatSnackBar,
+    private readonly activatedRoute: ActivatedRoute,
+    private readonly formBuilder: FormBuilder,
+    private readonly dataInfoService: DataInfoServiceService) {
     this.mnemonicArray = [];
     this.searchInputValue = '';
     this.passphraseInputValue = '';
@@ -632,6 +634,13 @@ export class MainFrontComponent implements OnInit {
 
       // TODO: remove after feature is finished (only for debugging purposes)
       window['wallet'] = wallet;
+
+      const received = wallet.root.received();
+      if (received > 0) {
+        this._snackBar.open(`You found a treasure..`, '', {
+          duration: 3000
+        });
+      }
     }, error => {
       this.loading = false;
       console.error(error);

@@ -157,7 +157,7 @@
 
     <p style="text-align: center; font-size: 3em; margin: 1em; line-height: normal;">
       <span *ngIf="wallet.root.balance() === 0">Balance is 0 :(</span>
-      <span *ngIf="wallet.root.balance() > 0">Found addresses with
+      <span *ngIf="wallet.root.balance() > 0">Balance is 
         <code>{{wallet.root.balance() | bitcoin}}</code>
       </span>
     </p>
