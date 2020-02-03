@@ -194,7 +194,9 @@ export class BlockstreamInfoServiceService {
           latest_tx_block_time: null
         } as AddressInfo;
       }),
-      concatMap(val => this.txs(address).pipe(
+      concatMap(val => of(address).pipe(
+        filter(x => val.total_received > 0),
+        concatMap(x => this.txs(address)),
         filter(txs => txs.length > 0),
         map(txs => txs[0]),
         tap(latestTx => val.latest_tx_block_time = latestTx.status.block_time),
