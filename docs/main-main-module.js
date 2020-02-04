@@ -2323,11 +2323,15 @@ const NETWORK_TYPE = typeforce.compile({
     },
 });
 const BITCOIN = {
-    wif: 0x80,
+    messagePrefix: '\x18Bitcoin Signed Message:\n',
+    bech32: 'bc',
     bip32: {
         public: 0x0488b21e,
         private: 0x0488ade4,
     },
+    pubKeyHash: 0x00,
+    scriptHash: 0x05,
+    wif: 0x80,
 };
 const HIGHEST_BIT = 0x80000000;
 const UINT31_MAX = Math.pow(2, 31) - 1;
@@ -3375,12 +3379,17 @@ class Block {
   hasWitness() {
     return anyTxHasWitness(this.transactions);
   }
-  byteLength(headersOnly) {
+  weight() {
+    const base = this.byteLength(false, false);
+    const total = this.byteLength(false, true);
+    return base * 3 + total;
+  }
+  byteLength(headersOnly, allowWitness = true) {
     if (headersOnly || !this.transactions) return 80;
     return (
       80 +
       varuint.encodingLength(this.transactions.length) +
-      this.transactions.reduce((a, x) => a + x.byteLength(), 0)
+      this.transactions.reduce((a, x) => a + x.byteLength(allowWitness), 0)
     );
   }
   getHash() {
@@ -5066,6 +5075,17 @@ class Psbt {
     return this;
   }
   addInput(inputData) {
+    if (
+      arguments.length > 1 ||
+      !inputData ||
+      inputData.hash === undefined ||
+      inputData.index === undefined
+    ) {
+      throw new Error(
+        `Invalid arguments for Psbt.addInput. ` +
+          `Requires single object with at least [hash] and [index]`,
+      );
+    }
     checkInputsForPartialSig(this.data.inputs, 'addInput');
     const c = this.__CACHE;
     this.data.addInput(inputData);
@@ -5086,6 +5106,17 @@ class Psbt {
     return this;
   }
   addOutput(outputData) {
+    if (
+      arguments.length > 1 ||
+      !outputData ||
+      outputData.value === undefined ||
+      (outputData.address === undefined && outputData.script === undefined)
+    ) {
+      throw new Error(
+        `Invalid arguments for Psbt.addOutput. ` +
+          `Requires single object with at least [script or address] and [value]`,
+      );
+    }
     checkInputsForPartialSig(this.data.inputs, 'addOutput');
     const { address } = outputData;
     if (typeof address === 'string') {
@@ -5127,7 +5158,7 @@ class Psbt {
     range(this.data.inputs.length).forEach(idx => this.finalizeInput(idx));
     return this;
   }
-  finalizeInput(inputIndex) {
+  finalizeInput(inputIndex, finalScriptsFunc = getFinalScripts) {
     const input = utils_1.checkForInput(this.data.inputs, inputIndex);
     const { script, isP2SH, isP2WSH, isSegwit } = getScriptFromInput(
       inputIndex,
@@ -5135,14 +5166,11 @@ class Psbt {
       this.__CACHE,
     );
     if (!script) throw new Error(`No script found for input #${inputIndex}`);
-    const scriptType = classifyScript(script);
-    if (!canFinalize(input, script, scriptType))
-      throw new Error(`Can not finalize input #${inputIndex}`);
     checkPartialSigSighashes(input);
-    const { finalScriptSig, finalScriptWitness } = getFinalScripts(
+    const { finalScriptSig, finalScriptWitness } = finalScriptsFunc(
+      inputIndex,
+      input,
       script,
-      scriptType,
-      input.partialSig,
       isSegwit,
       isP2SH,
       isP2WSH,
@@ -5491,15 +5519,27 @@ function canFinalize(input, script, scriptType) {
       return hasSigs(1, input.partialSig);
     case 'multisig':
       const p2ms = payments.p2ms({ output: script });
-      return hasSigs(p2ms.m, input.partialSig);
+      return hasSigs(p2ms.m, input.partialSig, p2ms.pubkeys);
     default:
       return false;
   }
 }
-function hasSigs(neededSigs, partialSig) {
+function hasSigs(neededSigs, partialSig, pubkeys) {
   if (!partialSig) return false;
-  if (partialSig.length > neededSigs) throw new Error('Too many signatures');
-  return partialSig.length === neededSigs;
+  let sigs;
+  if (pubkeys) {
+    sigs = pubkeys
+      .map(pkey => {
+        const pubkey = ecpair_1.fromPublicKey(pkey, { compressed: true })
+          .publicKey;
+        return partialSig.find(pSig => pSig.pubkey.equals(pubkey));
+      })
+      .filter(v => !!v);
+  } else {
+    sigs = partialSig;
+  }
+  if (sigs.length > neededSigs) throw new Error('Too many signatures');
+  return sigs.length === neededSigs;
 }
 function isFinalized(input) {
   return !!input.finalScriptSig || !!input.finalScriptWitness;
@@ -5661,7 +5701,20 @@ function getTxCacheValue(key, name, inputs, c) {
   if (key === '__FEE_RATE') return c.__FEE_RATE;
   else if (key === '__FEE') return c.__FEE;
 }
-function getFinalScripts(
+function getFinalScripts(inputIndex, input, script, isSegwit, isP2SH, isP2WSH) {
+  const scriptType = classifyScript(script);
+  if (!canFinalize(input, script, scriptType))
+    throw new Error(`Can not finalize input #${inputIndex}`);
+  return prepareFinalScripts(
+    script,
+    scriptType,
+    input.partialSig,
+    isSegwit,
+    isP2SH,
+    isP2WSH,
+  );
+}
+function prepareFinalScripts(
   script,
   scriptType,
   partialSig,
@@ -7217,15 +7270,31 @@ class Transaction {
     });
   }
   weight() {
-    const base = this.__byteLength(false);
-    const total = this.__byteLength(true);
+    const base = this.byteLength(false);
+    const total = this.byteLength(true);
     return base * 3 + total;
   }
   virtualSize() {
     return Math.ceil(this.weight() / 4);
   }
-  byteLength() {
-    return this.__byteLength(true);
+  byteLength(_ALLOW_WITNESS = true) {
+    const hasWitnesses = _ALLOW_WITNESS && this.hasWitnesses();
+    return (
+      (hasWitnesses ? 10 : 8) +
+      varuint.encodingLength(this.ins.length) +
+      varuint.encodingLength(this.outs.length) +
+      this.ins.reduce((sum, input) => {
+        return sum + 40 + varSliceSize(input.script);
+      }, 0) +
+      this.outs.reduce((sum, output) => {
+        return sum + 8 + varSliceSize(output.script);
+      }, 0) +
+      (hasWitnesses
+        ? this.ins.reduce((sum, input) => {
+            return sum + vectorSize(input.witness);
+          }, 0)
+        : 0)
+    );
   }
   clone() {
     const newTx = new Transaction();
@@ -7307,7 +7376,7 @@ class Transaction {
       txTmp.ins[inIndex].script = ourScript;
     }
     // serialize and hash
-    const buffer = Buffer.allocUnsafe(txTmp.__byteLength(false) + 4);
+    const buffer = Buffer.allocUnsafe(txTmp.byteLength(false) + 4);
     buffer.writeInt32LE(hashType, buffer.length - 4);
     txTmp.__toBuffer(buffer, 0, false);
     return bcrypto.hash256(buffer);
@@ -7424,27 +7493,8 @@ class Transaction {
     typeforce(types.tuple(types.Number, [types.Buffer]), arguments);
     this.ins[index].witness = witness;
   }
-  __byteLength(_ALLOW_WITNESS) {
-    const hasWitnesses = _ALLOW_WITNESS && this.hasWitnesses();
-    return (
-      (hasWitnesses ? 10 : 8) +
-      varuint.encodingLength(this.ins.length) +
-      varuint.encodingLength(this.outs.length) +
-      this.ins.reduce((sum, input) => {
-        return sum + 40 + varSliceSize(input.script);
-      }, 0) +
-      this.outs.reduce((sum, output) => {
-        return sum + 8 + varSliceSize(output.script);
-      }, 0) +
-      (hasWitnesses
-        ? this.ins.reduce((sum, input) => {
-            return sum + vectorSize(input.witness);
-          }, 0)
-        : 0)
-    );
-  }
-  __toBuffer(buffer, initialOffset, _ALLOW_WITNESS) {
-    if (!buffer) buffer = Buffer.allocUnsafe(this.__byteLength(_ALLOW_WITNESS));
+  __toBuffer(buffer, initialOffset, _ALLOW_WITNESS = false) {
+    if (!buffer) buffer = Buffer.allocUnsafe(this.byteLength(_ALLOW_WITNESS));
     let offset = initialOffset || 0;
     function writeSlice(slice) {
       offset += slice.copy(buffer, offset);
@@ -14563,6 +14613,8 @@ function BaseCurve(type, conf) {
   this._wnafT3 = new Array(4);
   this._wnafT4 = new Array(4);
 
+  this._bitLength = this.n ? this.n.bitLength() : 0;
+
   // Generalized Greg Maxwell's trick
   var adjustCount = this.n && this.p.div(this.n);
   if (!adjustCount || adjustCount.cmpn(100) > 0) {
@@ -14586,7 +14638,7 @@ BaseCurve.prototype._fixedNafMul = function _fixedNafMul(p, k) {
   assert(p.precomputed);
   var doubles = p._getDoubles();
 
-  var naf = getNAF(k, 1);
+  var naf = getNAF(k, 1, this._bitLength);
   var I = (1 << (doubles.step + 1)) - (doubles.step % 2 === 0 ? 2 : 1);
   I /= 3;
 
@@ -14623,7 +14675,7 @@ BaseCurve.prototype._wnafMul = function _wnafMul(p, k) {
   var wnd = nafPoints.points;
 
   // Get NAF form
-  var naf = getNAF(k, w);
+  var naf = getNAF(k, w, this._bitLength);
 
   // Add `this`*(N+1) for every w-NAF index
   var acc = this.jpoint(null, null, null);
@@ -14679,8 +14731,8 @@ BaseCurve.prototype._wnafMulAdd = function _wnafMulAdd(defW,
     var a = i - 1;
     var b = i;
     if (wndWidth[a] !== 1 || wndWidth[b] !== 1) {
-      naf[a] = getNAF(coeffs[a], wndWidth[a]);
-      naf[b] = getNAF(coeffs[b], wndWidth[b]);
+      naf[a] = getNAF(coeffs[a], wndWidth[a], this._bitLength);
+      naf[b] = getNAF(coeffs[b], wndWidth[b], this._bitLength);
       max = Math.max(naf[a].length, max);
       max = Math.max(naf[b].length, max);
       continue;
@@ -15996,8 +16048,9 @@ Point.prototype.getY = function getY() {
 
 Point.prototype.mul = function mul(k) {
   k = new BN(k, 16);
-
-  if (this._hasDoubles(k))
+  if (this.isInfinity())
+    return this;
+  else if (this._hasDoubles(k))
     return this.curve._fixedNafMul(this, k);
   else if (this.curve.endo)
     return this.curve._endoWnafMulAdd([ this ], [ k ]);
@@ -18387,14 +18440,17 @@ utils.toHex = minUtils.toHex;
 utils.encode = minUtils.encode;
 
 // Represent num in a w-NAF form
-function getNAF(num, w) {
-  var naf = [];
+function getNAF(num, w, bits) {
+  var naf = new Array(Math.max(num.bitLength(), bits) + 1);
+  naf.fill(0);
+
   var ws = 1 << (w + 1);
   var k = num.clone();
-  while (k.cmpn(1) >= 0) {
+
+  for (var i = 0; i < naf.length; i++) {
     var z;
+    var mod = k.andln(ws - 1);
     if (k.isOdd()) {
-      var mod = k.andln(ws - 1);
       if (mod > (ws >> 1) - 1)
         z = (ws >> 1) - mod;
       else
@@ -18403,13 +18459,9 @@ function getNAF(num, w) {
     } else {
       z = 0;
     }
-    naf.push(z);
 
-    // Optimization, shift by word if possible
-    var shift = (k.cmpn(0) !== 0 && k.andln(ws - 1) === 0) ? (w + 1) : 1;
-    for (var i = 1; i < shift; i++)
-      naf.push(0);
-    k.iushrn(shift);
+    naf[i] = z;
+    k.iushrn(1);
   }
 
   return naf;
@@ -18501,10 +18553,10 @@ utils.intFromLE = intFromLE;
 /*!********************************************!*\
   !*** ./node_modules/elliptic/package.json ***!
   \********************************************/
-/*! exports provided: _from, _id, _inBundle, _integrity, _location, _phantomChildren, _requested, _requiredBy, _resolved, _shasum, _spec, _where, author, bugs, bundleDependencies, dependencies, deprecated, description, devDependencies, files, homepage, keywords, license, main, name, repository, scripts, version, default */
+/*! exports provided: _args, _from, _id, _inBundle, _integrity, _location, _phantomChildren, _requested, _requiredBy, _resolved, _spec, _where, author, bugs, dependencies, description, devDependencies, files, homepage, keywords, license, main, name, repository, scripts, version, default */
 /***/ (function(module) {
 
-module.exports = JSON.parse("{\"_from\":\"elliptic@^6.0.0\",\"_id\":\"elliptic@6.5.0\",\"_inBundle\":false,\"_integrity\":\"sha512-eFOJTMyCYb7xtE/caJ6JJu+bhi67WCYNbkGSknu20pmM8Ke/bqOfdnZWxyoGN26JgfxTbXrsCkEw4KheCT/KGg==\",\"_location\":\"/elliptic\",\"_phantomChildren\":{},\"_requested\":{\"type\":\"range\",\"registry\":true,\"raw\":\"elliptic@^6.0.0\",\"name\":\"elliptic\",\"escapedName\":\"elliptic\",\"rawSpec\":\"^6.0.0\",\"saveSpec\":null,\"fetchSpec\":\"^6.0.0\"},\"_requiredBy\":[\"/browserify-sign\",\"/create-ecdh\"],\"_resolved\":\"https://registry.npmjs.org/elliptic/-/elliptic-6.5.0.tgz\",\"_shasum\":\"2b8ed4c891b7de3200e14412a5b8248c7af505ca\",\"_spec\":\"elliptic@^6.0.0\",\"_where\":\"/home/void/workspace/theborakompanioni/bip39-ng/node_modules/browserify-sign\",\"author\":{\"name\":\"Fedor Indutny\",\"email\":\"fedor@indutny.com\"},\"bugs\":{\"url\":\"https://github.com/indutny/elliptic/issues\"},\"bundleDependencies\":false,\"dependencies\":{\"bn.js\":\"^4.4.0\",\"brorand\":\"^1.0.1\",\"hash.js\":\"^1.0.0\",\"hmac-drbg\":\"^1.0.0\",\"inherits\":\"^2.0.1\",\"minimalistic-assert\":\"^1.0.0\",\"minimalistic-crypto-utils\":\"^1.0.0\"},\"deprecated\":false,\"description\":\"EC cryptography\",\"devDependencies\":{\"brfs\":\"^1.4.3\",\"coveralls\":\"^2.11.3\",\"grunt\":\"^0.4.5\",\"grunt-browserify\":\"^5.0.0\",\"grunt-cli\":\"^1.2.0\",\"grunt-contrib-connect\":\"^1.0.0\",\"grunt-contrib-copy\":\"^1.0.0\",\"grunt-contrib-uglify\":\"^1.0.1\",\"grunt-mocha-istanbul\":\"^3.0.1\",\"grunt-saucelabs\":\"^8.6.2\",\"istanbul\":\"^0.4.2\",\"jscs\":\"^2.9.0\",\"jshint\":\"^2.6.0\",\"mocha\":\"^2.1.0\"},\"files\":[\"lib\"],\"homepage\":\"https://github.com/indutny/elliptic\",\"keywords\":[\"EC\",\"Elliptic\",\"curve\",\"Cryptography\"],\"license\":\"MIT\",\"main\":\"lib/elliptic.js\",\"name\":\"elliptic\",\"repository\":{\"type\":\"git\",\"url\":\"git+ssh://git@github.com/indutny/elliptic.git\"},\"scripts\":{\"jscs\":\"jscs benchmarks/*.js lib/*.js lib/**/*.js lib/**/**/*.js test/index.js\",\"jshint\":\"jscs benchmarks/*.js lib/*.js lib/**/*.js lib/**/**/*.js test/index.js\",\"lint\":\"npm run jscs && npm run jshint\",\"test\":\"npm run lint && npm run unit\",\"unit\":\"istanbul test _mocha --reporter=spec test/index.js\",\"version\":\"grunt dist && git add dist/\"},\"version\":\"6.5.0\"}");
+module.exports = JSON.parse("{\"_args\":[[\"elliptic@6.5.2\",\"/home/void/workspace/theborakompanioni/bip39-ng\"]],\"_from\":\"elliptic@6.5.2\",\"_id\":\"elliptic@6.5.2\",\"_inBundle\":false,\"_integrity\":\"sha512-f4x70okzZbIQl/NSRLkI/+tteV/9WqL98zx+SQ69KbXxmVrmjwsNUPn/gYJJ0sHvEak24cZgHIPegRePAtA/xw==\",\"_location\":\"/elliptic\",\"_phantomChildren\":{},\"_requested\":{\"type\":\"version\",\"registry\":true,\"raw\":\"elliptic@6.5.2\",\"name\":\"elliptic\",\"escapedName\":\"elliptic\",\"rawSpec\":\"6.5.2\",\"saveSpec\":null,\"fetchSpec\":\"6.5.2\"},\"_requiredBy\":[\"/browserify-sign\",\"/create-ecdh\",\"/tiny-secp256k1\"],\"_resolved\":\"https://registry.npmjs.org/elliptic/-/elliptic-6.5.2.tgz\",\"_spec\":\"6.5.2\",\"_where\":\"/home/void/workspace/theborakompanioni/bip39-ng\",\"author\":{\"name\":\"Fedor Indutny\",\"email\":\"fedor@indutny.com\"},\"bugs\":{\"url\":\"https://github.com/indutny/elliptic/issues\"},\"dependencies\":{\"bn.js\":\"^4.4.0\",\"brorand\":\"^1.0.1\",\"hash.js\":\"^1.0.0\",\"hmac-drbg\":\"^1.0.0\",\"inherits\":\"^2.0.1\",\"minimalistic-assert\":\"^1.0.0\",\"minimalistic-crypto-utils\":\"^1.0.0\"},\"description\":\"EC cryptography\",\"devDependencies\":{\"brfs\":\"^1.4.3\",\"coveralls\":\"^3.0.8\",\"grunt\":\"^1.0.4\",\"grunt-browserify\":\"^5.0.0\",\"grunt-cli\":\"^1.2.0\",\"grunt-contrib-connect\":\"^1.0.0\",\"grunt-contrib-copy\":\"^1.0.0\",\"grunt-contrib-uglify\":\"^1.0.1\",\"grunt-mocha-istanbul\":\"^3.0.1\",\"grunt-saucelabs\":\"^9.0.1\",\"istanbul\":\"^0.4.2\",\"jscs\":\"^3.0.7\",\"jshint\":\"^2.10.3\",\"mocha\":\"^6.2.2\"},\"files\":[\"lib\"],\"homepage\":\"https://github.com/indutny/elliptic\",\"keywords\":[\"EC\",\"Elliptic\",\"curve\",\"Cryptography\"],\"license\":\"MIT\",\"main\":\"lib/elliptic.js\",\"name\":\"elliptic\",\"repository\":{\"type\":\"git\",\"url\":\"git+ssh://git@github.com/indutny/elliptic.git\"},\"scripts\":{\"jscs\":\"jscs benchmarks/*.js lib/*.js lib/**/*.js lib/**/**/*.js test/index.js\",\"jshint\":\"jscs benchmarks/*.js lib/*.js lib/**/*.js lib/**/**/*.js test/index.js\",\"lint\":\"npm run jscs && npm run jshint\",\"test\":\"npm run lint && npm run unit\",\"unit\":\"istanbul test _mocha --reporter=spec test/index.js\",\"version\":\"grunt dist && git add dist/\"},\"version\":\"6.5.2\"}");
 
 /***/ }),
 
@@ -18584,6 +18636,12 @@ EventEmitter.prototype._maxListeners = undefined;
 // added to it. This is a useful default which helps finding memory leaks.
 var defaultMaxListeners = 10;
 
+function checkListener(listener) {
+  if (typeof listener !== 'function') {
+    throw new TypeError('The "listener" argument must be of type Function. Received type ' + typeof listener);
+  }
+}
+
 Object.defineProperty(EventEmitter, 'defaultMaxListeners', {
   enumerable: true,
   get: function() {
@@ -18618,14 +18676,14 @@ EventEmitter.prototype.setMaxListeners = function setMaxListeners(n) {
   return this;
 };
 
-function $getMaxListeners(that) {
+function _getMaxListeners(that) {
   if (that._maxListeners === undefined)
     return EventEmitter.defaultMaxListeners;
   return that._maxListeners;
 }
 
 EventEmitter.prototype.getMaxListeners = function getMaxListeners() {
-  return $getMaxListeners(this);
+  return _getMaxListeners(this);
 };
 
 EventEmitter.prototype.emit = function emit(type) {
@@ -18677,9 +18735,7 @@ function _addListener(target, type, listener, prepend) {
   var events;
   var existing;
 
-  if (typeof listener !== 'function') {
-    throw new TypeError('The "listener" argument must be of type Function. Received type ' + typeof listener);
-  }
+  checkListener(listener);
 
   events = target._events;
   if (events === undefined) {
@@ -18716,7 +18772,7 @@ function _addListener(target, type, listener, prepend) {
     }
 
     // Check for listener leak
-    m = $getMaxListeners(target);
+    m = _getMaxListeners(target);
     if (m > 0 && existing.length > m && !existing.warned) {
       existing.warned = true;
       // No error code for this since it is a Warning
@@ -18748,12 +18804,12 @@ EventEmitter.prototype.prependListener =
     };
 
 function onceWrapper() {
-  var args = [];
-  for (var i = 0; i < arguments.length; i++) args.push(arguments[i]);
   if (!this.fired) {
     this.target.removeListener(this.type, this.wrapFn);
     this.fired = true;
-    ReflectApply(this.listener, this.target, args);
+    if (arguments.length === 0)
+      return this.listener.call(this.target);
+    return this.listener.apply(this.target, arguments);
   }
 }
 
@@ -18766,18 +18822,14 @@ function _onceWrap(target, type, listener) {
 }
 
 EventEmitter.prototype.once = function once(type, listener) {
-  if (typeof listener !== 'function') {
-    throw new TypeError('The "listener" argument must be of type Function. Received type ' + typeof listener);
-  }
+  checkListener(listener);
   this.on(type, _onceWrap(this, type, listener));
   return this;
 };
 
 EventEmitter.prototype.prependOnceListener =
     function prependOnceListener(type, listener) {
-      if (typeof listener !== 'function') {
-        throw new TypeError('The "listener" argument must be of type Function. Received type ' + typeof listener);
-      }
+      checkListener(listener);
       this.prependListener(type, _onceWrap(this, type, listener));
       return this;
     };
@@ -18787,9 +18839,7 @@ EventEmitter.prototype.removeListener =
     function removeListener(type, listener) {
       var list, events, position, i, originalListener;
 
-      if (typeof listener !== 'function') {
-        throw new TypeError('The "listener" argument must be of type Function. Received type ' + typeof listener);
-      }
+      checkListener(listener);
 
       events = this._events;
       if (events === undefined)
@@ -21495,7 +21545,7 @@ function randomBytes (size, cb) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony default export */ __webpack_exports__["default"] = ("<div id=\"faq-top\"></div>\n\n<div class=\"container mat-typography\">\n  <h1>FAQ</h1>\n\n  <mat-nav-list class=\"faq-nav-list\">\n    <a mat-list-item [routerLink]=\"\" fragment=\"faq-1\">What is my chance of winning?</a>\n    <a mat-list-item [routerLink]=\"\" fragment=\"faq-2\">Why is my chance practically zero?</a>\n    <a mat-list-item [routerLink]=\"\" fragment=\"faq-10\">So you are saying.. it is possible?</a>\n    <a mat-list-item [routerLink]=\"\" fragment=\"faq-8\">Is this site legit?</a>\n    <a mat-list-item [routerLink]=\"\" fragment=\"faq-9\">Should I use seeds generated here?</a>\n    <a mat-list-item [routerLink]=\"\" fragment=\"faq-3\">Why does this site exist?</a>\n    <a mat-list-item [routerLink]=\"\" fragment=\"faq-4\">What is a mnemonic phrase?</a>\n    <a mat-list-item [routerLink]=\"\" fragment=\"faq-5\">What is a deterministic wallet?</a>\n    <a mat-list-item [routerLink]=\"\" fragment=\"faq-6\">What is BIP39?</a>\n    <a mat-list-item [routerLink]=\"\" fragment=\"faq-7\">How do mnemonic seeds work?</a>\n  </mat-nav-list>\n\n  <mat-card class=\"faq-card\" id=\"faq-1\">\n\n    <mat-card-title>\n      <app-scroll-to-top-button elementClass=\"faq-top\"></app-scroll-to-top-button>\n      <h2>What is my chance of winning?</h2>\n    </mat-card-title>\n\n    <mat-card-content>\n      Low. Very Low. In fact it is so low that it is very unlikely that there will ever be a visitor finding an address with a\n      balance on it.\n      <a href=\"https://www.youtube.com/watch?v=zMRrNY0pxfM\">It is practically zero.</a>\n    </mat-card-content>\n  </mat-card>\n\n  <mat-card class=\"faq-card\" id=\"faq-2\">\n    <mat-card-title>\n      <app-scroll-to-top-button elementClass=\"faq-top\"></app-scroll-to-top-button>\n      <h2>Why is my chance practically zero?</h2>\n    </mat-card-title>\n    <mat-card-content>\n      <p>\n        <a href=\"https://www.reddit.com/r/Bitcoin/comments/6twuj1/are_12word_seeds_for_bitcoin_private_keys_secure/\" rel=\"noopener\">Because of statistics.</a>\n      </p>\n\n      <p>The total address space is 2^160. 2^160 is 1,461,501,637,330,902,918,203,684,832,716,283,019,655,932,542,976.</p>\n\n      <p>\n        To put that in perspective, there are only 2^63 grains of sand on all of the beaches of the Earth.\n      </p>\n      <p>It is more than there are atoms in the whole universe.</p>\n\n      <p>\n        If you had a billion computers, each of which could try a billion keys a second, and they tried for a billion years, they'd\n        have much, much less than a one in a billion chance of finding a used seed.\n      </p>\n\n    </mat-card-content>\n  </mat-card>\n\n  <mat-card class=\"faq-card\" id=\"faq-10\">\n    <mat-card-title>\n      <app-scroll-to-top-button elementClass=\"faq-top\"></app-scroll-to-top-button>\n      <h2>So you are saying.. it is possible?</h2>\n    </mat-card-title>\n    <mat-card-content>\n      <p>\n        So is it possible to get lucky and find the keys for existing adresses? No, not for keys generated by modern wallets on secure devices.\n        It is only possible if it is picked by a human by hand (we are bad at being a source for randomness) or due to software errors. \n      </p>\n      <p>\n        There are some addresses which received coins that have a very bad input phrase. Try for example: \n      </p> \n      <ul>\n        <li><a [routerLink]=\"['/']\"\n          [queryParams]=\"{q: ''}\">\n          <code>\"\"</code> (empty input)\n        </a></li>\n        <li><a [routerLink]=\"['/']\"\n          [queryParams]=\"{q: '1'}\">\n          <code>\"1\"</code>\n        </a></li>\n        <li><a [routerLink]=\"['/']\"\n          [queryParams]=\"{q: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon'}\">\n          <code>\"abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon\"</code>\n        </a></li>\n        <li><a [routerLink]=\"['/']\"\n          [queryParams]=\"{q: 'write wrong yard year yellow you young youth zebra zero zone zoo'}\">\n          <code>\"write wrong yard year yellow you young youth zebra zero zone zoo\"</code>\n        </a></li>\n      </ul>\n    </mat-card-content>\n  </mat-card>\n\n  <mat-card class=\"faq-card\" id=\"faq-8\">\n    <mat-card-title>\n      <app-scroll-to-top-button elementClass=\"faq-top\"></app-scroll-to-top-button>\n      <h2>Is this site legit?</h2>\n    </mat-card-title>\n    <mat-card-content>\n      <a [href]=\"appConfig.repositoryURL\" rel=\"noopener\">Yes</a> and\n      <a [routerLink]=\"\" fragment=\"faq-9\">no (see 'Should I use seeds generated here?')</a>.\n    </mat-card-content>\n  </mat-card>\n\n  <mat-card class=\"faq-card\" id=\"faq-9\">\n    <mat-card-title>\n      <app-scroll-to-top-button elementClass=\"faq-top\"></app-scroll-to-top-button>\n      <h2>Should I use seeds generated here?</h2>\n    </mat-card-title>\n    <mat-card-content>\n      <p>\n        NO! Do NOT use seeds generated online! You should always genreate the seed yourself on a secure device without access to\n        the internet or any other network.\n      </p>\n      <p>\n        <strong>YOU SHOULD GENERATE THE SEED YOURSELF. ON A SECURE DEVICE. YOURSELF!</strong>\n      </p>\n      <p>\n        The page generates the seed on your computer and does not ever send any information of the seed to any other site or service.\n        You can review the code and verify this. Nonetheless, as the source is free to use for anybody, how would you know\n        that you are not on a complete look-a-like copycat private-key-stealing clone site? You don't. So stick to the principle\n        of generating seeds yourself. Friends do not let friends generate seeds online.\n      </p>\n    </mat-card-content>\n  </mat-card>\n\n  <mat-card class=\"faq-card\" id=\"faq-3\">\n    <mat-card-title>\n      <app-scroll-to-top-button elementClass=\"faq-top\"></app-scroll-to-top-button>\n      <h2>Why does this site exist?</h2>\n    </mat-card-title>\n    <mat-card-content>\n      This sites solely exists to spark interest and enthusiasm for the inner workings of bitcoin. It should guide visitors to additional\n      information and act as an entry point for further study.\n    </mat-card-content>\n  </mat-card>\n\n  <mat-card class=\"faq-card\" id=\"faq-4\">\n    <mat-card-title>\n      <app-scroll-to-top-button elementClass=\"faq-top\"></app-scroll-to-top-button>\n      <h2>What is a mnemonic phrase?</h2>\n    </mat-card-title>\n    <mat-card-content>\n      <p>\n        A mnemonic code or sentence is a group of words taken from a predefined list of words. It can be used as a seed to generate\n        deterministic bitcoin wallets.\n      </p>\n\n      Most of the time the words are taken from a dictionary, e.g. from the\n      <a href=\"https://github.com/bitcoin/bips/blob/master/bip-0039/bip-0039-wordlists.md\" rel=\"noopener\">\n        BIP39 wordlists\n      </a>\n      .\n    </mat-card-content>\n  </mat-card>\n\n  <mat-card class=\"faq-card\" id=\"faq-5\">\n    <mat-card-title>\n      <app-scroll-to-top-button elementClass=\"faq-top\"></app-scroll-to-top-button>\n      <h2>What is a deterministic wallet?</h2>\n    </mat-card-title>\n    <mat-card-content>\n      <p>\n        A deterministic wallet is a system of deriving keys from a single starting point known as a seed. The seed allows a user\n        to easily back up and restore a wallet without needing any other information and can in some cases allow the creation\n        of public addresses without the knowledge of the private key.\n      </p>\n\n      <a href=\"https://en.bitcoin.it/wiki/Deterministic_wallet\" rel=\"noopener\">Read Bitcoin wiki page of \"Deterministic wallet\" article.</a>\n    </mat-card-content>\n  </mat-card>\n\n  <mat-card class=\"faq-card\" id=\"faq-6\">\n    <mat-card-title>\n      <app-scroll-to-top-button elementClass=\"faq-top\"></app-scroll-to-top-button>\n      <h2>What is BIP39?</h2>\n    </mat-card-title>\n    <mat-card-content>\n      <p>\n        BIP39 is a Bitcoin Improvement Proposal describing the implementation of a mnemonic sentence for the generation of deterministic\n        wallets.\n      </p>\n      <p>Popular wallets that use BIP39 for the mnemonic scheme include Trezor, Ledger, Electrum, Mycelium, Bither, Coinomy,\n        and MyEtherWallet..\n      </p>\n\n      <a href=\"https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki\" rel=\"noopener\">Read the full BIP39</a>\n\n    </mat-card-content>\n  </mat-card>\n\n  <mat-card class=\"faq-card\" id=\"faq-7\">\n    <mat-card-title>\n      <app-scroll-to-top-button elementClass=\"faq-top\"></app-scroll-to-top-button>\n      <h2>How do mnemonic seeds work?</h2>\n    </mat-card-title>\n    <mat-card-content>\n      <iframe width=\"420\" height=\"315\" src=\"https://www.youtube.com/embed/wWCIQFNf_8g\"></iframe>\n    </mat-card-content>\n  </mat-card>\n</div>\n<div class=\"clear\"></div>");
+/* harmony default export */ __webpack_exports__["default"] = ("<div id=\"faq-top\"></div>\n\n<div class=\"container mat-typography\">\n  <h1>FAQ</h1>\n\n  <mat-nav-list class=\"faq-nav-list\">\n    <a mat-list-item [routerLink]=\"\" fragment=\"faq-1\">What is my chance of winning?</a>\n    <a mat-list-item [routerLink]=\"\" fragment=\"faq-2\">Why is my chance practically zero?</a>\n    <a mat-list-item [routerLink]=\"\" fragment=\"faq-10\">So you are saying.. it is possible?</a>\n    <a mat-list-item [routerLink]=\"\" fragment=\"faq-8\">Is this site legit?</a>\n    <a mat-list-item [routerLink]=\"\" fragment=\"faq-9\">Should I use seeds generated here?</a>\n    <a mat-list-item [routerLink]=\"\" fragment=\"faq-3\">Why does this site exist?</a>\n    <a mat-list-item [routerLink]=\"\" fragment=\"faq-4\">What is a mnemonic phrase?</a>\n    <a mat-list-item [routerLink]=\"\" fragment=\"faq-5\">What is a deterministic wallet?</a>\n    <a mat-list-item [routerLink]=\"\" fragment=\"faq-6\">What is BIP39?</a>\n    <a mat-list-item [routerLink]=\"\" fragment=\"faq-7\">How do mnemonic seeds work?</a>\n  </mat-nav-list>\n\n  <mat-card class=\"faq-card\" id=\"faq-1\">\n\n    <mat-card-title>\n      <app-scroll-to-top-button elementClass=\"faq-top\"></app-scroll-to-top-button>\n      <h2>What is my chance of winning?</h2>\n    </mat-card-title>\n\n    <mat-card-content>\n      Low. Very Low. In fact it is so low that it is very unlikely that there will ever be a visitor finding an address with a\n      balance on it.\n      <a href=\"https://www.youtube.com/watch?v=zMRrNY0pxfM\">It is practically zero.</a>\n    </mat-card-content>\n  </mat-card>\n\n  <mat-card class=\"faq-card\" id=\"faq-2\">\n    <mat-card-title>\n      <app-scroll-to-top-button elementClass=\"faq-top\"></app-scroll-to-top-button>\n      <h2>Why is my chance practically zero?</h2>\n    </mat-card-title>\n    <mat-card-content>\n      <p>\n        <a href=\"https://www.reddit.com/r/Bitcoin/comments/6twuj1/are_12word_seeds_for_bitcoin_private_keys_secure/\" rel=\"noopener\">Because of statistics.</a>\n      </p>\n\n      <p>The total address space is 2^160. 2^160 is 1,461,501,637,330,902,918,203,684,832,716,283,019,655,932,542,976.</p>\n\n      <p>\n        To put that in perspective, there are only 2^63 grains of sand on all of the beaches of the Earth.\n      </p>\n      <p>It is more than there are atoms in the whole universe.</p>\n\n      <p>\n        If you had a billion computers, each of which could try a billion keys a second, and they tried for a billion years, they'd\n        have much, much less than a one in a billion chance of finding a used seed.\n      </p>\n\n    </mat-card-content>\n  </mat-card>\n\n  <mat-card class=\"faq-card\" id=\"faq-10\">\n    <mat-card-title>\n      <app-scroll-to-top-button elementClass=\"faq-top\"></app-scroll-to-top-button>\n      <h2>So you are saying.. it is possible?</h2>\n    </mat-card-title>\n    <mat-card-content>\n      <p>\n        So is it possible to get lucky and find the keys for existing adresses? No, not for keys generated by modern wallets on secure devices.\n        It is only possible if it is picked by a human by hand (we are bad at being a source for randomness) or due to software errors. \n      </p>\n      <p>\n        There are some addresses which received coins that have a very bad input phrase. Try for example: \n      </p> \n      <ul>\n        <li><a [routerLink]=\"['/']\"\n          [queryParams]=\"{q: ''}\">\n          <code>\"\"</code> (empty input)\n        </a></li>\n        <li><a [routerLink]=\"['/']\"\n          [queryParams]=\"{q: ' '}\">\n          <code>\" \"</code> (whitespace)\n        </a></li>\n        <li><a [routerLink]=\"['/']\"\n          [queryParams]=\"{q: '1'}\">\n          <code>\"1\"</code>\n        </a></li>\n        <li><a [routerLink]=\"['/']\"\n          [queryParams]=\"{q: 'satoshi'}\">\n          <code>\"satoshi\"</code>\n        </a></li>\n        <li><a [routerLink]=\"['/']\"\n          [queryParams]=\"{q: '1qay2wsx3edc'}\">\n          <code>\"1qay2wsx3edc\"</code>\n        </a></li>\n        <li><a [routerLink]=\"['/']\"\n          [queryParams]=\"{q: '1qaz2wsx3edc'}\">\n          <code>\"1qaz2wsx3edc\"</code>\n        </a></li>\n        <li><a [routerLink]=\"['/']\"\n          [queryParams]=\"{q: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon'}\">\n          <code>\"abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon\"</code>\n        </a></li>\n        <li><a [routerLink]=\"['/']\"\n          [queryParams]=\"{q: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'}\">\n          <code>\"abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about\"</code>\n        </a></li>\n        <li><a [routerLink]=\"['/']\"\n          [queryParams]=\"{q: 'write wrong yard year yellow you young youth zebra zero zone zoo'}\">\n          <code>\"write wrong yard year yellow you young youth zebra zero zone zoo\"</code>\n        </a></li>\n        <li><a [routerLink]=\"['/']\"\n          [queryParams]=\"{q: 'zero zero zero zero zero zero zero zero zero zero zero zero'}\">\n          <code>\"zero zero zero zero zero zero zero zero zero zero zero zero\"</code>\n        </a></li>\n        <li><a [routerLink]=\"['/']\"\n          [queryParams]=\"{q: 'zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong'}\">\n          <code>\"zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong\"</code>\n        </a></li>\n        <li>\n          <a [routerLink]=\"['/']\"\n            [queryParams]=\"{q: 'army van defense carry jealous true garbage claim echo media make crunch'}\">\n            <code>\"army van defense carry jealous true garbage claim echo media make crunch\"</code>\n          </a>\n          (a mnemonic printed in the book <em>Mastering Bitcoin</em> by <i>Andreas Antonopoulos</i>)\n        </li>\n        \n        \n      </ul>\n    </mat-card-content>\n  </mat-card>\n\n  <mat-card class=\"faq-card\" id=\"faq-8\">\n    <mat-card-title>\n      <app-scroll-to-top-button elementClass=\"faq-top\"></app-scroll-to-top-button>\n      <h2>Is this site legit?</h2>\n    </mat-card-title>\n    <mat-card-content>\n      <a [href]=\"appConfig.repositoryURL\" rel=\"noopener\">Yes</a> and\n      <a [routerLink]=\"\" fragment=\"faq-9\">no (see 'Should I use seeds generated here?')</a>.\n    </mat-card-content>\n  </mat-card>\n\n  <mat-card class=\"faq-card\" id=\"faq-9\">\n    <mat-card-title>\n      <app-scroll-to-top-button elementClass=\"faq-top\"></app-scroll-to-top-button>\n      <h2>Should I use seeds generated here?</h2>\n    </mat-card-title>\n    <mat-card-content>\n      <p>\n        NO! Do NOT use seeds generated online! You should always genreate the seed yourself on a secure device without access to\n        the internet or any other network.\n      </p>\n      <p>\n        <strong>YOU SHOULD GENERATE THE SEED YOURSELF. ON A SECURE DEVICE. YOURSELF!</strong>\n      </p>\n      <p>\n        The page generates the seed on your computer and does not ever send any information of the seed to any other site or service.\n        You can review the code and verify this. Nonetheless, as the source is free to use for anybody, how would you know\n        that you are not on a complete look-a-like copycat private-key-stealing clone site? You don't. So stick to the principle\n        of generating seeds yourself. Friends do not let friends generate seeds online.\n      </p>\n    </mat-card-content>\n  </mat-card>\n\n  <mat-card class=\"faq-card\" id=\"faq-3\">\n    <mat-card-title>\n      <app-scroll-to-top-button elementClass=\"faq-top\"></app-scroll-to-top-button>\n      <h2>Why does this site exist?</h2>\n    </mat-card-title>\n    <mat-card-content>\n      This sites solely exists to spark interest and enthusiasm for the inner workings of bitcoin. It should guide visitors to additional\n      information and act as an entry point for further study.\n    </mat-card-content>\n  </mat-card>\n\n  <mat-card class=\"faq-card\" id=\"faq-4\">\n    <mat-card-title>\n      <app-scroll-to-top-button elementClass=\"faq-top\"></app-scroll-to-top-button>\n      <h2>What is a mnemonic phrase?</h2>\n    </mat-card-title>\n    <mat-card-content>\n      <p>\n        A mnemonic code or sentence is a group of words taken from a predefined list of words. It can be used as a seed to generate\n        deterministic bitcoin wallets.\n      </p>\n\n      Most of the time the words are taken from a dictionary, e.g. from the\n      <a href=\"https://github.com/bitcoin/bips/blob/master/bip-0039/bip-0039-wordlists.md\" rel=\"noopener\">\n        BIP39 wordlists\n      </a>\n      .\n    </mat-card-content>\n  </mat-card>\n\n  <mat-card class=\"faq-card\" id=\"faq-5\">\n    <mat-card-title>\n      <app-scroll-to-top-button elementClass=\"faq-top\"></app-scroll-to-top-button>\n      <h2>What is a deterministic wallet?</h2>\n    </mat-card-title>\n    <mat-card-content>\n      <p>\n        A deterministic wallet is a system of deriving keys from a single starting point known as a seed. The seed allows a user\n        to easily back up and restore a wallet without needing any other information and can in some cases allow the creation\n        of public addresses without the knowledge of the private key.\n      </p>\n\n      <a href=\"https://en.bitcoin.it/wiki/Deterministic_wallet\" rel=\"noopener\">Read Bitcoin wiki page of \"Deterministic wallet\" article.</a>\n    </mat-card-content>\n  </mat-card>\n\n  <mat-card class=\"faq-card\" id=\"faq-6\">\n    <mat-card-title>\n      <app-scroll-to-top-button elementClass=\"faq-top\"></app-scroll-to-top-button>\n      <h2>What is BIP39?</h2>\n    </mat-card-title>\n    <mat-card-content>\n      <p>\n        BIP39 is a Bitcoin Improvement Proposal describing the implementation of a mnemonic sentence for the generation of deterministic\n        wallets.\n      </p>\n      <p>Popular wallets that use BIP39 for the mnemonic scheme include Trezor, Ledger, Electrum, Mycelium, Bither, Coinomy,\n        and MyEtherWallet..\n      </p>\n\n      <a href=\"https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki\" rel=\"noopener\">Read the full BIP39</a>\n\n    </mat-card-content>\n  </mat-card>\n\n  <mat-card class=\"faq-card\" id=\"faq-7\">\n    <mat-card-title>\n      <app-scroll-to-top-button elementClass=\"faq-top\"></app-scroll-to-top-button>\n      <h2>How do mnemonic seeds work?</h2>\n    </mat-card-title>\n    <mat-card-content>\n      <iframe width=\"420\" height=\"315\" src=\"https://www.youtube.com/embed/wWCIQFNf_8g\"></iframe>\n    </mat-card-content>\n  </mat-card>\n</div>\n<div class=\"clear\"></div>");
 
 /***/ }),
 
@@ -21508,7 +21558,7 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony default export */ __webpack_exports__["default"] = ("<div class=\"container mat-typography\">\n  <h1>Generate random Bitcoin address and see if you are a winner</h1>\n\n  <div>    \n    <div fxLayout=\"row wrap\" fxLayoutAlign=\"center center\">\n      <div fxFlex=\"100%\" fxFlex.gt-sm=\"80%\" fxFlex.gt-md=\"70%\" fxFlex.gt-md=\"50%\"  style=\"text-align: center\" >\n        \n        <div *ngIf=\"!(feelingLuckyCounterClicked > 3)\" >\n          <button mat-raised-button color=\"primary\"\n          (click)=\"buttonIamFeelingLuckyClicked()\" \n          class=\"i-am-feeling-lucky-button\" \n          [disabled]=\"loading\">\n            <span *ngIf=\"feelingLuckyCounterClicked === 0\">I'm feeling lucky!</span>\n            <span *ngIf=\"feelingLuckyCounterClicked === 1\">Try again!</span>\n            <span *ngIf=\"feelingLuckyCounterClicked === 2\">And again!</span>\n            <span *ngIf=\"feelingLuckyCounterClicked === 3\">And again ...</span>\n            <span *ngIf=\"feelingLuckyCounterClicked > 3\">Try again!</span>\n          </button>\n        </div>\n\n        <div *ngIf=\"feelingLuckyCounterClicked > 3\">\n          <mat-card style=\"margin: 1em;\">\n            <p style=\"font-size: 1.2em; line-height: normal;\">\n              You have had your fair chance today.\n              <a routerLink=\"/faq\" fragment=\"faq-1\">It won't get any better</a>. Do not get blinded by trying to get rich quick. Learn how Bitcoin works and try your\n              best to integrate it in the real world. Bitcoin needs adoption. Maybe you are able to use it in you next project?\n              Talk and share your knowledge with others. Spread the word.\n            </p>\n          </mat-card>\n        </div>\n        \n      </div>\n    </div>\n\n    <div fxLayout=\"row wrap\" fxLayoutAlign=\"center center\">\n      <div fxFlex=\"100%\" fxFlex.gt-sm=\"80%\" fxFlex.gt-md=\"70%\" fxFlex.gt-md=\"50%\">\n          <mat-form-field appearance=\"outline\" style=\"width: 100%;\">\n            <mat-label>Search</mat-label>\n            <input matInput [(ngModel)]=\"searchInputValue\" (keyup.enter)=\"onChangeSearchInput($event.target.value)\" />\n            <mat-spinner matSuffix *ngIf=\"loading\" diameter=\"15\" style=\"margin: auto 10px 4px 10px;\"></mat-spinner>\n          </mat-form-field>\n      </div>\n    </div>\n    \n    <div  fxLayout=\"row\" fxLayoutAlign=\"center center\" style=\"margin-bottom: 2rem;\">\n      <div fxFlex=\"0 1 auto\" fxFlex.gt-sm=\"0 1 auto\">\n        <button class=\"settings-button\" mat-button (click)=\"displayDetailedSettings = !displayDetailedSettings\">\n          <i class=\"material-icons\">\n              settings_applications\n          </i>\n        </button>\n      </div>\n      <div fxFlex=\"0 1 auto\" fxFlex.gt-sm=\"0 1 auto\" >\n        <button class=\"search-button\" mat-raised-button (click)=\"!loading && buttonSearchClicked()\">\n          <i matPrefix class=\"material-icons\">search</i>\n          Balance Search\n        </button>\n      </div>\n      <div fxFlex=\"0 1 auto\" fxFlex.gt-sm=\"0 1 auto\" *ngIf=\"feelingLuckyCounterClicked > 3\">\n        <button class=\"i-am-feeling-lucky-button-small\" \n              mat-raised-button color=\"primary\" \n              (click)=\"!loading && buttonIamFeelingLuckyClicked()\">\n          <span>I'm feeling lucky!</span>\n        </button>\n      </div>\n    </div>\n\n    <div *ngIf=\"displayDetailedSettings\" fxLayout=\"row wrap\">\n      <mat-card fxFlex=\"100%\" style=\"margin-bottom: 10px\">\n        <mat-card-header>\n          <mat-card-title>Passphrase settings</mat-card-title>\n          <mat-card-subtitle></mat-card-subtitle>\n        </mat-card-header>\n        <mat-form-field appearance=\"outline\" style=\"width: 100%;\">\n          <mat-label>Passphrase</mat-label>\n          <input matInput type=\"text\"\n          placeholder=\"correct horse battery staple\"\n          [(ngModel)]=\"passphraseInputValue\" />\n          <mat-hint></mat-hint>\n        </mat-form-field>\n      </mat-card>\n\n      <mat-card fxFlex=\"100%\">\n        <mat-card-header>\n          <mat-card-title>BIP32 path settings</mat-card-title>\n          <mat-card-subtitle></mat-card-subtitle>\n        </mat-card-header>\n        <div fxLayout=\"row wrap\" fxLayoutAlign=\"center center\" >\n          <div fxFlex=\"100%\" fxFlex.gt-sm=\"100%\" fxFlex.gt-md=\"25%\" fxFlex.gt-md=\"25%\">\n              <mat-form-field appearance=\"outline\" style=\"width: 100%;\">\n                <mat-label>Path Prefix</mat-label>\n                <input matInput type=\"text\" \n                pattern=\"m/((\\d)+'?/)*\"\n                placeholder=\"m/44'/0'/\"\n                required\n                [(ngModel)]=\"pathPrefix\" \n                [matAutocomplete]=\"pathPrefixInputAutocomplete\" />\n                <mat-hint>BIP32 path prefix (pattern <code>m/purpose'/coin_type'/)</code></mat-hint>\n              </mat-form-field>\n\n              <mat-autocomplete #pathPrefixInputAutocomplete=\"matAutocomplete\">\n                <mat-option *ngFor=\"let option of pathPrefixInputAutocompleteOptions\" [value]=\"option.value\">{{option.name}}</mat-option>\n              </mat-autocomplete>\n          </div>\n          <div fxFlex=\"100%\" fxFlex.gt-sm=\"33%\" fxFlex.gt-md=\"25%\" fxFlex.gt-md=\"25%\">\n              <mat-form-field appearance=\"outline\" style=\"width: 100%;\">\n                <mat-label>Path Account</mat-label>\n                <input matInput type=\"number\" [(ngModel)]=\"pathAccount\" placeholder=\"0\" required/>\n              </mat-form-field>\n          </div>\n          <div fxFlex=\"100%\" fxFlex.gt-sm=\"33%\" fxFlex.gt-md=\"25%\" fxFlex.gt-md=\"25%\">\n              <mat-form-field appearance=\"outline\" style=\"width: 100%;\">\n                <mat-label>Path Change</mat-label>\n                <input matInput type=\"number\" [(ngModel)]=\"pathChange\"  placeholder=\"0\" required/>\n              </mat-form-field>\n          </div>\n          <div fxFlex=\"100%\" fxFlex.gt-sm=\"33%\" fxFlex.gt-md=\"25%\" fxFlex.gt-md=\"25%\">\n              <mat-form-field appearance=\"outline\" style=\"width: 100%;\">\n                <mat-label>Path Index</mat-label>\n                <input matInput type=\"number\" [(ngModel)]=\"pathIndex\" placeholder=\"0\" required/>\n              </mat-form-field>\n          </div>\n        </div>\n      </mat-card>\n    </div>\n    \n    <div id=\"search-result-spacer-top\"></div>\n\n    <div *ngIf=\"result\">\n\n      <div *ngIf=\"result.error\">\n        <p style=\"background-color: red; padding: 1em;\">{{ result.error }}</p>\n        <p style=\"background-color: red; padding: 1em;\">{{ result.error.message }}</p>\n      </div>\n\n      <p style=\"text-align: center; font-size: 1.5em; margin: 1em; line-height: normal;\" *ngIf=\"result.received !== undefined\">\n        <span *ngIf=\"result.received === 0\">Address never received anything.</span>\n        <span *ngIf=\"result.received > 0\">Found address with\n          <code>received > 0</code>\n        </span>\n      </p>\n\n      <p style=\"text-align: center; font-size: 3em; margin: 1em; line-height: normal;\" *ngIf=\"result.balance !== undefined\">\n        <span *ngIf=\"result.balance === 0\">Balance is 0 :(</span>\n        <span *ngIf=\"result.balance > 0\">Found address with\n          <code>{{result.balance}} satoshis</code>\n        </span>\n      </p>\n\n      <mat-progress-bar *ngIf=\"loading\" mode=\"indeterminate\"></mat-progress-bar>\n\n      <mat-form-field class=\"full-width\" appearance=\"fill\" style=\"text-align: center;\" *ngIf=\"result.address\">\n        <mat-label>Address</mat-label>\n        <input style=\"font-size: 150%\" matInput type=\"text\" placeholder=\"\" [value]=\"result.address\" disabled/>\n        <a href=\"https://www.blockchain.com/btc/address/{{result.address}}\" target=\"_blank\">view on block explorer</a>\n      </mat-form-field>\n    </div>\n\n    <div *ngIf=\"result\" [hidden]=\"loading\">\n      <mat-card style=\"margin: 1em;\">\n        <h3>Search</h3>\n        <div *ngIf=\"result.mnemonic\">\n            <span class=\"bold\">Results for search term:</span> \n            <pre>{{result.mnemonic}}</pre>\n        </div>\n        <div *ngIf=\"result.path\">\n          <p>\n            <span class=\"bold\">Path (BIP44):</span> {{result.path}}\n            (see <a href=\"https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki\">BIP44</a>)\n          </p>\n          <p style=\"display: none\">\n            See <a href=\"https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki\">BIP32</a> and \n            <a href=\"https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki\">BIP39</a>, \n            <a href=\"https://github.com/bitcoin/bips/blob/master/bip-0049.mediawiki\">BIP49</a>, \n            <a href=\"https://github.com/bitcoin/bips/blob/master/bip-0084.mediawiki\">BIP84</a>.\n          </p>\n        </div>\n        <div *ngIf=\"result.address\">\n          <span class=\"bold\">Address:</span>\n          <pre>{{result.address}}</pre>\n        </div>\n      </mat-card>\n    </div>\n\n\n\n    <div *ngIf=\"result\" [hidden]=\"loading\">\n      <mat-card style=\"margin: 1em;\">\n        <h3>Wallet Information</h3>\n        <div *ngIf=\"result.seedHex\">\n          <span class=\"bold\">Seed:</span>\n          <pre>{{result.seedHex}}</pre>\n        </div>\n        <div *ngIf=\"result.rootXpriv\">\n          <span class=\"bold\">BIP32 xpriv:</span>\n          <pre>{{result.rootXpriv}}</pre>\n        </div>\n        <!--div *ngIf=\"result.rootXpriv\">\n          <span class=\"bold\">BIP32 xpub:</span>\n          <pre>{{result.rootXpub}}</pre>\n        </div-->\n        <div *ngIf=\"result.rootWif\">\n          <span class=\"bold\">WIF:</span>\n          <pre>{{result.rootWif}}</pre>\n          <p>\n            See <a href=\"https://en.bitcoin.it/wiki/Wallet_import_format\">Wallet Import Format wiki page on en.bitcoin.it</a> \n            for more information.\n          </p>\n        </div>\n        <div *ngIf=\"result.masterPrivateKey\">\n          <span class=\"bold\">Master Private Key:</span>\n          <pre>{{result.masterPrivateKey}}</pre>\n        </div>\n      </mat-card>\n    </div>\n\n    <div *ngIf=\"result\" [hidden]=\"loading || result.mnemonic === undefined\">\n      <mat-card style=\"margin: 1em;\">\n        <h3>Private Key Mnemonic</h3>\n        <div class=\"word-input-container\" fxLayout=\"row wrap\" *ngIf=\"!result.mneomincIsValid\">\n          Input is not a valid BIP39 mnemonic seed.\n        </div>\n        <div class=\"word-input-container\" fxLayout=\"row wrap\" *ngIf=\"result.mneomincIsValid\">\n          <div fxFlex=\"100%\" fxFlex.gt-sm=\"32%\" fxFlex.gt-md=\"24%\" fxFlex.gt-md=\"16.5%\" *ngFor=\"let i of [0,1,2,3,4,5,6,7,8,9,10,11]\">\n            <span>\n              <mat-form-field class=\"example-form-field-{{i}}\" appearance=\"fill\">\n                <mat-label>Word {{i+1}}</mat-label>\n                <input matInput type=\"text\" placeholder=\"Word {{i+1}}\" [value]=\"mnemonicArray[i]\" disabled/>\n              </mat-form-field>\n            </span>\n          </div>\n        </div>\n      </mat-card>\n    </div>\n\n    <div *ngIf=\"result\" [hidden]=\"loading || result.addresses === undefined\" class=\"more-addresses-container\">\n      <mat-card style=\"margin: 1em;\">\n        <h3>More Addresses</h3>\n        <div *ngIf=\"result.addresses && result.addresses.length > 0\">\n          <table mat-table [dataSource]=\"result.addresses\" class=\"full-width\">\n            <ng-container matColumnDef=\"info\">\n              <th mat-header-cell *matHeaderCellDef> info </th>\n              <td mat-cell *matCellDef=\"let address\"> \n                path: {{address.path}}\n                <br />\n                address: <a href=\"https://www.blockchain.com/btc/address/{{address.address}}\" target=\"_blank\">{{address.address}}</a>\n                <br />\n                wif: {{address.wif}}\n                <br /> \n                lastCheckTimestamp: {{address.lastCheckTimestamp | date: 'yyyy-mm-ddThh:mm:ss'}}<br />\n              </td>\n              <td mat-footer-cell *matFooterCellDef></td>\n            </ng-container>\n            <ng-container matColumnDef=\"path\">\n              <th mat-header-cell *matHeaderCellDef> path </th>\n              <td mat-cell *matCellDef=\"let address\"> {{address.path}} </td>\n              <td mat-footer-cell *matFooterCellDef></td>\n            </ng-container>\n            <ng-container matColumnDef=\"address\">\n              <th mat-header-cell *matHeaderCellDef> address </th>\n              <td mat-cell *matCellDef=\"let address\"> {{address.address}} </td>\n              <td mat-footer-cell *matFooterCellDef></td>\n            </ng-container>\n            <ng-container matColumnDef=\"wif\">\n              <th mat-header-cell *matHeaderCellDef> wif </th>\n              <td mat-cell *matCellDef=\"let address\"> {{address.wif}} </td>\n              <td mat-footer-cell *matFooterCellDef></td>\n            </ng-container>\n            <ng-container matColumnDef=\"received\">\n              <th mat-header-cell *matHeaderCellDef> received </th>\n              <td mat-cell *matCellDef=\"let address\"> {{address.received}} </td>\n              <td mat-footer-cell *matFooterCellDef> <strong>total received</strong><br />{{result.received}}</td>\n            </ng-container>\n            <ng-container matColumnDef=\"balance\">\n              <th mat-header-cell *matHeaderCellDef> balance </th>\n              <td mat-cell *matCellDef=\"let address\"> {{address.balance}} </td>\n              <td mat-footer-cell *matFooterCellDef> <strong>total balance</strong><br/>{{result.balance}}</td>\n            </ng-container>\n            <ng-container matColumnDef=\"lastCheckedTimestamp\">\n              <th mat-header-cell *matHeaderCellDef> lastCheckedTimestamp </th>\n              <td mat-cell *matCellDef=\"let address\"> {{address.lastCheckedTimestamp | date: 'yyyy-mm-ddThh:mm:ss'}} </td>\n              <td mat-footer-cell *matFooterCellDef></td>\n            </ng-container>\n\n            <tr mat-header-row *matHeaderRowDef=\"addressesDisplayedColumns\"></tr>\n            <tr mat-row *matRowDef=\"let row; columns: addressesDisplayedColumns;\"></tr>\n            <tr mat-footer-row *matFooterRowDef=\"addressesDisplayedColumns; sticky: true\"></tr>\n          </table>\n        </div>\n      </mat-card>\n\n    </div>\n  </div>\n\n</div>\n<div class=\"clear\"></div>");
+/* harmony default export */ __webpack_exports__["default"] = ("<div class=\"container mat-typography\">\n  <h1>Generate random Bitcoin address and see if you are a winner</h1>\n  \n  <div fxLayout=\"row wrap\" fxLayoutAlign=\"center center\">\n    <div fxFlex=\"100%\" fxFlex.gt-sm=\"80%\" fxFlex.gt-md=\"70%\" fxFlex.gt-md=\"50%\"  style=\"text-align: center\" >\n      \n      <div *ngIf=\"!(feelingLuckyCounterClicked > 3)\" >\n        <button mat-raised-button color=\"primary\"\n        (click)=\"buttonIamFeelingLuckyClicked()\" \n        class=\"i-am-feeling-lucky-button\" \n        [disabled]=\"loading\">\n          <span *ngIf=\"feelingLuckyCounterClicked === 0\">I'm feeling lucky!</span>\n          <span *ngIf=\"feelingLuckyCounterClicked === 1\">Try again!</span>\n          <span *ngIf=\"feelingLuckyCounterClicked === 2\">And again!</span>\n          <span *ngIf=\"feelingLuckyCounterClicked === 3\">And again ...</span>\n          <span *ngIf=\"feelingLuckyCounterClicked > 3\">Try again!</span>\n        </button>\n      </div>\n\n      <div *ngIf=\"feelingLuckyCounterClicked > 3\">\n        <mat-card style=\"margin: 1em;\">\n          <p style=\"font-size: 1.2em; line-height: normal;\">\n            You have had your fair chance today.\n            <a routerLink=\"/faq\" fragment=\"faq-1\">It won't get any better</a>. Do not get blinded by trying to get rich quick. Learn how Bitcoin works and try your\n            best to integrate it in the real world. Bitcoin needs adoption. Maybe you are able to use it in you next project?\n            Talk and share your knowledge with others. Spread the word.\n          </p>\n        </mat-card>\n      </div>\n      \n    </div>\n  </div>\n\n  <div fxLayout=\"row wrap\" fxLayoutAlign=\"center center\">\n    <div fxFlex=\"100%\" fxFlex.gt-sm=\"80%\" fxFlex.gt-md=\"70%\" fxFlex.gt-md=\"50%\">\n        <mat-form-field appearance=\"outline\" style=\"width: 100%;\">\n          <mat-label>Search</mat-label>\n          <input matInput [(ngModel)]=\"searchInputValue\" (keyup.enter)=\"onChangeSearchInput($event.target.value)\" />\n          <mat-spinner matSuffix *ngIf=\"loading\" diameter=\"15\" style=\"margin: auto 10px 4px 10px;\"></mat-spinner>\n        </mat-form-field>\n    </div>\n  </div>\n  \n  <div  fxLayout=\"row\" fxLayoutAlign=\"center center\" style=\"margin-bottom: 2rem;\">\n    <div fxFlex=\"0 1 auto\" fxFlex.gt-sm=\"0 1 auto\">\n      <button class=\"settings-button\" mat-button (click)=\"displayDetailedSettings = !displayDetailedSettings\">\n        <i class=\"material-icons\">\n            settings_applications\n        </i>\n      </button>\n    </div>\n    <div fxFlex=\"0 1 auto\" fxFlex.gt-sm=\"0 1 auto\" >\n      <button class=\"search-button\" mat-raised-button (click)=\"!loading && buttonSearchClicked()\">\n        <i matPrefix class=\"material-icons\">search</i>\n        Balance Search\n      </button>\n    </div>\n    <div fxFlex=\"0 1 auto\" fxFlex.gt-sm=\"0 1 auto\" *ngIf=\"feelingLuckyCounterClicked > 3\">\n      <button class=\"i-am-feeling-lucky-button-small\" \n            mat-raised-button color=\"primary\" \n            (click)=\"!loading && buttonIamFeelingLuckyClicked()\">\n        <span>I'm feeling lucky!</span>\n      </button>\n    </div>\n  </div>\n\n  <div *ngIf=\"displayDetailedSettings\" fxLayout=\"row wrap\">\n    <mat-card fxFlex=\"100%\" fxFlex.gt-sm=\"70%\" style=\"margin-bottom: 10px\">\n      <mat-card-header>\n        <mat-card-title>Passphrase settings</mat-card-title>\n        <mat-card-subtitle></mat-card-subtitle>\n      </mat-card-header>\n      <mat-form-field appearance=\"outline\" style=\"width: 100%;\">\n        <mat-label>Passphrase</mat-label>\n        <input matInput type=\"text\"\n        placeholder=\"correct horse battery staple\"\n        [(ngModel)]=\"passphraseInputValue\" />\n        <mat-hint></mat-hint>\n      </mat-form-field>\n    </mat-card>\n    <mat-card fxFlex=\"100%\"fxFlex.gt-sm=\"30%\" style=\"margin-bottom: 10px\">\n      <mat-card-header>\n        <mat-card-title>Network settings</mat-card-title>\n        <mat-card-subtitle></mat-card-subtitle>\n      </mat-card-header>\n\n      <mat-form-field  appearance=\"outline\" style=\"width: 100%;\">\n        <mat-label>Network</mat-label>\n        <mat-select [(ngModel)]=\"networkInputValue\" name=\"network\">\n          <mat-option *ngFor=\"let network of networkInputSelectOptions\" [value]=\"network.value\">\n            {{network.name}}\n          </mat-option>\n        </mat-select>\n      </mat-form-field>\n    </mat-card>\n\n    <mat-card fxFlex=\"100%\">\n      <mat-card-header>\n        <mat-card-title>BIP32 path settings</mat-card-title>\n        <mat-card-subtitle></mat-card-subtitle>\n      </mat-card-header>\n      <div fxLayout=\"row wrap\" fxLayoutAlign=\"center center\" >\n        <div fxFlex=\"100%\" fxFlex.gt-sm=\"100%\" fxFlex.gt-md=\"25%\" fxFlex.gt-md=\"25%\">\n            <mat-form-field appearance=\"outline\" style=\"width: 100%;\">\n              <mat-label>Path Prefix</mat-label>\n              <input matInput type=\"text\" \n              pattern=\"m/((\\d)+'?/)*\"\n              placeholder=\"m/44'/0'/\"\n              required\n              [(ngModel)]=\"pathPrefix\" \n              [matAutocomplete]=\"pathPrefixInputAutocomplete\" />\n              <mat-hint>BIP32 path prefix (pattern <code>m/purpose'/coin_type'/)</code></mat-hint>\n            </mat-form-field>\n\n            <mat-autocomplete #pathPrefixInputAutocomplete=\"matAutocomplete\">\n              <mat-option *ngFor=\"let option of pathPrefixInputAutocompleteOptions\" [value]=\"option.value\">{{option.name}}</mat-option>\n            </mat-autocomplete>\n        </div>\n        <div fxFlex=\"100%\" fxFlex.gt-sm=\"33%\" fxFlex.gt-md=\"25%\" fxFlex.gt-md=\"25%\">\n            <mat-form-field appearance=\"outline\" style=\"width: 100%;\">\n              <mat-label>Path Account</mat-label>\n              <input matInput type=\"number\" [(ngModel)]=\"pathAccount\" placeholder=\"0\" required/>\n            </mat-form-field>\n        </div>\n        <div fxFlex=\"100%\" fxFlex.gt-sm=\"33%\" fxFlex.gt-md=\"25%\" fxFlex.gt-md=\"25%\">\n            <mat-form-field appearance=\"outline\" style=\"width: 100%;\">\n              <mat-label>Path Change</mat-label>\n              <input matInput type=\"number\" [(ngModel)]=\"pathChange\"  placeholder=\"0\" required/>\n            </mat-form-field>\n        </div>\n        <div fxFlex=\"100%\" fxFlex.gt-sm=\"33%\" fxFlex.gt-md=\"25%\" fxFlex.gt-md=\"25%\">\n            <mat-form-field appearance=\"outline\" style=\"width: 100%;\">\n              <mat-label>Path Index</mat-label>\n              <input matInput type=\"number\" [(ngModel)]=\"pathIndex\" placeholder=\"0\" required/>\n            </mat-form-field>\n        </div>\n      </div>\n    </mat-card>\n  </div>\n  \n  <div id=\"search-result-spacer-top\"></div>\n\n\n  <div *ngIf=\"result\" style=\"margin: 0 0 2rem 0;\">\n\n    <div *ngIf=\"result.error\">\n      <p style=\"background-color: red; padding: 1em;\">{{ result.error }}</p>\n      <p style=\"background-color: red; padding: 1em;\">{{ result.error.message }}</p>\n    </div>\n\n    <div *ngIf=\"!result.error\" style=\"text-align: center; line-height: normal;\">\n      <p style=\"font-size: 1.5rem; margin: 1rem 0;\">\n        <span *ngIf=\"result.received === 0\">Addresses never received anything.</span>\n        <span *ngIf=\"result.received > 0\">Found addresses with\n          <code>received > 0</code> (<code>{{ result.received | bitcoin}}</code>)\n        </span>\n      </p>\n      <p *ngIf=\"result.latestActivityTimestamp > 0\" style=\"font-size: 1rem; margin: 0.25rem 0;\">\n        Most recent activity was {{ result.latestActivityTimestamp * 1000 | amTimeAgo }} ({{ result.latestActivityTimestamp * 1000 | date}})\n      </p>\n\n      <p style=\"font-size: 2.5rem; margin: 1rem 0;\">\n        <span *ngIf=\"result.balance === 0\">\n          Balance is <code>{{0 | bitcoin}}</code><br />\n          ¯\\_(ツ)_/¯\n        </span>\n        <span *ngIf=\"result.balance > 0\">₿alance is <br />\n          <code>{{result.balance | bitcoin}}</code>\n        </span>\n      </p>\n      <p style=\"font-size: 1rem; margin: 1rem 0;\">\n        Scanned {{ result.numberOfAddressesScanned | number}} addresses in {{result.searchDurationInMs / 1000 | number:'1.2-2'}} seconds\n      </p>\n    </div>\n\n  </div>\n\n  <mat-progress-bar *ngIf=\"loading\" mode=\"indeterminate\"></mat-progress-bar>\n\n  <div *ngIf=\"result && !result.error\" [hidden]=\"loading\">\n    <mat-card style=\"margin: 1em;\">\n      <h3>Search</h3>\n\n      <span class=\"bold\">Results for search term:</span> \n      <pre>{{result.mnemonic || '(empty)'}}</pre>\n      \n      <p>\n        <span class=\"bold\">Total Balance:</span> \n        {{ result.balance | bitcoin}}\n      </p>\n      <p>\n        <span class=\"bold\">Total Received:</span> \n        {{ result.received | bitcoin}}\n      </p>\n      <p>\n        <span class=\"bold\">Node Count:</span> \n        {{ result.numberOfNodes | number}}\n      </p>\n      <p>\n        <span class=\"bold\">Addresses with unspent transaction outputs (utxo):</span> \n        {{ result.numberOfNodesWithBalance | number}}\n      </p>\n      <p>\n        <span class=\"bold\">Addresses with transactions:</span> \n        {{ result.numberOfNodesWithReceived | number}}\n      </p>\n    </mat-card>\n  </div>\n\n  <div *ngIf=\"result\" [hidden]=\"loading\">\n    <mat-card style=\"margin: 1em;\" *ngIf=\"result.numberOfNodesWithBalance > 0\">\n      <h3>Addresses with unspent transaction outputs (utxo)</h3>\n      \n      <div fxLayout=\"row wrap\" fxLayoutAlign=\"center center\">\n        <div fxFlex=\"100%\" fxFlex.gt-sm=\"100%\" fxFlex.gt-md=\"100%\" fxFlex.gt-md=\"100%\" *ngFor=\"let node of result.nodesWithBalance\">\n          <ng-container *ngFor=\"let addressView of node.addresses\">\n            <div *ngIf=\"addressView.balance > 0\">\n              Balance: {{ addressView.balance | bitcoin}}<br />\n              Received:{{ addressView.received | bitcoin}} \n              <mat-form-field class=\"full-width\" appearance=\"fill\" style=\"text-align: center;\">\n                <mat-label>Address</mat-label>\n                <input style=\"font-size: 150%\" matInput type=\"text\" placeholder=\"\" [value]=\"addressView._address.address\" disabled/>\n                <a href=\"https://www.blockchain.com/btc/address/{{addressView._address.address}}\" target=\"_blank\">view on block explorer</a>\n                <br />\n                <br />\n                <span>wif: {{node._node.wif}}</span><br />\n                <span>path: {{node._node.path}}</span>\n              </mat-form-field>\n            </div>\n          </ng-container>\n        </div>\n      </div>\n    </mat-card>\n  </div>\n\n  <div *ngIf=\"result\" [hidden]=\"loading\">\n    <mat-card style=\"margin: 1em;\" *ngIf=\"result.numberOfNodesWithReceived > 0\">\n      <h3>Addresses with transactions</h3>\n      \n      <div fxLayout=\"row wrap\" fxLayoutAlign=\"center center\">\n        <div fxFlex=\"100%\" fxFlex.gt-sm=\"100%\" fxFlex.gt-md=\"100%\" fxFlex.gt-md=\"100%\" *ngFor=\"let node of result.nodesWithReceived\">\n            <ng-container *ngFor=\"let addressView of node.addresses\">\n              <div *ngIf=\"addressView.received > 0\">\n                Balance: {{ addressView.balance | bitcoin}}<br />\n                Received:{{ addressView.received | bitcoin}} \n                <mat-form-field class=\"full-width\" appearance=\"fill\" style=\"text-align: center;\">\n                  <mat-label>Address</mat-label>\n                  <input style=\"font-size: 150%\" matInput type=\"text\" placeholder=\"\" [value]=\"addressView._address.address\" disabled/>\n                  <a href=\"https://www.blockchain.com/btc/address/{{addressView._address.address}}\" target=\"_blank\">view on block explorer</a>\n                  <br />\n                  <br />\n                  <span>wif: {{node._node.wif}}</span><br />\n                  <span *ngIf=\"addressView.info && addressView.info.latest_tx_block_time\">\n                    activity: {{ addressView.info.latest_tx_block_time * 1000 | amTimeAgo }} ({{ addressView.info.latest_tx_block_time * 1000 | date}})\n                  </span><br />\n                  <span>path: {{node._node.path}}</span>\n                </mat-form-field>\n              </div>\n            </ng-container>\n        </div>\n      </div>\n    </mat-card>\n  </div>\n\n  <div *ngIf=\"wallet\" [hidden]=\"loading\">\n    <mat-card style=\"margin: 1em;\">\n      <h3>Wallet Information</h3>\n      <div>\n        <span class=\"bold\">Seed:</span>\n        <pre>{{result.seedHex}}</pre>\n      </div>\n      <div>\n        <span class=\"bold\">BIP32 xpriv:</span>\n        <pre>{{result.xpriv}}</pre>\n      </div>\n      <div *ngIf=\"result.xpub\">\n        <span class=\"bold\">BIP32 xpub:</span>\n        <pre>{{result.xpub}}</pre>\n      </div>\n      <div>\n        <span class=\"bold\">WIF:</span>\n        <pre>{{result.wif}}</pre>\n        <p>\n          See <a href=\"https://en.bitcoin.it/wiki/Wallet_import_format\">Wallet Import Format wiki page on en.bitcoin.it</a> \n          for more information.\n        </p>\n      </div>\n      <!-- div>\n        <span class=\"bold\">Master Private Key:</span>\n        <pre>{{wallet.root._node.privateKey}}</pre>\n      </div-->\n    </mat-card>\n  </div>\n\n  <div *ngIf=\"result\" [hidden]=\"loading || result.mnemonic === undefined\">\n    <mat-card style=\"margin: 1em;\">\n      <h3>Private Key Mnemonic</h3>\n      <div class=\"word-input-container\" fxLayout=\"row wrap\" *ngIf=\"!result.mneomincIsValid\">\n        Input is not a valid BIP39 mnemonic seed.\n      </div>\n      <div class=\"word-input-container\" fxLayout=\"row wrap\" *ngIf=\"result.mneomincIsValid\">\n        <div fxFlex=\"100%\" fxFlex.gt-sm=\"32%\" fxFlex.gt-md=\"24%\" fxFlex.gt-md=\"16.5%\" *ngFor=\"let i of [0,1,2,3,4,5,6,7,8,9,10,11]\">\n          <span>\n            <mat-form-field class=\"example-form-field-{{i}}\" appearance=\"fill\">\n              <mat-label>Word {{i+1}}</mat-label>\n              <input matInput type=\"text\" placeholder=\"Word {{i+1}}\" [value]=\"mnemonicArray[i]\" disabled/>\n            </mat-form-field>\n          </span>\n        </div>\n      </div>\n    </mat-card>\n  </div>\n\n  \n  <!--div *ngIf=\"result\" [hidden]=\"loading || result.addresses === undefined\" class=\"more-addresses-container\">\n    <mat-card style=\"margin: 1em;\">\n      <h3>More Addresses</h3>\n      <div *ngIf=\"result.addresses && result.addresses.length > 0\">\n        <table mat-table [dataSource]=\"result.addresses\" class=\"full-width\">\n          <ng-container matColumnDef=\"info\">\n            <th mat-header-cell *matHeaderCellDef> info </th>\n            <td mat-cell *matCellDef=\"let address\"> \n              path: {{address.path}}\n              <br />\n              address: <a href=\"https://www.blockchain.com/btc/address/{{address.address}}\" target=\"_blank\">{{address.address}}</a>\n              <br />\n              wif: {{address.wif}}\n              <br /> \n              lastCheckTimestamp: {{address.lastCheckTimestamp | date: 'yyyy-mm-ddThh:mm:ss'}}<br />\n            </td>\n            <td mat-footer-cell *matFooterCellDef></td>\n          </ng-container>\n          <ng-container matColumnDef=\"path\">\n            <th mat-header-cell *matHeaderCellDef> path </th>\n            <td mat-cell *matCellDef=\"let address\"> {{address.path}} </td>\n            <td mat-footer-cell *matFooterCellDef></td>\n          </ng-container>\n          <ng-container matColumnDef=\"address\">\n            <th mat-header-cell *matHeaderCellDef> address </th>\n            <td mat-cell *matCellDef=\"let address\"> {{address.address}} </td>\n            <td mat-footer-cell *matFooterCellDef></td>\n          </ng-container>\n          <ng-container matColumnDef=\"wif\">\n            <th mat-header-cell *matHeaderCellDef> wif </th>\n            <td mat-cell *matCellDef=\"let address\"> {{address.wif}} </td>\n            <td mat-footer-cell *matFooterCellDef></td>\n          </ng-container>\n          <ng-container matColumnDef=\"received\">\n            <th mat-header-cell *matHeaderCellDef> received </th>\n            <td mat-cell *matCellDef=\"let address\"> {{address.received}} </td>\n            <td mat-footer-cell *matFooterCellDef> <strong>total received</strong><br />{{result.received}}</td>\n          </ng-container>\n          <ng-container matColumnDef=\"balance\">\n            <th mat-header-cell *matHeaderCellDef> balance </th>\n            <td mat-cell *matCellDef=\"let address\"> {{address.balance}} </td>\n            <td mat-footer-cell *matFooterCellDef> <strong>total balance</strong><br/>{{result.balance}}</td>\n          </ng-container>\n          <ng-container matColumnDef=\"lastCheckedTimestamp\">\n            <th mat-header-cell *matHeaderCellDef> lastCheckedTimestamp </th>\n            <td mat-cell *matCellDef=\"let address\"> {{address.lastCheckedTimestamp | date: 'yyyy-mm-ddThh:mm:ss'}} </td>\n            <td mat-footer-cell *matFooterCellDef></td>\n          </ng-container>\n\n          <tr mat-header-row *matHeaderRowDef=\"addressesDisplayedColumns\"></tr>\n          <tr mat-row *matRowDef=\"let row; columns: addressesDisplayedColumns;\"></tr>\n          <tr mat-footer-row *matFooterRowDef=\"addressesDisplayedColumns; sticky: true\"></tr>\n        </table>\n      </div>\n    </mat-card>\n\n  </div-->\n\n\n    \n  <div *ngIf=\"wallet\">\n\n    <!-- p>\n      <span class=\"bold\">Path (BIP44):</span> {{result.path}}\n      (see <a href=\"https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki\">BIP44</a>)\n    </p>\n    <p style=\"display: none\">\n      See <a href=\"https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki\">BIP32</a> and \n      <a href=\"https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki\">BIP39</a>, \n      <a href=\"https://github.com/bitcoin/bips/blob/master/bip-0049.mediawiki\">BIP49</a>, \n      <a href=\"https://github.com/bitcoin/bips/blob/master/bip-0084.mediawiki\">BIP84</a>.\n    </p-->\n\n    <mat-tab-group mat-stretch-tabs>\n      <mat-tab *ngFor=\"let node of wallet.root.childNodes\">\n        <ng-template mat-tab-label>\n          <mat-icon>account_tree</mat-icon>&nbsp;&nbsp;\n          {{ node._node.path }} \n          ({{ node.received() | bitcoin}})\n        </ng-template>\n        <mat-card style=\"margin: 1em;\">\n\n          <ul>\n              <li>Total Balance: {{ node.balance() | bitcoin}}</li>\n              <li>Total Received: {{ node.received() | bitcoin}}</li>\n              <li>Child Node Count: {{ node.childNodes.length | number}}</li>\n          </ul>\n\n          <div *ngFor=\"let child of node.childNodes\">\n            WIF: {{ child._node.wif }}<br />\n            <div *ngFor=\"let addressView of child.addresses\">\n              Balance: {{ addressView.balance | bitcoin}}<br />\n              Received:{{ addressView.received | bitcoin}} \n              <mat-form-field class=\"full-width\" appearance=\"fill\" style=\"text-align: center;\">\n                <mat-label>Address ({{ child._node.path }}) </mat-label>\n                <input style=\"font-size: 100%\" matInput type=\"text\" placeholder=\"\" [value]=\"addressView._address.address\" disabled/>\n                <a href=\"https://www.blockchain.com/btc/address/{{addressView._address.address}}\" target=\"_blank\">view on block explorer</a>\n              </mat-form-field>\n            </div>\n          </div>\n      \n          <button mat-raised-button color=\"primary\" (click)=\"wallet.scanNextChildNode(node)\">Scan more addresses</button>\n        \n        </mat-card>\n      </mat-tab>\n    </mat-tab-group>\n  </div>\n\n</div>\n<div class=\"clear\"></div>");
 
 /***/ }),
 
@@ -26416,39 +26466,6 @@ module.exports = { encode: encode, decode: decode, encodingLength: encodingLengt
 
 /***/ }),
 
-/***/ "./node_modules/webpack/buildin/module.js":
-/*!***********************************!*\
-  !*** (webpack)/buildin/module.js ***!
-  \***********************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = function(module) {
-	if (!module.webpackPolyfill) {
-		module.deprecate = function() {};
-		module.paths = [];
-		// module.parent = undefined by default
-		if (!module.children) module.children = [];
-		Object.defineProperty(module, "loaded", {
-			enumerable: true,
-			get: function() {
-				return module.l;
-			}
-		});
-		Object.defineProperty(module, "id", {
-			enumerable: true,
-			get: function() {
-				return module.i;
-			}
-		});
-		module.webpackPolyfill = 1;
-	}
-	return module;
-};
-
-
-/***/ }),
-
 /***/ "./node_modules/wif/index.js":
 /*!***********************************!*\
   !*** ./node_modules/wif/index.js ***!
@@ -26672,25 +26689,27 @@ __webpack_require__.r(__webpack_exports__);
 /*!*********************************************************!*\
   !*** ./src/app/main/main-front/main-front.component.ts ***!
   \*********************************************************/
-/*! exports provided: MainFrontComponent */
+/*! exports provided: BitcoinPipe, MainFrontComponent */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BitcoinPipe", function() { return BitcoinPipe; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "MainFrontComponent", function() { return MainFrontComponent; });
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
 /* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/forms */ "./node_modules/@angular/forms/fesm5/forms.js");
-/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @angular/router */ "./node_modules/@angular/router/fesm5/router.js");
-/* harmony import */ var rxjs_Subject__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! rxjs/Subject */ "./node_modules/rxjs-compat/_esm5/Subject.js");
-/* harmony import */ var _core_shared_data_info_service_service__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../core/shared/data-info-service.service */ "./src/app/core/shared/data-info-service.service.ts");
-/* harmony import */ var bitcoinjs_lib__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! bitcoinjs-lib */ "./node_modules/bitcoinjs-lib/src/index.js");
-/* harmony import */ var bitcoinjs_lib__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(bitcoinjs_lib__WEBPACK_IMPORTED_MODULE_5__);
-/* harmony import */ var bip32__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! bip32 */ "./node_modules/bip32/src/index.js");
-/* harmony import */ var bip32__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(bip32__WEBPACK_IMPORTED_MODULE_6__);
-/* harmony import */ var bip39__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! bip39 */ "./node_modules/bip39/src/index.js");
-/* harmony import */ var bip39__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(bip39__WEBPACK_IMPORTED_MODULE_7__);
-/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! rxjs/operators */ "./node_modules/rxjs/_esm5/operators/index.js");
-/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! rxjs */ "./node_modules/rxjs/_esm5/index.js");
+/* harmony import */ var _angular_material_snack_bar__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @angular/material/snack-bar */ "./node_modules/@angular/material/esm5/snack-bar.es5.js");
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/router */ "./node_modules/@angular/router/fesm5/router.js");
+/* harmony import */ var rxjs_Subject__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! rxjs/Subject */ "./node_modules/rxjs-compat/_esm5/Subject.js");
+/* harmony import */ var _core_shared_data_info_service_service__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../core/shared/data-info-service.service */ "./src/app/core/shared/data-info-service.service.ts");
+/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @angular/common */ "./node_modules/@angular/common/fesm5/common.js");
+/* harmony import */ var bitcoinjs_lib__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! bitcoinjs-lib */ "./node_modules/bitcoinjs-lib/src/index.js");
+/* harmony import */ var bitcoinjs_lib__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(bitcoinjs_lib__WEBPACK_IMPORTED_MODULE_7__);
+/* harmony import */ var bip39__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! bip39 */ "./node_modules/bip39/src/index.js");
+/* harmony import */ var bip39__WEBPACK_IMPORTED_MODULE_8___default = /*#__PURE__*/__webpack_require__.n(bip39__WEBPACK_IMPORTED_MODULE_8__);
+/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! rxjs/operators */ "./node_modules/rxjs/_esm5/operators/index.js");
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! rxjs */ "./node_modules/rxjs/_esm5/index.js");
+/* harmony import */ var _wallet_core_wallet__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../../wallet/core/wallet */ "./src/app/wallet/core/wallet.ts");
 var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -26713,61 +26732,9 @@ var __importDefault = (undefined && undefined.__importDefault) || function (mod)
 
 
 
-var NgBip32HdNodeView = /** @class */ (function () {
-    function NgBip32HdNodeView(_node) {
-        var _this = this;
-        this._node = _node;
-        this.balance = function () {
-            var selfBalance = _this._node.addresses.map(function (it) { return it.balance; }).reduce(function (prev, curr) { return prev + curr; });
-            var nodesBlanace = _this.nodes().map(function (it) { return it.balance(); }).reduce(function (prev, curr) { return prev + curr; });
-            return selfBalance + nodesBlanace;
-        };
-        this.received = function () {
-            var selfReceived = _this._node.addresses.map(function (it) { return it.received; }).reduce(function (prev, curr) { return prev + curr; });
-            var nodesReceived = _this.nodes().map(function (it) { return it.received(); }).reduce(function (prev, curr) { return prev + curr; });
-            return selfReceived + nodesReceived;
-        };
-        this.errors = function () { return _this._node.addresses.filter(function (it) { return !!it.error; }).map(function (it) { return it.error; }); };
-        this.nodes = function () { return _this._node.nodes.map(function (it) { return new NgBip32HdNodeView(it); }); };
-    }
-    return NgBip32HdNodeView;
-}());
-var NgBip32HdRootView = /** @class */ (function () {
-    function NgBip32HdRootView(mnemonic, _root) {
-        var _this = this;
-        this.mnemonic = mnemonic;
-        this._root = _root;
-        this.root = function () { return new NgBip32HdNodeView(_this._root); };
-        this.hasValidMnemonic = function () { return bip39__WEBPACK_IMPORTED_MODULE_7__["validateMnemonic"](_this.mnemonic); };
-    }
-    return NgBip32HdRootView;
-}());
-function buf2hex(buffer) {
-    return Array.prototype.map.call(new Uint8Array(buffer), function (x) { return ('00' + x.toString(16)).slice(-2); }).join('');
-}
-function p2pkhAddress(node, network) {
-    return bitcoinjs_lib__WEBPACK_IMPORTED_MODULE_5__["payments"].p2pkh({ pubkey: node.publicKey, network: network }).address;
-}
-function segwitAdddress(node, network) {
-    return bitcoinjs_lib__WEBPACK_IMPORTED_MODULE_5__["payments"].p2sh({
-        redeem: bitcoinjs_lib__WEBPACK_IMPORTED_MODULE_5__["payments"].p2wpkh({ pubkey: node.publicKey })
-    }).address;
-}
-function p2wpkhAddress(node, network) {
-    return bitcoinjs_lib__WEBPACK_IMPORTED_MODULE_5__["payments"].p2wpkh({ pubkey: node.publicKey, network: network }).address;
-}
-function generateAddressFn(path, defaultFn) {
-    if (path.substr(0, "m/44'/".length) === "m/44'/") {
-        return p2pkhAddress;
-    }
-    if (path.substr(0, "m/49'/".length) === "m/49'/") {
-        return segwitAdddress;
-    }
-    if (path.substr(0, "m/84'/".length) === "m/84'/") {
-        return p2wpkhAddress;
-    }
-    return defaultFn ? defaultFn : p2pkhAddress;
-}
+
+
+
 function buildPath(prefix, account, change, index) {
     if (prefix && Number.isInteger(account) && Number.isInteger(change) && Number.isInteger(index)) {
         return "" + prefix + account + "'/" + change + "/" + index;
@@ -26783,16 +26750,44 @@ function buildPath(prefix, account, change, index) {
     }
     return "" + prefix;
 }
-function findLastIntegerInString(val) {
-    var match = val.match(/(\d+)(?!.*\d)/);
-    if (match.length === 2) {
-        return Number.parseInt(match[1], 10);
+var BitcoinPipe = /** @class */ (function () {
+    function BitcoinPipe(injector) {
+        this.currencyPipe = injector.get(_angular_common__WEBPACK_IMPORTED_MODULE_6__["CurrencyPipe"]);
     }
-    return null;
-}
+    BitcoinPipe.prototype.transform = function (value, valueType, displayType) {
+        var _valueType = valueType && valueType === 'btc' ? 'btc' : 'sat';
+        var _displayType = displayType && displayType === 'sat' ? 'sat' : 'btc';
+        var displayBitcoin = _displayType === 'btc';
+        var isSatToBtc = _valueType === 'sat' && _displayType === 'btc';
+        var isBtcToSat = _valueType === 'btc' && _displayType === 'sat';
+        var _value = value;
+        if (isSatToBtc) {
+            _value = value / 100000000;
+        }
+        if (isBtcToSat) {
+            _value = value / 100000000;
+        }
+        var symbol = displayBitcoin ? '₿' : 'sat';
+        var digitInfo = displayBitcoin ? '1.0-8' : '1.0-0';
+        return this.currencyPipe.transform(_value, 'XBT', symbol, digitInfo);
+    };
+    BitcoinPipe.ctorParameters = function () { return [
+        { type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Injector"] }
+    ]; };
+    BitcoinPipe = __decorate([
+        Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["Pipe"])({
+            name: 'bitcoin'
+        }),
+        __metadata("design:paramtypes", [_angular_core__WEBPACK_IMPORTED_MODULE_0__["Injector"]])
+    ], BitcoinPipe);
+    return BitcoinPipe;
+}());
+
 var MainFrontComponent = /** @class */ (function () {
-    function MainFrontComponent(router, activatedRoute, formBuilder, dataInfoService) {
+    // ['path', 'address', 'wif', 'received', 'balance', 'lastCheckedTimestamp'];
+    function MainFrontComponent(router, _snackBar, activatedRoute, formBuilder, dataInfoService) {
         this.router = router;
+        this._snackBar = _snackBar;
         this.activatedRoute = activatedRoute;
         this.formBuilder = formBuilder;
         this.dataInfoService = dataInfoService;
@@ -26802,6 +26797,15 @@ var MainFrontComponent = /** @class */ (function () {
         this.pathPrefixBip44 = "m/44'/0'/"; // addresses 1xxx
         this.pathPrefixBip49 = "m/49'/0'/"; // addresses 3xxx
         this.pathPrefixBip84 = "m/84'/0'/"; // addresses bc1xxx
+        this.networkInputValue = bitcoinjs_lib__WEBPACK_IMPORTED_MODULE_7__["networks"].bitcoin;
+        this.networkInputSelectOptions = [{
+                value: bitcoinjs_lib__WEBPACK_IMPORTED_MODULE_7__["networks"].bitcoin,
+                name: "mainnet"
+            }, {
+                value: bitcoinjs_lib__WEBPACK_IMPORTED_MODULE_7__["networks"].testnet,
+                name: "testnet"
+            }
+        ];
         this.pathAccount = 0;
         this.pathChange = 0;
         this.pathIndex = 0;
@@ -26817,13 +26821,13 @@ var MainFrontComponent = /** @class */ (function () {
                 name: this.pathPrefixBip84 + ' (BIP84)'
             }
         ];
-        this.mnemonicInputChangedSubject = new rxjs_Subject__WEBPACK_IMPORTED_MODULE_3__["Subject"]();
-        this.searchInputChangedSubject = new rxjs_Subject__WEBPACK_IMPORTED_MODULE_3__["Subject"]();
+        this.mnemonicInputChangedSubject = new rxjs_Subject__WEBPACK_IMPORTED_MODULE_4__["Subject"]();
+        this.searchInputChangedSubject = new rxjs_Subject__WEBPACK_IMPORTED_MODULE_4__["Subject"]();
         this.tryCounter = 0;
         this.feelingLuckyCounterClicked = 0;
         this.loading = false;
         this.displayDetailedSettings = false;
-        this.addressesDisplayedColumns = ['info', 'received', 'balance']; // ['path', 'address', 'wif', 'received', 'balance', 'lastCheckedTimestamp'];
+        this.addressesDisplayedColumns = ['info', 'received', 'balance'];
         this.mnemonicArray = [];
         this.searchInputValue = '';
         this.passphraseInputValue = '';
@@ -26842,14 +26846,14 @@ var MainFrontComponent = /** @class */ (function () {
             _this.searchInputValue = mnemonic;
             _this.generateResult(mnemonic);
         });
-        this.searchInputChangedSubject.pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["filter"])(function (val) { return val !== null; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["throttleTime"])(100)).subscribe(function (searchFieldValue) {
+        this.searchInputChangedSubject.pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_9__["filter"])(function (val) { return val !== null; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_9__["throttleTime"])(100)).subscribe(function (searchFieldValue) {
             _this.searchInputValue = searchFieldValue;
             _this.mnemonicInputChangedSubject.next(searchFieldValue);
         });
         this.activatedRoute.queryParamMap.pipe().subscribe(function (p) {
             _this.passphraseInputValue = p.get(_this.PASSPHRASE_QUERY_PARAM_NAME);
         });
-        this.activatedRoute.queryParamMap.pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["take"])(1)).subscribe(function (p) {
+        this.activatedRoute.queryParamMap.pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_9__["take"])(1)).subscribe(function (p) {
             var mnemonic = p.get(_this.SEARCH_QUERY_PARAM_NAME);
             _this.searchInputChangedSubject.next(mnemonic);
         });
@@ -26873,100 +26877,196 @@ var MainFrontComponent = /** @class */ (function () {
     };
     MainFrontComponent.prototype.buttonIamFeelingLuckyClicked = function () {
         this.feelingLuckyCounterClicked++;
-        var mnemonic = bip39__WEBPACK_IMPORTED_MODULE_7__["generateMnemonic"]();
+        var mnemonic = bip39__WEBPACK_IMPORTED_MODULE_8__["generateMnemonic"]();
         this.onChangeSearchInput(mnemonic);
     };
     MainFrontComponent.prototype.generateResult = function (mnemonic) {
         var _this = this;
         this.loading = true;
         this.result = null;
-        Object(rxjs__WEBPACK_IMPORTED_MODULE_9__["of"])(1).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["map"])(function (foo) {
-            var seed = bip39__WEBPACK_IMPORTED_MODULE_7__["mnemonicToSeedSync"](mnemonic, _this.passphraseInputValue);
-            var root = bip32__WEBPACK_IMPORTED_MODULE_6__["fromSeed"](seed);
-            var rootXpriv = root.toBase58();
-            var rootXpub = root.neutered().toBase58();
-            var rootWif = root.toWIF();
-            var masterPrivateKey = root.privateKey;
-            var path = _this.buildPathWithIndex(_this.pathIndex);
-            var currentIndex = findLastIntegerInString(path) || 0;
-            var addresses = [];
-            var addressesNew = [];
-            for (var i = currentIndex; i <= 20; i++) {
-                var iPath = _this.buildPathWithIndex(i);
-                var iChild = root.derivePath(iPath);
-                var iAddress = generateAddressFn(iPath)(iChild);
-                var addressResultNew = new NgBip32HdNodeView({
-                    root: iChild,
-                    path: iPath,
-                    publicKey: '0x' + buf2hex(iChild.publicKey),
-                    privateKey: '0x' + buf2hex(iChild.privateKey),
-                    xpriv: iChild.toBase58(),
-                    xpub: iChild.neutered().toBase58(),
-                    wif: iChild.toWIF(),
-                    addresses: [{
-                            address: iAddress,
-                            error: null,
-                            received: 0,
-                            balance: 0,
-                            lastCheckTimestamp: null,
-                        }],
-                    nodes: []
-                });
-                var addressResult = {
-                    root: iChild,
-                    address: iAddress,
-                    path: iPath,
-                    publicKey: '0x' + buf2hex(iChild.publicKey),
-                    privateKey: '0x' + buf2hex(iChild.privateKey),
-                    xpriv: iChild.toBase58(),
-                    xpub: iChild.neutered().toBase58(),
-                    wif: iChild.toWIF(),
-                    error: null,
-                    received: 0,
-                    balance: 0,
-                    lastCheckTimestamp: null,
-                };
-                addresses.push(addressResult);
-                addressesNew.push(addressResultNew);
+        this.wallet = null;
+        var now = Date.now();
+        Object(rxjs__WEBPACK_IMPORTED_MODULE_10__["of"])(1).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_9__["map"])(function (foo) {
+            var wallet = new _wallet_core_wallet__WEBPACK_IMPORTED_MODULE_11__["NgBip32HdWalletView"](mnemonic, _this.passphraseInputValue, _this.networkInputValue, _this.dataInfoService);
+            // private pathPrefixBip44 = `m/44'/0'/`; // addresses 1xxx
+            // private pathPrefixBip49 = `m/49'/0'/`; // addresses 3xxx
+            // private pathPrefixBip84 = `m/84'/0'/`; // addresses bc1xxx
+            for (var i = 0; i < 3; i++) {
+                // see https://github.com/dan-da/hd-wallet-derive/blob/master/doc/wallet-bip32-path-presets.md
+                wallet.getOrCreateNode("m/44'/0'/0'/0").getOrCreateNextIndex();
+                // wallet.getOrCreateNode(`m/44'/0'/0'/1`).getOrCreateNextIndex();
+                wallet.getOrCreateNode("m/49'/0'/0'/0").getOrCreateNextIndex();
+                // wallet.getOrCreateNode(`m/49'/0'/0'/1`).getOrCreateNextIndex();
+                wallet.getOrCreateNode("m/84'/0'/0'/0").getOrCreateNextIndex();
+                // wallet.getOrCreateNode(`m/84'/0'/0'/1`).getOrCreateNextIndex();
+                wallet.getOrCreateNode("m/0'/0").getOrCreateNextIndex();
+                wallet.getOrCreateNode("m/0").getOrCreateNextIndex();
             }
-            var result = {
-                mneomincIsValid: bip39__WEBPACK_IMPORTED_MODULE_7__["validateMnemonic"](mnemonic),
-                mnemonic: mnemonic || '(empty)',
-                root: root,
-                seedHex: '0x' + buf2hex(seed),
-                masterPrivateKey: '0x' + buf2hex(masterPrivateKey),
-                rootWif: rootWif,
-                rootXpriv: rootXpriv,
-                rootXpub: rootXpub,
-                address: addresses.length > 0 ? addresses[0].address : null,
-                addresses: addresses,
-                addressesNew: addressesNew,
-                balance: null,
-                received: null
-            };
-            return result;
-        }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(function (result) { return _this.result = result; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["delay"])(300), 
-        // fetch addresses balances and received by until reveived <= 0
-        Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["concatMap"])(function (result) { return Object(rxjs__WEBPACK_IMPORTED_MODULE_9__["from"])(result.addresses).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["concatMap"])(function (val) { return _this.dataInfoService.fetchReceivedByAddress(val.address).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(function (received) { return val.received = received; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(function (x) { return val.lastCheckTimestamp = new Date().getTime(); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["map"])(function (x) { return val; })); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["takeWhile"])(function (val) { return val.received > 0; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(function (val) { return console.log('take ' + val.address + ' because reveiced > 0: ' + val.received); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["concatMap"])(function (val) { return _this.dataInfoService.fetchAddressBalance(val.address).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(function (balance) { return val.balance = balance; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["map"])(function (x) { return val; })); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["map"])(function (x) { return result; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["endWith"])(result)); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["concatMap"])(function (result) { return Object(rxjs__WEBPACK_IMPORTED_MODULE_9__["from"])(result.addressesNew).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["concatMap"])(function (addressesNew) { return Object(rxjs__WEBPACK_IMPORTED_MODULE_9__["from"])(addressesNew._node.addresses); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["concatMap"])(function (addressView) { return _this.dataInfoService.fetchReceivedByAddress(addressView.address).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(function (received) { return addressView.received = received; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(function (x) { return addressView.lastCheckTimestamp = new Date().getTime(); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["map"])(function (x) { return addressView; })); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["takeWhile"])(function (addressView) { return addressView.received > 0; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(function (addressView) { return console.log('take ' + addressView.address + ' because reveiced > 0: ' + addressView.received); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["concatMap"])(function (addressView) { return _this.dataInfoService.fetchAddressBalance(addressView.address).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(function (balance) { return addressView.balance = balance; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["map"])(function (x) { return addressView; })); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["map"])(function (x) { return result; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["endWith"])(result)); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["takeLast"])(1), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["concatMap"])(function (result) { return Object(rxjs__WEBPACK_IMPORTED_MODULE_9__["from"])(result.addresses).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["filter"])(function (val) { return val.received > 0; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["map"])(function (val) { return val.received; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["reduce"])(function (acc, curr) { return acc + curr; }, 0), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(function (totalReceived) { return result.received = totalReceived; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["map"])(function (x) { return result; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["endWith"])(result)); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["takeLast"])(1), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(function (result) { return _this.result = result; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["delay"])(1300), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["concatMap"])(function (result) { return Object(rxjs__WEBPACK_IMPORTED_MODULE_9__["from"])(result.addresses).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["filter"])(function (val) { return val.balance > 0; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["map"])(function (val) { return val.balance; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["reduce"])(function (acc, curr) { return acc + curr; }, 0), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["tap"])(function (totalBalance) { return result.balance = totalBalance; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["map"])(function (x) { return result; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["endWith"])(result)); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_8__["takeLast"])(1)).subscribe(function (result) {
-            _this.result = result;
-            console.log('subscribe');
+            return wallet;
+        }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_9__["concatMap"])(function (wallet) { return wallet.scanBalances().pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_9__["map"])(function (x) { return wallet; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_9__["endWith"])(wallet), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_9__["takeLast"])(1)); }), 
+        // add all "change" accounts if "default node"s received is > 0
+        Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_9__["concatMap"])(function (wallet) { return Object(rxjs__WEBPACK_IMPORTED_MODULE_10__["from"])(wallet.root.childNodes).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_9__["filter"])(function (node) { return node.received() > 0; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_9__["filter"])(function (node) { return node._node.path.match(/(\/0)$/).length > 0; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_9__["map"])(function (node) { return node._node.path.replace(/(\/0)$/, '/1'); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_9__["map"])(function (path) { return wallet.getOrCreateNode(path).getOrCreateNextIndex(); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_9__["flatMap"])(function (changeNode) { return wallet.scanBalanceOfNode(changeNode); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_9__["map"])(function (x) { return wallet; }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_9__["endWith"])(wallet), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_9__["takeLast"])(1)); })).subscribe(function (wallet) {
+            console.log('wallet created');
+            _this.wallet = wallet;
         }, function (error) {
             _this.loading = false;
-            _this.result = _this.result || {};
-            _this.result.error = error;
-            console.log('error');
+            _this.result = {
+                error: error
+            };
+            console.error(error);
         }, function () {
+            console.log('wallet finished');
             _this.loading = false;
-            _this.tryCounter++;
-            _this.result = _this.result || {};
-            console.log('end');
+            if (_this.wallet) {
+                var addresses = _this.wallet.findAllAddresses();
+                var nodesWithReceived = _this.wallet.findNodesWithReceivedGreaterZero();
+                var nodesWithBalance = _this.wallet.findNodesWithBalanceGreaterZero();
+                _this.result = {
+                    error: null,
+                    searchDurationInMs: Date.now() - now,
+                    mnemonic: _this.wallet.mnemonic,
+                    mneomincIsValid: bip39__WEBPACK_IMPORTED_MODULE_8__["validateMnemonic"](mnemonic),
+                    received: _this.wallet.root.received(),
+                    balance: _this.wallet.root.balance(),
+                    latestActivityTimestamp: Math.max(_this.wallet.findLatestActivity() || 0, 0),
+                    numberOfAddressesScanned: addresses.length,
+                    numberOfNodes: _this.wallet.findAllNodes().length,
+                    nodesWithReceived: nodesWithReceived,
+                    numberOfNodesWithReceived: nodesWithReceived.length,
+                    nodesWithBalance: nodesWithBalance,
+                    numberOfNodesWithBalance: nodesWithBalance.length,
+                    addresses: addresses,
+                    seedHex: _this.wallet.seedHex(),
+                    wif: _this.wallet.root._node.wif,
+                    xpriv: _this.wallet.root._node.xpriv,
+                    xpub: _this.wallet.root._node.xpub,
+                };
+            }
+            _this.result = (_this.result || {});
+            if (_this.result.received > 0) {
+                _this._snackBar.open("You found a treasure..", '', {
+                    duration: 3000
+                });
+            }
         });
+        /*of(1).pipe(
+          map(foo => {
+            const seed = Bip39.mnemonicToSeedSync(mnemonic, this.passphraseInputValue);
+            const root = Bip32.fromSeed(seed);
+    
+            const rootXpriv = root.toBase58();
+            const rootXpub = root.neutered().toBase58();
+            const rootWif = root.toWIF();
+            const masterPrivateKey = root.privateKey;
+    
+            const path = this.buildPathWithIndex(this.pathIndex);
+            const currentIndex = findLastIntegerInString(path) || 0;
+    
+            const addresses: NgBip32HdNodeLegacy[] = [];
+            for (let i = currentIndex; i <= 20; i++) {
+              const iPath = this.buildPathWithIndex(i);
+              const iChild = root.derivePath(iPath);
+              const iAddress = generateAddressFn(iPath)(iChild);
+    
+              const addressResult: NgBip32HdNodeLegacy = {
+                root: iChild,
+                address: iAddress,
+                path: iPath,
+                publicKey: '0x' + buf2hex(iChild.publicKey),
+                privateKey: '0x' + buf2hex(iChild.privateKey),
+                xpriv: iChild.toBase58(),
+                xpub: iChild.neutered().toBase58(),
+                wif: iChild.toWIF(),
+                error: null,
+                received: 0,
+                balance: 0,
+                lastCheckTimestamp: null,
+              };
+              addresses.push(addressResult);
+            }
+    
+            const result = {
+              mneomincIsValid: Bip39.validateMnemonic(mnemonic),
+              mnemonic: mnemonic || '(empty)',
+              root: root,
+    
+              seedHex: '0x' + buf2hex(seed),
+              masterPrivateKey: '0x' + buf2hex(masterPrivateKey),
+              rootWif: rootWif,
+              rootXpriv: rootXpriv,
+              rootXpub: rootXpub,
+    
+              address: addresses.length > 0 ? addresses[0].address : null,
+              addresses: addresses,
+    
+              balance: null,
+              received: null
+            };
+    
+            return result;
+          }),
+          tap(result => this.result = result),
+          delay(300),
+          // fetch addresses balances and received by until reveived <= 0
+          concatMap(result => from(result.addresses as NgBip32HdNodeLegacy[]).pipe(
+              concatMap(val => this.dataInfoService.fetchReceivedByAddress(val.address).pipe(
+                tap(received => val.received = received),
+                tap(x => val.lastCheckTimestamp = new Date().getTime()),
+                map(x => val)
+              )),
+              takeWhile(val => val.received > 0),
+              tap(val => console.log('take ' + val.address + ' because reveiced > 0: ' + val.received)),
+              concatMap(val => this.dataInfoService.fetchAddressBalance(val.address).pipe(
+                tap(balance => val.balance = balance),
+                map(x => val)
+              )),
+              map(x => result),
+              endWith(result)
+            )),
+          takeLast(1),
+          concatMap(result => from(result.addresses as NgBip32HdNodeLegacy[]).pipe(
+            filter(val => val.received > 0),
+            map(val => val.received),
+            reduce((acc, curr) => acc + curr, 0),
+            tap(totalReceived => result.received = totalReceived),
+            map(x => result),
+            endWith(result)
+          )),
+          takeLast(1),
+          tap(result => this.result = result),
+          delay(1300),
+          concatMap(result => from(result.addresses as NgBip32HdNodeLegacy[]).pipe(
+            filter(val => val.balance > 0),
+            map(val => val.balance),
+            reduce((acc, curr) => acc + curr, 0),
+            tap(totalBalance => result.balance = totalBalance),
+            map(x => result),
+            endWith(result)
+          )),
+          takeLast(1),
+        ).subscribe(result => {
+          this.result = result;
+          console.log('subscribe');
+        }, error => {
+          this.loading = false;
+    
+          this.result = this.result || {};
+          this.result.error = error;
+          console.log('error');
+        }, () => {
+          this.loading = false;
+          this.tryCounter++;
+    
+          this.result = this.result || {};
+          console.log('end');
+        });*/
     };
     MainFrontComponent.ctorParameters = function () { return [
-        { type: _angular_router__WEBPACK_IMPORTED_MODULE_2__["Router"] },
-        { type: _angular_router__WEBPACK_IMPORTED_MODULE_2__["ActivatedRoute"] },
+        { type: _angular_router__WEBPACK_IMPORTED_MODULE_3__["Router"] },
+        { type: _angular_material_snack_bar__WEBPACK_IMPORTED_MODULE_2__["MatSnackBar"] },
+        { type: _angular_router__WEBPACK_IMPORTED_MODULE_3__["ActivatedRoute"] },
         { type: _angular_forms__WEBPACK_IMPORTED_MODULE_1__["FormBuilder"] },
-        { type: _core_shared_data_info_service_service__WEBPACK_IMPORTED_MODULE_4__["DataInfoServiceService"] }
+        { type: _core_shared_data_info_service_service__WEBPACK_IMPORTED_MODULE_5__["DataInfoServiceService"] }
     ]; };
     MainFrontComponent = __decorate([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["Component"])({
@@ -26974,10 +27074,11 @@ var MainFrontComponent = /** @class */ (function () {
             template: __importDefault(__webpack_require__(/*! raw-loader!./main-front.component.html */ "./node_modules/raw-loader/dist/cjs.js!./src/app/main/main-front/main-front.component.html")).default,
             styles: [__importDefault(__webpack_require__(/*! ./main-front.component.scss */ "./src/app/main/main-front/main-front.component.scss")).default]
         }),
-        __metadata("design:paramtypes", [_angular_router__WEBPACK_IMPORTED_MODULE_2__["Router"],
-            _angular_router__WEBPACK_IMPORTED_MODULE_2__["ActivatedRoute"],
+        __metadata("design:paramtypes", [_angular_router__WEBPACK_IMPORTED_MODULE_3__["Router"],
+            _angular_material_snack_bar__WEBPACK_IMPORTED_MODULE_2__["MatSnackBar"],
+            _angular_router__WEBPACK_IMPORTED_MODULE_3__["ActivatedRoute"],
             _angular_forms__WEBPACK_IMPORTED_MODULE_1__["FormBuilder"],
-            _core_shared_data_info_service_service__WEBPACK_IMPORTED_MODULE_4__["DataInfoServiceService"]])
+            _core_shared_data_info_service_service__WEBPACK_IMPORTED_MODULE_5__["DataInfoServiceService"]])
     ], MainFrontComponent);
     return MainFrontComponent;
 }());
@@ -27228,17 +27329,279 @@ var MainModule = /** @class */ (function () {
             declarations: [
                 _main_component__WEBPACK_IMPORTED_MODULE_8__["MainComponent"],
                 _main_front_main_front_component__WEBPACK_IMPORTED_MODULE_5__["MainFrontComponent"],
+                _main_front_main_front_component__WEBPACK_IMPORTED_MODULE_5__["BitcoinPipe"],
                 _main_faq_main_faq_component__WEBPACK_IMPORTED_MODULE_6__["MainFaqComponent"],
                 _main_faq_main_faq_component__WEBPACK_IMPORTED_MODULE_6__["ScrollToTopButtonComponent"],
                 _main_wordlist_main_wordlist_component__WEBPACK_IMPORTED_MODULE_7__["MainWordlistComponent"],
             ],
             entryComponents: [],
-            providers: []
+            providers: [_angular_common__WEBPACK_IMPORTED_MODULE_1__["CurrencyPipe"]],
         })
     ], MainModule);
     return MainModule;
 }());
 
+
+
+/***/ }),
+
+/***/ "./src/app/wallet/core/wallet.ts":
+/*!***************************************!*\
+  !*** ./src/app/wallet/core/wallet.ts ***!
+  \***************************************/
+/*! exports provided: NgBip32HdWalletView */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "NgBip32HdWalletView", function() { return NgBip32HdWalletView; });
+/* harmony import */ var bitcoinjs_lib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! bitcoinjs-lib */ "./node_modules/bitcoinjs-lib/src/index.js");
+/* harmony import */ var bitcoinjs_lib__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(bitcoinjs_lib__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var bip32__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! bip32 */ "./node_modules/bip32/src/index.js");
+/* harmony import */ var bip32__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(bip32__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var bip39__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! bip39 */ "./node_modules/bip39/src/index.js");
+/* harmony import */ var bip39__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(bip39__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! rxjs/operators */ "./node_modules/rxjs/_esm5/operators/index.js");
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! rxjs */ "./node_modules/rxjs/_esm5/index.js");
+var __importDefault = (undefined && undefined.__importDefault) || function (mod) {
+  return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+
+
+
+
+
+function isValidBip32Path(value) {
+    return value.match(/^(m\/)?(\d+'?\/)*\d+'?$/) !== null;
+}
+var NgBip32HdAddressView = /** @class */ (function () {
+    function NgBip32HdAddressView(_address) {
+        this._address = _address;
+    }
+    return NgBip32HdAddressView;
+}());
+function _newNodeInternal(node, path) {
+    var defaultAddressGenerationFun = function (n, network) { return [
+        p2pkhAddress(n, network),
+        segwitAdddress(n, network),
+        p2wpkhAddress(n, network)
+    ]; };
+    return _newNodeInternalWithAddressGenerationStrategy(node, path, function (n, p) {
+        var addresses = generateAddressArrayFn(p, defaultAddressGenerationFun)(n, n.network);
+        return addresses.map(function (val) {
+            return {
+                address: val
+            };
+        });
+    });
+}
+function _newNodeInternalWithAddressGenerationStrategy(node, path, addressGen) {
+    console.log('create new node with path ' + path);
+    return {
+        _self: node,
+        path: path,
+        publicKey: '0x' + buf2hex(node.publicKey),
+        privateKey: '0x' + buf2hex(node.privateKey),
+        xpriv: node.toBase58(),
+        xpub: node.neutered().toBase58(),
+        wif: node.toWIF(),
+        addresses: addressGen(node, path),
+        childNodes: []
+    };
+}
+var NgBip32HdNodeView = /** @class */ (function () {
+    function NgBip32HdNodeView(_root, _node) {
+        this._root = _root;
+        this._node = _node;
+        this.addresses = _node.addresses.map(function (it) { return new NgBip32HdAddressView(it); });
+        this.childNodes = _node.childNodes.map(function (it) { return new NgBip32HdNodeView(_root, it); });
+    }
+    NgBip32HdNodeView.prototype.errors = function () {
+        return this.addresses.filter(function (it) { return !!it.error; }).map(function (it) { return it.error; });
+    };
+    NgBip32HdNodeView.prototype.selfBalance = function () {
+        return this.addresses
+            .map(function (it) { return it.balance; })
+            .filter(function (val) { return !!val; })
+            .reduce(function (prev, curr) { return prev + curr; }, 0);
+    };
+    NgBip32HdNodeView.prototype.nodesBlanace = function () {
+        return this.childNodes
+            .map(function (it) { return it.balance(); })
+            .reduce(function (prev, curr) { return prev + curr; }, 0);
+    };
+    NgBip32HdNodeView.prototype.balance = function () {
+        return this.selfBalance() + this.nodesBlanace();
+    };
+    NgBip32HdNodeView.prototype.selfReceived = function () {
+        return this.addresses
+            .map(function (it) { return it.received; })
+            .filter(function (val) { return !!val; })
+            .reduce(function (prev, curr) { return prev + curr; }, 0);
+    };
+    NgBip32HdNodeView.prototype.nodesReceived = function () {
+        return this.childNodes
+            .map(function (it) { return it.received(); })
+            .reduce(function (prev, curr) { return prev + curr; }, 0);
+    };
+    NgBip32HdNodeView.prototype.received = function () {
+        return this.selfReceived() + this.nodesReceived();
+    };
+    NgBip32HdNodeView.prototype.hasNodeWithPath = function (path) {
+        return this.findNodeByPath(path) !== undefined;
+    };
+    NgBip32HdNodeView.prototype.findNodeByPath = function (path) {
+        var nodes = this.childNodes
+            .filter(function (it) { return it._node.path === path; });
+        return nodes.length > 0 ? nodes[0] : undefined;
+    };
+    NgBip32HdNodeView.prototype._getOrCreateBySubpath = function (subpath) {
+        var fullpath = this._node.path + "/" + subpath;
+        if (this.hasNodeWithPath(fullpath)) {
+            return this.findNodeByPath(fullpath);
+        }
+        var child = this._root.derivePath(fullpath);
+        var newNode = _newNodeInternal(child, fullpath);
+        this._node.childNodes.push(newNode);
+        this.childNodes.push(new NgBip32HdNodeView(this._root, newNode));
+        return this.findNodeByPath(fullpath);
+    };
+    NgBip32HdNodeView.prototype.getOrCreateIndex = function (index) {
+        return this._getOrCreateBySubpath("" + index);
+    };
+    NgBip32HdNodeView.prototype.getOrCreateIndexRange = function (offet, amount) {
+        var _this = this;
+        if (amount === void 0) { amount = 20; }
+        return Array.from(Array(amount).keys())
+            .map(function (val) { return val + offet; })
+            .map(function (index) { return _this.getOrCreateIndex(index); });
+    };
+    NgBip32HdNodeView.prototype.getOrCreateNextIndex = function () {
+        if (this.childNodes.length === 0) {
+            return this.getOrCreateIndex(0);
+        }
+        var lastChildNode = this.childNodes[this.childNodes.length - 1];
+        var currentIndex = findLastIntegerInString(lastChildNode._node.path);
+        return this.getOrCreateIndex(currentIndex + 1);
+    };
+    return NgBip32HdNodeView;
+}());
+var NgBip32HdWalletView = /** @class */ (function () {
+    function NgBip32HdWalletView(mnemonic, passphrase, network, dataInfoService) {
+        if (network === void 0) { network = bitcoinjs_lib__WEBPACK_IMPORTED_MODULE_0__["networks"].bitcoin; }
+        this.mnemonic = mnemonic;
+        this.network = network;
+        this.dataInfoService = dataInfoService;
+        this.seed = bip39__WEBPACK_IMPORTED_MODULE_2__["mnemonicToSeedSync"](mnemonic, passphrase);
+        var rootNode = bip32__WEBPACK_IMPORTED_MODULE_1__["fromSeed"](this.seed, this.network);
+        this.root = new NgBip32HdNodeView(rootNode, _newNodeInternal(rootNode, 'm'));
+    }
+    NgBip32HdWalletView.prototype.seedHex = function () {
+        return '0x' + buf2hex(this.seed);
+    };
+    NgBip32HdWalletView.prototype.hasValidMnemonic = function () {
+        return bip39__WEBPACK_IMPORTED_MODULE_2__["validateMnemonic"](this.mnemonic);
+    };
+    NgBip32HdWalletView.prototype.getOrCreateNode = function (path) {
+        if (!isValidBip32Path(path)) {
+            throw new Error('invalid bip32 path');
+        }
+        return this.root._getOrCreateBySubpath(path.substr(2, path.length));
+    };
+    NgBip32HdWalletView.prototype.scanNextChildNode = function (node) {
+        this.scanBalanceOfNode(node.getOrCreateNextIndex())
+            .subscribe();
+    };
+    NgBip32HdWalletView.prototype.findAllAddresses = function () {
+        return this.findAllNodes()
+            .map(function (node) { return node.addresses; })
+            .reduce(function (prev, curr) { return prev.concat(curr); }, []);
+    };
+    NgBip32HdWalletView.prototype.findAllNodes = function () {
+        return this.findNodesRecursive(this.root, function (node) { return true; });
+    };
+    NgBip32HdWalletView.prototype.findNodesWithBalanceGreaterZero = function () {
+        return this.findNodesRecursive(this.root, function (node) { return node.selfBalance() > 0; });
+    };
+    NgBip32HdWalletView.prototype.findNodesWithReceivedGreaterZero = function () {
+        return this.findNodesRecursive(this.root, function (node) { return node.selfReceived() > 0; });
+    };
+    NgBip32HdWalletView.prototype.findLatestActivity = function () {
+        var arrayOfLatestBlocktimes = this.findNodesWithReceivedGreaterZero()
+            .map(function (node) { return node.addresses.filter(function (address) { return address.received > 0; }); })
+            .reduce(function (prev, curr) { return prev.concat(curr); }, [])
+            .filter(function (address) { return address.info !== null; })
+            .map(function (address) { return address.info.latest_tx_block_time; });
+        return Math.max.apply(Math, arrayOfLatestBlocktimes);
+    };
+    NgBip32HdWalletView.prototype.findNodesRecursive = function (node, predicate) {
+        var _this = this;
+        var nodesWithBalance = node.childNodes
+            .map(function (childNode) { return _this.findNodesRecursive(childNode, predicate); })
+            .reduce(function (prev, curr) { return prev.concat(curr); }, []);
+        return (predicate(node) ? [node] : []).concat(nodesWithBalance);
+    };
+    NgBip32HdWalletView.prototype.scanBalances = function () {
+        return this._scanAddressesBalancesRecursiveWithPredicate(this.dataInfoService, this.root, function (childNode) { return true; });
+    };
+    NgBip32HdWalletView.prototype.scanBalanceOfNode = function (nodeView) {
+        return this._scanAddressesBalancesRecursiveWithPredicate(this.dataInfoService, nodeView, function (childNode) { return true; });
+    };
+    NgBip32HdWalletView.prototype._scanAddressesBalancesRecursive = function (dataInfoService, nodeView) {
+        return this._scanAddressesBalancesRecursiveWithPredicate(dataInfoService, nodeView, function (childNode) { return childNode.received() > 0; });
+    };
+    NgBip32HdWalletView.prototype._scanAddressesBalancesRecursiveWithPredicate = function (dataInfoService, nodeView, predicate) {
+        var _this = this;
+        var recursiveScanOfChildNodes = Object(rxjs__WEBPACK_IMPORTED_MODULE_4__["from"])(nodeView.childNodes).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["concatMap"])(function (childNode) { return _this._scanAddressesBalancesRecursive(dataInfoService, childNode); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["takeWhile"])(predicate), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["endWith"])(nodeView), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["last"])());
+        var options = {
+            testnet: nodeView._node._self.network === bitcoinjs_lib__WEBPACK_IMPORTED_MODULE_0__["networks"].testnet
+        };
+        var selfScan = Object(rxjs__WEBPACK_IMPORTED_MODULE_4__["of"])(nodeView).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["tap"])(function (node) { return console.log("start fetching for path " + node._node.path); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["concatMap"])(function (node) { return Object(rxjs__WEBPACK_IMPORTED_MODULE_4__["from"])(node.addresses).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["tap"])(function (addressView) { return console.log("fetchAddressInfo for " + node._node.path + " and address " + addressView._address.address); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["concatMap"])(function (addressView) { return dataInfoService.fetchAddressInfo(addressView._address.address, options).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["tap"])(function (info) {
+            addressView.received = info.total_received;
+            addressView.balance = info.final_balance;
+            addressView.info = info;
+        }, function (error) { return addressView.error = error; }, function () { return addressView.lastCheckTimestamp = new Date().getTime(); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["tap"])(function (received) {
+            console.log(node._node.path + " and address " + addressView._address.address + " received " + received);
+        }, function (error) { return console.log("error while scanning " + node._node.path + ": " + error); })); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["map"])(function (addressView) { return node; })); }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["last"])(), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["tap"])(function (node) { return console.log("end fetching for path " + node._node.path + " (received: " + node.received() + ", balance: " + node.balance() + ")"); }));
+        return Object(rxjs__WEBPACK_IMPORTED_MODULE_4__["concat"])(recursiveScanOfChildNodes, selfScan).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["last"])());
+    };
+    return NgBip32HdWalletView;
+}());
+
+function buf2hex(buffer) {
+    return Array.prototype.map.call(new Uint8Array(buffer), function (x) { return ('00' + x.toString(16)).slice(-2); }).join('');
+}
+function p2pkhAddress(node, network) {
+    return bitcoinjs_lib__WEBPACK_IMPORTED_MODULE_0__["payments"].p2pkh({ pubkey: node.publicKey, network: network }).address;
+}
+function segwitAdddress(node, network) {
+    return bitcoinjs_lib__WEBPACK_IMPORTED_MODULE_0__["payments"].p2sh({
+        redeem: bitcoinjs_lib__WEBPACK_IMPORTED_MODULE_0__["payments"].p2wpkh({ pubkey: node.publicKey, network: network }),
+        network: network
+    }).address;
+}
+function p2wpkhAddress(node, network) {
+    return bitcoinjs_lib__WEBPACK_IMPORTED_MODULE_0__["payments"].p2wpkh({ pubkey: node.publicKey, network: network }).address;
+}
+function generateAddressArrayFn(path, defaultFn) {
+    if (path.substr(0, "m/44'/".length) === "m/44'/") {
+        return function (node, network) { return [p2pkhAddress(node, network)]; };
+    }
+    if (path.substr(0, "m/49'/".length) === "m/49'/") {
+        return function (node, network) { return [segwitAdddress(node, network)]; };
+    }
+    if (path.substr(0, "m/84'/".length) === "m/84'/") {
+        return function (node, network) { return [p2wpkhAddress(node, network)]; };
+    }
+    return defaultFn ? defaultFn : function (node, network) { return [p2wpkhAddress(node, network)]; };
+}
+function findLastIntegerInString(val) {
+    var match = val.match(/(\d+)(?!.*\d)/);
+    if (match.length === 2) {
+        return Number.parseInt(match[1], 10);
+    }
+    return null;
+}
 
 
 /***/ }),

@@ -61,7 +61,7 @@ export class BlockstreamInfoServiceService {
   }
 
   private baseUrl(options: any = {}) {
-    return `https://blockstream.info/${options.testnet ? 'testnet' : ''}`;
+    return `https://blockstream.info/${(options.testnet ? 'testnet' : '')}`;
   }
 
   public fetchReceivedByAddress(address: string, options: any = {}): Observable<number>  {
@@ -95,7 +95,7 @@ export class BlockstreamInfoServiceService {
       }),
       concatMap(val => of(address).pipe(
         filter(x => val.total_received > 0),
-        concatMap(x => this.txs(address)),
+        concatMap(x => this.txs(address, options)),
         filter(txs => txs.length > 0),
         map(txs => txs[0]),
         tap(latestTx => val.latest_tx_block_time = latestTx.status.block_time),
