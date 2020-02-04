@@ -141,7 +141,7 @@
   <div id="search-result-spacer-top"></div>
 
 
-  <div *ngIf="result">
+  <div *ngIf="result" style="margin: 0 0 2rem 0;">
 
     <div *ngIf="result.error">
       <p style="background-color: red; padding: 1em;">{{ result.error }}</p>
@@ -149,24 +149,27 @@
     </div>
 
     <div *ngIf="!result.error" style="text-align: center; line-height: normal;">
-      <p style="font-size: 1.5rem; margin: 0.8rem;">
+      <p style="font-size: 1.5rem; margin: 1rem 0;">
         <span *ngIf="result.received === 0">Addresses never received anything.</span>
         <span *ngIf="result.received > 0">Found addresses with
-          <code>received > 0</code> ({{ result.received | bitcoin}})
+          <code>received > 0</code> (<code>{{ result.received | bitcoin}}</code>)
         </span>
       </p>
-      <p style="font-size: 1rem; margin: 0.8rem;">
+      <p *ngIf="result.latestActivityTimestamp > 0" style="font-size: 1rem; margin: 0.25rem 0;">
         Most recent activity was {{ result.latestActivityTimestamp * 1000 | amTimeAgo }} ({{ result.latestActivityTimestamp * 1000 | date}})
       </p>
 
-      <p style="font-size: 3rem; margin: 0.8rem;">
-        <span *ngIf="result.balance === 0">Balance is 0 :(</span>
-        <span *ngIf="result.balance > 0">Balance is 
+      <p style="font-size: 2.5rem; margin: 1rem 0;">
+        <span *ngIf="result.balance === 0">
+          Balance is <code>{{0 | bitcoin}}</code><br />
+          ¯\_(ツ)_/¯
+        </span>
+        <span *ngIf="result.balance > 0">₿alance is <br />
           <code>{{result.balance | bitcoin}}</code>
         </span>
       </p>
-      <p style="font-size: 1rem; margin: 0.8rem;">
-        Scanned {{ result.numberOfAddressesScanned | number}} addresses in {{result.searchDurationInSeconds | number}} seconds
+      <p style="font-size: 1rem; margin: 1rem 0;">
+        Scanned {{ result.numberOfAddressesScanned | number}} addresses in {{result.searchDurationInMs / 1000 | number:'1.2-2'}} seconds
       </p>
     </div>
 
@@ -195,7 +198,7 @@
       </p>
       <p>
         <span class="bold">Addresses with unspent transaction outputs (utxo):</span> 
-        {{ result.numberOfNodesWithBalances | number}}
+        {{ result.numberOfNodesWithBalance | number}}
       </p>
       <p>
         <span class="bold">Addresses with transactions:</span> 
@@ -204,14 +207,14 @@
     </mat-card>
   </div>
 
-  <div *ngIf="wallet" [hidden]="loading">
-    <mat-card style="margin: 1em;" *ngIf="wallet.findNodesWithBalanceGreaterZero().length > 0">
+  <div *ngIf="result" [hidden]="loading">
+    <mat-card style="margin: 1em;" *ngIf="result.numberOfNodesWithBalance > 0">
       <h3>Addresses with unspent transaction outputs (utxo)</h3>
       
       <div fxLayout="row wrap" fxLayoutAlign="center center">
-        <div fxFlex="100%" fxFlex.gt-sm="100%" fxFlex.gt-md="100%" fxFlex.gt-md="100%" *ngFor="let node of wallet.findNodesWithBalanceGreaterZero()">
-            
-            <div *ngFor="let addressView of node.addresses">
+        <div fxFlex="100%" fxFlex.gt-sm="100%" fxFlex.gt-md="100%" fxFlex.gt-md="100%" *ngFor="let node of result.nodesWithBalance">
+          <ng-container *ngFor="let addressView of node.addresses">
+            <div *ngIf="addressView.balance > 0">
               Balance: {{ addressView.balance | bitcoin}}<br />
               Received:{{ addressView.received | bitcoin}} 
               <mat-form-field class="full-width" appearance="fill" style="text-align: center;">
@@ -224,31 +227,36 @@
                 <span>path: {{node._node.path}}</span>
               </mat-form-field>
             </div>
+          </ng-container>
         </div>
       </div>
     </mat-card>
   </div>
 
-  <div *ngIf="wallet" [hidden]="loading">
-    <mat-card style="margin: 1em;" *ngIf="wallet.findNodesWithReceivedGreaterZero().length > 0">
+  <div *ngIf="result" [hidden]="loading">
+    <mat-card style="margin: 1em;" *ngIf="result.numberOfNodesWithReceived > 0">
       <h3>Addresses with transactions</h3>
       
       <div fxLayout="row wrap" fxLayoutAlign="center center">
-        <div fxFlex="100%" fxFlex.gt-sm="100%" fxFlex.gt-md="100%" fxFlex.gt-md="100%" *ngFor="let node of wallet.findNodesWithReceivedGreaterZero()">
-            
-            <div *ngFor="let addressView of node.addresses">
-              Balance: {{ addressView.balance | bitcoin}}<br />
-              Received:{{ addressView.received | bitcoin}} 
-              <mat-form-field class="full-width" appearance="fill" style="text-align: center;">
-                <mat-label>Address</mat-label>
-                <input style="font-size: 150%" matInput type="text" placeholder="" [value]="addressView._address.address" disabled/>
-                <a href="https://www.blockchain.com/btc/address/{{addressView._address.address}}" target="_blank">view on block explorer</a>
-                <br />
-                <br />
-                <span>wif: {{node._node.wif}}</span><br />
-                <span>path: {{node._node.path}}</span>
-              </mat-form-field>
-            </div>
+        <div fxFlex="100%" fxFlex.gt-sm="100%" fxFlex.gt-md="100%" fxFlex.gt-md="100%" *ngFor="let node of result.nodesWithReceived">
+            <ng-container *ngFor="let addressView of node.addresses">
+              <div *ngIf="addressView.received > 0">
+                Balance: {{ addressView.balance | bitcoin}}<br />
+                Received:{{ addressView.received | bitcoin}} 
+                <mat-form-field class="full-width" appearance="fill" style="text-align: center;">
+                  <mat-label>Address</mat-label>
+                  <input style="font-size: 150%" matInput type="text" placeholder="" [value]="addressView._address.address" disabled/>
+                  <a href="https://www.blockchain.com/btc/address/{{addressView._address.address}}" target="_blank">view on block explorer</a>
+                  <br />
+                  <br />
+                  <span>wif: {{node._node.wif}}</span><br />
+                  <span *ngIf="addressView.info && addressView.info.latest_tx_block_time">
+                    activity: {{ addressView.info.latest_tx_block_time * 1000 | amTimeAgo }} ({{ addressView.info.latest_tx_block_time * 1000 | date}})
+                  </span><br />
+                  <span>path: {{node._node.path}}</span>
+                </mat-form-field>
+              </div>
+            </ng-container>
         </div>
       </div>
     </mat-card>
@@ -259,28 +267,28 @@
       <h3>Wallet Information</h3>
       <div>
         <span class="bold">Seed:</span>
-        <pre>{{wallet.seedHex()}}</pre>
+        <pre>{{result.seedHex}}</pre>
       </div>
       <div>
         <span class="bold">BIP32 xpriv:</span>
-        <pre>{{wallet.root._node.xpriv}}</pre>
+        <pre>{{result.xpriv}}</pre>
       </div>
-      <!--div *ngIf="result.rootXpriv">
+      <div *ngIf="result.xpub">
         <span class="bold">BIP32 xpub:</span>
-        <pre>{{result.rootXpub}}</pre>
-      </div-->
+        <pre>{{result.xpub}}</pre>
+      </div>
       <div>
         <span class="bold">WIF:</span>
-        <pre>{{wallet.root._node.wif}}</pre>
+        <pre>{{result.wif}}</pre>
         <p>
           See <a href="https://en.bitcoin.it/wiki/Wallet_import_format">Wallet Import Format wiki page on en.bitcoin.it</a> 
           for more information.
         </p>
       </div>
-      <div>
+      <!-- div>
         <span class="bold">Master Private Key:</span>
         <pre>{{wallet.root._node.privateKey}}</pre>
-      </div>
+      </div-->
     </mat-card>
   </div>
 
@@ -304,7 +312,7 @@
   </div>
 
   
-  <div *ngIf="result" [hidden]="loading || result.addresses === undefined" class="more-addresses-container">
+  <!--div *ngIf="result" [hidden]="loading || result.addresses === undefined" class="more-addresses-container">
     <mat-card style="margin: 1em;">
       <h3>More Addresses</h3>
       <div *ngIf="result.addresses && result.addresses.length > 0">
@@ -360,7 +368,7 @@
       </div>
     </mat-card>
 
-  </div>
+  </div-->
 
 
     

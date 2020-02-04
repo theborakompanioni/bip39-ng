@@ -264,23 +264,36 @@ export class MainFrontComponent implements OnInit {
       this.loading = false;
 
       if (this.wallet) {
+        const addresses = this.wallet.findAllAddresses();
+        const nodesWithReceived = this.wallet.findNodesWithReceivedGreaterZero();
+        const nodesWithBalance = this.wallet.findNodesWithBalanceGreaterZero();
         this.result = {
           error: null,
-          searchDurationInSeconds: Date.now() - now,
+          searchDurationInMs: Date.now() - now,
 
           mnemonic: this.wallet.mnemonic,
+          mneomincIsValid: Bip39.validateMnemonic(mnemonic),
+
           received: this.wallet.root.received(),
           balance: this.wallet.root.balance(),
+
           latestActivityTimestamp: Math.max(this.wallet.findLatestActivity() || 0, 0),
-          numberOfAddressesScanned: this.wallet.findAllAddresses().length,
+          numberOfAddressesScanned: addresses.length,
           numberOfNodes: this.wallet.findAllNodes().length,
-          numberOfNodesWithBalances: this.wallet.findNodesWithBalanceGreaterZero().length,
-          numberOfNodesWithReceived: this.wallet.findNodesWithReceivedGreaterZero().length
+          nodesWithReceived: nodesWithReceived,
+          numberOfNodesWithReceived: nodesWithReceived.length,
+          nodesWithBalance: nodesWithBalance,
+          numberOfNodesWithBalance: nodesWithBalance.length,
+
+          addresses: addresses,
+          seedHex: this.wallet.seedHex(),
+          wif: this.wallet.root._node.wif,
+          xpriv: this.wallet.root._node.xpriv,
+          xpub: this.wallet.root._node.xpub,
         };
       }
 
       this.result = (this.result || {});
-      this.result.searchDurationInSeconds = Date.now() - now;
 
       if (this.result.received > 0) {
         this._snackBar.open(`You found a treasure..`, '', {
