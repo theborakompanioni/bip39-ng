@@ -45,6 +45,7 @@
     "blockchain.info": "^2.12.1",
     "classlist.js": "1.1.20150312",
     "core-js": "3.6.1",
+    "ngx-moment": "^3.5.0",
     "rxjs": "6.5.4",
     "rxjs-compat": "6.5.4",
     "zone.js": "0.10.2"
@@ -82,7 +83,7 @@
     "karma-jasmine-html-reporter": "1.5.1",
     "karma-remap-istanbul": "0.6.0",
     "karma-scss-preprocessor": "4.0.0",
-    "moment": "2.24.0",
+    "moment": "^2.24.0",
     "ng-packagr": "^5.7.1",
     "node-sass": "^4.13.1",
     "protractor": "5.4.2",

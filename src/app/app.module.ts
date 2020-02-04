@@ -1,6 +1,8 @@
 import {NgModule} from '@angular/core';
 import {BrowserModule} from '@angular/platform-browser';
 import {FormsModule} from '@angular/forms';
+import {ServiceWorkerModule} from '@angular/service-worker';
+
 import {APP_CONFIG, AppConfig} from './config/app.config';
 import {AppRoutingModule} from './app-routing.module';
 import {SharedModule} from './shared/modules/shared.module';
@@ -13,7 +15,6 @@ import {HttpLoaderFactory, createTranslateLoader} from './app.translate.factory'
 import {ProgressBarService} from './core/shared/progress-bar.service';
 import {ProgressInterceptor} from './shared/interceptors/progress.interceptor';
 import {TimingInterceptor} from './shared/interceptors/timing.interceptor';
-import {ServiceWorkerModule} from '@angular/service-worker';
 import {environment} from '../environments/environment';
 
 @NgModule({

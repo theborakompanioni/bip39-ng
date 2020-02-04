@@ -81,7 +81,6 @@ export class MainFrontComponent implements OnInit {
 
   result: any;
   wallet: NgBip32HdWalletView;
-  searchDuration: number;
 
   mnemonicArray: Array<string>;
   searchInputValue: string;
@@ -208,7 +207,6 @@ export class MainFrontComponent implements OnInit {
     this.loading = true;
     this.result = null;
     this.wallet = null;
-    this.searchDuration = null;
 
     const now = Date.now();
 
@@ -253,25 +251,42 @@ export class MainFrontComponent implements OnInit {
     ).subscribe(wallet => {
       console.log('wallet created');
       this.wallet = wallet;
+    }, error => {
+      this.loading = false;
 
-      // TODO: remove after feature is finished (only for debugging purposes)
-      window['wallet'] = wallet;
+      this.result = {
+        error: error
+      };
 
-      const received = wallet.root.received();
-      if (received > 0) {
+      console.error(error);
+    }, () => {
+      console.log('wallet finished');
+      this.loading = false;
+
+      if (this.wallet) {
+        this.result = {
+          error: null,
+          searchDurationInSeconds: Date.now() - now,
+
+          mnemonic: this.wallet.mnemonic,
+          received: this.wallet.root.received(),
+          balance: this.wallet.root.balance(),
+          latestActivityTimestamp: Math.max(this.wallet.findLatestActivity() || 0, 0),
+          numberOfAddressesScanned: this.wallet.findAllAddresses().length,
+          numberOfNodes: this.wallet.findAllNodes().length,
+          numberOfNodesWithBalances: this.wallet.findNodesWithBalanceGreaterZero().length,
+          numberOfNodesWithReceived: this.wallet.findNodesWithReceivedGreaterZero().length
+        };
+      }
+
+      this.result = (this.result || {});
+      this.result.searchDurationInSeconds = Date.now() - now;
+
+      if (this.result.received > 0) {
         this._snackBar.open(`You found a treasure..`, '', {
           duration: 3000
         });
       }
-    }, error => {
-      this.loading = false;
-      this.searchDuration = Date.now() - now;
-
-      console.error(error);
-    }, () => {
-      this.loading = false;
-      this.searchDuration = Date.now() - now;
-      console.log('wallet finished');
     });
 
     /*of(1).pipe(

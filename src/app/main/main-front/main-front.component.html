@@ -141,61 +141,65 @@
   <div id="search-result-spacer-top"></div>
 
 
-  <div *ngIf="wallet">
+  <div *ngIf="result">
 
-    <div *ngIf="wallet.error">
-      <p style="background-color: red; padding: 1em;">{{ wallet.error }}</p>
-      <p style="background-color: red; padding: 1em;">{{ wallet.error.message }}</p>
+    <div *ngIf="result.error">
+      <p style="background-color: red; padding: 1em;">{{ result.error }}</p>
+      <p style="background-color: red; padding: 1em;">{{ result.error.message }}</p>
     </div>
 
-    <p style="text-align: center; font-size: 1.5em; margin: 1em; line-height: normal;">
-      <span *ngIf="wallet.root.received() === 0">Addresses never received anything.</span>
-      <span *ngIf="wallet.root.received() > 0">Found addresses with
-        <code>received > 0</code> ({{ wallet.root.received() | bitcoin}})
-      </span>
-    </p>
+    <div *ngIf="!result.error" style="text-align: center; line-height: normal;">
+      <p style="font-size: 1.5rem; margin: 0.8rem;">
+        <span *ngIf="result.received === 0">Addresses never received anything.</span>
+        <span *ngIf="result.received > 0">Found addresses with
+          <code>received > 0</code> ({{ result.received | bitcoin}})
+        </span>
+      </p>
+      <p style="font-size: 1rem; margin: 0.8rem;">
+        Most recent activity was {{ result.latestActivityTimestamp * 1000 | amTimeAgo }} ({{ result.latestActivityTimestamp * 1000 | date}})
+      </p>
 
-    <p style="text-align: center; font-size: 3em; margin: 1em; line-height: normal;">
-      <span *ngIf="wallet.root.balance() === 0">Balance is 0 :(</span>
-      <span *ngIf="wallet.root.balance() > 0">Balance is 
-        <code>{{wallet.root.balance() | bitcoin}}</code>
-      </span>
-    </p>
-    <p style="text-align: center; font-size: 0.8em; margin: 2em; line-height: normal;">
-      Scanned {{ wallet.findAllAddresses().length | number}} addresses in {{searchDuration | number}} seconds
-    </p>
+      <p style="font-size: 3rem; margin: 0.8rem;">
+        <span *ngIf="result.balance === 0">Balance is 0 :(</span>
+        <span *ngIf="result.balance > 0">Balance is 
+          <code>{{result.balance | bitcoin}}</code>
+        </span>
+      </p>
+      <p style="font-size: 1rem; margin: 0.8rem;">
+        Scanned {{ result.numberOfAddressesScanned | number}} addresses in {{result.searchDurationInSeconds | number}} seconds
+      </p>
+    </div>
 
   </div>
 
   <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
 
-
-  <div *ngIf="wallet" [hidden]="loading">
+  <div *ngIf="result && !result.error" [hidden]="loading">
     <mat-card style="margin: 1em;">
       <h3>Search</h3>
 
       <span class="bold">Results for search term:</span> 
-      <pre>{{wallet.mnemonic || '(empty)'}}</pre>
+      <pre>{{result.mnemonic || '(empty)'}}</pre>
       
       <p>
         <span class="bold">Total Balance:</span> 
-        {{wallet.root.balance() | bitcoin}}
+        {{ result.balance | bitcoin}}
       </p>
       <p>
         <span class="bold">Total Received:</span> 
-        {{ wallet.root.received() | bitcoin}}
+        {{ result.received | bitcoin}}
       </p>
       <p>
         <span class="bold">Node Count:</span> 
-        {{ wallet.findAllNodes().length}}
+        {{ result.numberOfNodes | number}}
       </p>
       <p>
         <span class="bold">Addresses with unspent transaction outputs (utxo):</span> 
-        {{ wallet.findNodesWithBalanceGreaterZero().length | number}}
+        {{ result.numberOfNodesWithBalances | number}}
       </p>
       <p>
         <span class="bold">Addresses with transactions:</span> 
-        {{ wallet.findNodesWithReceivedGreaterZero().length | number}}
+        {{ result.numberOfNodesWithReceived | number}}
       </p>
     </mat-card>
   </div>

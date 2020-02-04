@@ -241,10 +241,11 @@ export class NgBip32HdWalletView {
     return this.findNodesRecursive(this.root, (node) => node.selfBalance() > 0);
   }
 
-  private findNodesWithReceivedGreaterZero(): NgBip32HdNodeView[] {
+  public findNodesWithReceivedGreaterZero(): NgBip32HdNodeView[] {
     return this.findNodesRecursive(this.root, (node) => node.selfReceived() > 0);
   }
-  private findLatestActivity(): Timestamp | null {
+
+  public findLatestActivity(): Timestamp | null {
      const arrayOfLatestBlocktimes: number[] = this.findNodesWithReceivedGreaterZero()
       .map(node => node.addresses.filter(address => address.received > 0))
       .reduce((prev, curr) => prev.concat(curr), [])
