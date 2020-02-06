@@ -23,11 +23,16 @@
               },
               {
                 "glob": "favicon.ico",
-                "input": "src",
+                "input": "src/assets/images",
                 "output": "/"
               },
               {
                 "glob": "sitemap.xml",
+                "input": "src/assets",
+                "output": "/"
+              },
+              {
+                "glob": "manifest.json",
                 "input": "src/assets",
                 "output": "/"
               }
@@ -57,10 +62,10 @@
               "sourceMap": false,
               "extractCss": true,
               "namedChunks": false,
-              "aot": true,
+              "aot": false,
               "extractLicenses": true,
               "vendorChunk": false,
-              "buildOptimizer": true,
+              "buildOptimizer": false,
               "serviceWorker": true,
               "baseHref": "/",
               "fileReplacements": [
@@ -117,11 +122,16 @@
               },
               {
                 "glob": "favicon.ico",
-                "input": "src",
+                "input": "src/assets/images",
                 "output": "/"
               },
               {
                 "glob": "sitemap.xml",
+                "input": "src/assets",
+                "output": "/"
+              },
+              {
+                "glob": "manifest.json",
                 "input": "src/assets",
                 "output": "/"
               }
