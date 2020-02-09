@@ -98,13 +98,35 @@ function _newNodeInternalWithAddressGenerationStrategy(node: Bip32.BIP32Interfac
   };
 }
 
-class NgBip32HdNodeView {
+export class NgBip32HdNodeView {
   public readonly addresses: NgBip32HdAddressView[];
   public childNodes: NgBip32HdNodeView[];
 
   constructor(private readonly _root: Bip32.BIP32Interface, public readonly _node: NgBip32HdNode) {
     this.addresses = _node.addresses.map(it => new NgBip32HdAddressView(it));
     this.childNodes = _node.childNodes.map(it => new NgBip32HdNodeView(_root, it));
+  }
+
+  nodesLatestActivity(): number {
+    const arrayOfLatestBlocktimes: number[] = this.childNodes
+     .map(node => node.addresses.filter(address => address.received > 0))
+     .reduce((prev, curr) => prev.concat(curr), [])
+     .filter(address => address.info !== null)
+     .map(address => address.info.latest_tx_block_time);
+
+     return Math.max(...arrayOfLatestBlocktimes, 0) || 0;
+  }
+
+  selfLatestActivity(): number {
+    const arrayOfLatestBlocktimes: number[] = this.addresses
+      .filter(address => address.info !== null)
+      .map(address => address.info.latest_tx_block_time);
+
+    return Math.max(...arrayOfLatestBlocktimes, 0) || 0;
+  }
+
+  latestActivity() {
+    return Math.max(this.nodesLatestActivity(), this.selfLatestActivity(), 0) || 0;
   }
 
   errors(): Error[] {
@@ -118,14 +140,14 @@ class NgBip32HdNodeView {
       .reduce((prev, curr) => prev + curr, 0);
   }
 
-  nodesBlanace(): Satoshi {
+  nodesBalance(): Satoshi {
     return this.childNodes
-    .map(it => it.balance())
-    .reduce((prev, curr) => prev + curr, 0);
+      .map(it => it.balance())
+      .reduce((prev, curr) => prev + curr, 0);
   }
 
   balance(): Satoshi {
-    return this.selfBalance() + this.nodesBlanace();
+    return this.selfBalance() + this.nodesBalance();
   }
 
   selfReceived() {
@@ -247,12 +269,9 @@ export class NgBip32HdWalletView {
 
   public findLatestActivity(): Timestamp | null {
      const arrayOfLatestBlocktimes: number[] = this.findNodesWithReceivedGreaterZero()
-      .map(node => node.addresses.filter(address => address.received > 0))
-      .reduce((prev, curr) => prev.concat(curr), [])
-      .filter(address => address.info !== null)
-      .map(address => address.info.latest_tx_block_time);
+      .map(node => node.latestActivity());
 
-      return Math.max(...arrayOfLatestBlocktimes);
+      return Math.max(...arrayOfLatestBlocktimes, 0);
   }
 
   private findNodesRecursive(node: NgBip32HdNodeView, predicate: (node: NgBip32HdNodeView) => boolean): NgBip32HdNodeView[] {

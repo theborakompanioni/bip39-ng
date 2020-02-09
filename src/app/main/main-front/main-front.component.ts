@@ -13,7 +13,7 @@ import * as Bitcoin from 'bitcoinjs-lib';
 import * as Bip39 from 'bip39';
 import { filter, map, take, throttleTime, takeLast, endWith, concatMap, flatMap } from 'rxjs/operators';
 import { of, from} from 'rxjs';
-import { Bip32Path, NgBip32HdWalletView } from '../../wallet/core/wallet';
+import { Bip32Path, NgBip32HdWalletView, NgBip32HdNodeView } from '../../wallet/core/wallet';
 
 function buildPath(prefix: string, account: number, change: number, index: number): Bip32Path {
   if (prefix && Number.isInteger(account) &&  Number.isInteger(change) && Number.isInteger(index)) {
@@ -264,9 +264,13 @@ export class MainFrontComponent implements OnInit {
       this.loading = false;
 
       if (this.wallet) {
+        const sortByLastActivity = (a: NgBip32HdNodeView, b: NgBip32HdNodeView) => {
+          return a.selfLatestActivity() < b.selfLatestActivity() ? 1 : -1;
+        };
+
         const addresses = this.wallet.findAllAddresses();
-        const nodesWithReceived = this.wallet.findNodesWithReceivedGreaterZero();
-        const nodesWithBalance = this.wallet.findNodesWithBalanceGreaterZero();
+        const nodesWithReceived = this.wallet.findNodesWithReceivedGreaterZero().sort(sortByLastActivity);
+        const nodesWithBalance = this.wallet.findNodesWithBalanceGreaterZero().sort(sortByLastActivity);
         this.result = {
           error: null,
           searchDurationInMs: Date.now() - now,
@@ -281,9 +285,7 @@ export class MainFrontComponent implements OnInit {
           numberOfAddressesScanned: addresses.length,
           numberOfNodes: this.wallet.findAllNodes().length,
           nodesWithReceived: nodesWithReceived,
-          numberOfNodesWithReceived: nodesWithReceived.length,
           nodesWithBalance: nodesWithBalance,
-          numberOfNodesWithBalance: nodesWithBalance.length,
 
           addresses: addresses,
           seedHex: this.wallet.seedHex(),
