@@ -73,6 +73,8 @@ export class BitcoinPipe implements PipeTransform {
 export class MainFrontComponent implements OnInit {
   private readonly SEARCH_QUERY_PARAM_NAME = 'q';
   private readonly PASSPHRASE_QUERY_PARAM_NAME = 'p';
+  private readonly NETWORK_QUERY_PARAM_NAME = 'n';
+  private readonly NETWORK_DEFAULT_VALUE = Bitcoin.networks.bitcoin;
 
   // path : = m / purpose' / coin_type' / account' / change / address_index
   /*private readonly pathPrefixBip44 = `m/44'/0'/`; // addresses 1xxx
@@ -97,7 +99,7 @@ export class MainFrontComponent implements OnInit {
   mnemonicArray: Array<string>;
   searchInputValue: string;
   passphraseInputValue: string;
-  networkInputValue: Bitcoin.Network = Bitcoin.networks.bitcoin;
+  networkInputValue: Bitcoin.Network = this.NETWORK_DEFAULT_VALUE;
 
   readonly networkInputSelectOptions = [{
     value: Bitcoin.networks.bitcoin,
@@ -147,13 +149,18 @@ export class MainFrontComponent implements OnInit {
     });
 
     this.activatedRoute.queryParamMap.pipe(
+      take(1)
     ).subscribe(p => {
-      this.passphraseInputValue = p.get(this.PASSPHRASE_QUERY_PARAM_NAME);
     });
 
     this.activatedRoute.queryParamMap.pipe(
       take(1)
     ).subscribe(p => {
+      this.passphraseInputValue = p.get(this.PASSPHRASE_QUERY_PARAM_NAME);
+      this.networkInputValue = this.networkInputSelectOptions
+        .filter(val => val.name === p.get(this.NETWORK_QUERY_PARAM_NAME))
+        .map(val => val.value)[0] || this.NETWORK_DEFAULT_VALUE;
+
       const mnemonic = p.get(this.SEARCH_QUERY_PARAM_NAME);
       this.searchInputChangedSubject.next(mnemonic);
     });
@@ -163,6 +170,14 @@ export class MainFrontComponent implements OnInit {
     const queryParams = {};
     queryParams[this.SEARCH_QUERY_PARAM_NAME] = mnemonic;
     queryParams[this.PASSPHRASE_QUERY_PARAM_NAME] = this.passphraseInputValue;
+
+    delete queryParams[this.NETWORK_QUERY_PARAM_NAME];
+    this.networkInputSelectOptions
+        .filter(val => val.value === this.networkInputValue)
+        .map(val => val.name)
+        .forEach(networkName => {
+          queryParams[this.NETWORK_QUERY_PARAM_NAME] = networkName;
+        });
     queryParams['ts'] = Date.now();
 
     // add query params but do not reload page (default if same page)
