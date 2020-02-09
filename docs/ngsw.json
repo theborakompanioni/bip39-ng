@@ -1,6 +1,6 @@
 {
   "configVersion": 1,
-  "timestamp": 1581007519287,
+  "timestamp": 1581287292421,
   "index": "/bip39-ng/index.html",
   "assetGroups": [
     {
@@ -65,10 +65,10 @@
   "hashTable": {
     "/bip39-ng/assets/css/loading.css": "702bd03f01fd23e914617bfc96041088d7dbc88b",
     "/bip39-ng/assets/css/reset.css": "82d5673e122656776dfc4e78e2883974f5eb0cdc",
-    "/bip39-ng/assets/i18n/en.json": "507443aa4c55f65d513475993d88f3375ccf4e7e",
-    "/bip39-ng/assets/i18n/es.json": "0a4acaf6e33862e6142b55f9614462e7a4042480",
-    "/bip39-ng/assets/i18n/pt-br.json": "2e29f8a8326ad5551fa7d0460ad4188800c6a29c",
-    "/bip39-ng/assets/i18n/zh.json": "adf835623dcbcad9a5cb9e738476f55f968f3549",
+    "/bip39-ng/assets/i18n/en.json": "f8cfcae08e6a9c67ca330735b5eb48655900a754",
+    "/bip39-ng/assets/i18n/es.json": "f87131ed234c34772a64a3763d51c2ed0f7d21df",
+    "/bip39-ng/assets/i18n/pt-br.json": "fc1efea13ccf3916c20404483d90d6a10b745138",
+    "/bip39-ng/assets/i18n/zh.json": "5eb74877a5bafd944fba70a2a84ce178a562ff19",
     "/bip39-ng/assets/images/404.gif": "5884765f20002934d84bbe9fb8cca3a46dc1326f",
     "/bip39-ng/assets/images/angular.svg": "765534075317a076e12de7e81a17a3d9df390a2c",
     "/bip39-ng/assets/images/favicon.ico": "745dc3e299ded192c07fad54e2bd26504be57de2",
@@ -100,10 +100,10 @@
     "/bip39-ng/assets/images/pwa/ms-icon-70x70.png": "0b139bfb077ad8791180ddabee7cafb076cbe359",
     "/bip39-ng/assets/js/gtm.js": "f1c6ea941d05d76b2f8b23d1e8b210143bd2b2e0",
     "/bip39-ng/assets/js/modernizr.js": "150b77e7d9c4fd1be99e62508a151c197ea906a7",
-    "/bip39-ng/assets/manifest.json": "8c0218bbcf90fdc9dd7ce2c53eaf22652cf42ac9",
+    "/bip39-ng/assets/manifest.json": "3094215711336c6e96496bd9b39b31f40d23946f",
     "/bip39-ng/assets/sitemap.xml": "379920962425a40740192c07c6d8d9246c20774d",
     "/bip39-ng/favicon.ico": "745dc3e299ded192c07fad54e2bd26504be57de2",
-    "/bip39-ng/index.html": "53e8052e5abc2c5b47aca67eea69c97b5a48ccad"
+    "/bip39-ng/index.html": "ff8c628e899425dd57af6e8412eef8e6f28aea68"
   },
   "navigationUrls": [
     {

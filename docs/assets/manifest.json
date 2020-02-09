@@ -1,6 +1,6 @@
 {
-    "short_name": "bip39-ng",
-    "name": "tbk bip39-ng",
+    "short_name": "Bitcoin Lottery",
+    "name": "Bitcoin Mnemonic Lottery",
     "display": "standalone",
     "start_url": "/bip39-ng/?utm_source=pwa",
     "theme_color": "#3f51b5",
