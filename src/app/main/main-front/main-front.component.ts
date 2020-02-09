@@ -75,9 +75,21 @@ export class MainFrontComponent implements OnInit {
   private readonly PASSPHRASE_QUERY_PARAM_NAME = 'p';
 
   // path : = m / purpose' / coin_type' / account' / change / address_index
-  private readonly pathPrefixBip44 = `m/44'/0'/`; // addresses 1xxx
+  /*private readonly pathPrefixBip44 = `m/44'/0'/`; // addresses 1xxx
   private readonly pathPrefixBip49 = `m/49'/0'/`; // addresses 3xxx
   private readonly pathPrefixBip84 = `m/84'/0'/`; // addresses bc1xxx
+
+  readonly pathPrefixInputAutocompleteOptions = [{
+      value: this.pathPrefixBip44,
+      name: this.pathPrefixBip44 + ' (BIP44)'
+    }, {
+      value: this.pathPrefixBip49,
+      name: this.pathPrefixBip49 + ' (BIP49)'
+    }, {
+      value: this.pathPrefixBip84,
+      name: this.pathPrefixBip84 + ' (BIP84)'
+    }
+  ];*/
 
   result: any;
   wallet: NgBip32HdWalletView;
@@ -93,27 +105,7 @@ export class MainFrontComponent implements OnInit {
   }, {
     value: Bitcoin.networks.testnet,
     name: `testnet`
-  }
-];
-
-
-  pathAccount = 0;
-  pathChange = 0;
-  pathIndex = 0;
-
-  pathPrefix = `${this.pathPrefixBip44}`;
-
-  readonly pathPrefixInputAutocompleteOptions = [{
-      value: this.pathPrefixBip44,
-      name: this.pathPrefixBip44 + ' (BIP44)'
-    }, {
-      value: this.pathPrefixBip49,
-      name: this.pathPrefixBip49 + ' (BIP49)'
-    }, {
-      value: this.pathPrefixBip84,
-      name: this.pathPrefixBip84 + ' (BIP84)'
-    }
-  ];
+  }];
 
   mnemonicInputChangedSubject: Subject<string> = new Subject<string>();
   searchInputChangedSubject: Subject<string> = new Subject<string>();
@@ -123,7 +115,7 @@ export class MainFrontComponent implements OnInit {
   loading = false;
 
   displayDetailedSettings = false;
-  readonly addressesDisplayedColumns = ['info', 'received', 'balance'];
+  // readonly addressesDisplayedColumns = ['info', 'received', 'balance'];
   // ['path', 'address', 'wif', 'received', 'balance', 'lastCheckedTimestamp'];
 
   constructor(private readonly router: Router,
@@ -134,14 +126,6 @@ export class MainFrontComponent implements OnInit {
     this.mnemonicArray = [];
     this.searchInputValue = '';
     this.passphraseInputValue = '';
-  }
-
-  buildPath() {
-    return this.buildPathWithIndex(this.pathIndex);
-  }
-
-  buildPathWithIndex(index: number) {
-    return buildPath(this.pathPrefix, this.pathAccount, this.pathChange, index);
   }
 
   ngOnInit() {
@@ -299,122 +283,10 @@ export class MainFrontComponent implements OnInit {
 
       if (this.result.received > 0) {
         this._snackBar.open(`You found a treasure..`, '', {
-          duration: 3000
+          duration: 7000
         });
       }
     });
-
-    /*of(1).pipe(
-      map(foo => {
-        const seed = Bip39.mnemonicToSeedSync(mnemonic, this.passphraseInputValue);
-        const root = Bip32.fromSeed(seed);
-
-        const rootXpriv = root.toBase58();
-        const rootXpub = root.neutered().toBase58();
-        const rootWif = root.toWIF();
-        const masterPrivateKey = root.privateKey;
-
-        const path = this.buildPathWithIndex(this.pathIndex);
-        const currentIndex = findLastIntegerInString(path) || 0;
-
-        const addresses: NgBip32HdNodeLegacy[] = [];
-        for (let i = currentIndex; i <= 20; i++) {
-          const iPath = this.buildPathWithIndex(i);
-          const iChild = root.derivePath(iPath);
-          const iAddress = generateAddressFn(iPath)(iChild);
-
-          const addressResult: NgBip32HdNodeLegacy = {
-            root: iChild,
-            address: iAddress,
-            path: iPath,
-            publicKey: '0x' + buf2hex(iChild.publicKey),
-            privateKey: '0x' + buf2hex(iChild.privateKey),
-            xpriv: iChild.toBase58(),
-            xpub: iChild.neutered().toBase58(),
-            wif: iChild.toWIF(),
-            error: null,
-            received: 0,
-            balance: 0,
-            lastCheckTimestamp: null,
-          };
-          addresses.push(addressResult);
-        }
-
-        const result = {
-          mneomincIsValid: Bip39.validateMnemonic(mnemonic),
-          mnemonic: mnemonic || '(empty)',
-          root: root,
-
-          seedHex: '0x' + buf2hex(seed),
-          masterPrivateKey: '0x' + buf2hex(masterPrivateKey),
-          rootWif: rootWif,
-          rootXpriv: rootXpriv,
-          rootXpub: rootXpub,
-
-          address: addresses.length > 0 ? addresses[0].address : null,
-          addresses: addresses,
-
-          balance: null,
-          received: null
-        };
-
-        return result;
-      }),
-      tap(result => this.result = result),
-      delay(300),
-      // fetch addresses balances and received by until reveived <= 0
-      concatMap(result => from(result.addresses as NgBip32HdNodeLegacy[]).pipe(
-          concatMap(val => this.dataInfoService.fetchReceivedByAddress(val.address).pipe(
-            tap(received => val.received = received),
-            tap(x => val.lastCheckTimestamp = new Date().getTime()),
-            map(x => val)
-          )),
-          takeWhile(val => val.received > 0),
-          tap(val => console.log('take ' + val.address + ' because reveiced > 0: ' + val.received)),
-          concatMap(val => this.dataInfoService.fetchAddressBalance(val.address).pipe(
-            tap(balance => val.balance = balance),
-            map(x => val)
-          )),
-          map(x => result),
-          endWith(result)
-        )),
-      takeLast(1),
-      concatMap(result => from(result.addresses as NgBip32HdNodeLegacy[]).pipe(
-        filter(val => val.received > 0),
-        map(val => val.received),
-        reduce((acc, curr) => acc + curr, 0),
-        tap(totalReceived => result.received = totalReceived),
-        map(x => result),
-        endWith(result)
-      )),
-      takeLast(1),
-      tap(result => this.result = result),
-      delay(1300),
-      concatMap(result => from(result.addresses as NgBip32HdNodeLegacy[]).pipe(
-        filter(val => val.balance > 0),
-        map(val => val.balance),
-        reduce((acc, curr) => acc + curr, 0),
-        tap(totalBalance => result.balance = totalBalance),
-        map(x => result),
-        endWith(result)
-      )),
-      takeLast(1),
-    ).subscribe(result => {
-      this.result = result;
-      console.log('subscribe');
-    }, error => {
-      this.loading = false;
-
-      this.result = this.result || {};
-      this.result.error = error;
-      console.log('error');
-    }, () => {
-      this.loading = false;
-      this.tryCounter++;
-
-      this.result = this.result || {};
-      console.log('end');
-    });*/
   }
 
 }
