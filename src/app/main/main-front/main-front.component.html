@@ -243,12 +243,12 @@
       <div class="word-input-container" fxLayout="row wrap" *ngIf="!result.mneomincIsValid">
         Input is not a valid BIP39 mnemonic seed.
       </div>
-      <div class="word-input-container" fxLayout="row wrap" *ngIf="result.mneomincIsValid">
-        <div fxFlex="100%" fxFlex.gt-sm="32%" fxFlex.gt-md="24%" fxFlex.gt-md="16.5%" *ngFor="let i of [0,1,2,3,4,5,6,7,8,9,10,11]">
+      <div class="word-input-container" fxLayout="row wrap" *ngIf="result.mneomincIsValid && result.mnemonicArray">
+        <div fxFlex="100%" fxFlex.gt-sm="32%" fxFlex.gt-md="24%" fxFlex.gt-md="16.5%" *ngFor="let word of result.mnemonicArray; index as i">
           <span>
             <mat-form-field class="example-form-field-{{i}}" appearance="fill">
-              <mat-label>Word {{i+1}}</mat-label>
-              <input matInput type="text" placeholder="Word {{i+1}}" [value]="mnemonicArray[i]" disabled/>
+              <mat-label>Word {{i+1}} <ng-container *ngIf="i === result.mnemonicArray.length - 1">(Checksum Word)</ng-container></mat-label>
+              <input matInput type="text" placeholder="Word {{i+1}}" [value]="word" disabled/>
             </mat-form-field>
           </span>
         </div>

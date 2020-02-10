@@ -94,7 +94,6 @@ export class MainFrontComponent implements OnInit {
   result: any;
   wallet: NgBip32HdWalletView;
 
-  mnemonicArray: Array<string>;
   searchInputValue: string;
   passphraseInputValue: string;
   networkInputValue: Bitcoin.Network = MainFrontComponent.NETWORK_DEFAULT_VALUE;
@@ -123,7 +122,6 @@ export class MainFrontComponent implements OnInit {
     private readonly activatedRoute: ActivatedRoute,
     private readonly formBuilder: FormBuilder,
     private readonly dataInfoService: DataInfoServiceService) {
-    this.mnemonicArray = [];
     this.searchInputValue = '';
     this.passphraseInputValue = '';
   }
@@ -132,7 +130,6 @@ export class MainFrontComponent implements OnInit {
     this.mnemonicInputChangedSubject.pipe(
     ).subscribe(mnemonic => {
       console.log('onChangeMnemonic');
-      this.mnemonicArray = mnemonic.split(' ');
       this.searchInputValue = mnemonic;
 
       this.generateResult(mnemonic);
@@ -268,12 +265,15 @@ export class MainFrontComponent implements OnInit {
         const addresses = this.wallet.findAllAddresses();
         const nodesWithReceived = this.wallet.findNodesWithReceivedGreaterZero().sort(sortByLastActivity);
         const nodesWithBalance = this.wallet.findNodesWithBalanceGreaterZero().sort(sortByLastActivity);
+
+        const mneomincIsValid = Bip39.validateMnemonic(mnemonic);
         this.result = {
           error: null,
           searchDurationInMs: Date.now() - now,
 
           mnemonic: this.wallet.mnemonic,
           mneomincIsValid: Bip39.validateMnemonic(mnemonic),
+          mnemonicArray: !mneomincIsValid ? [] : mnemonic.split(' '),
 
           received: this.wallet.root.received(),
           balance: this.wallet.root.balance(),
