@@ -1,7 +1,6 @@
 import { Component, OnInit, Inject, AfterViewInit, Input } from '@angular/core';
 import { APP_CONFIG, AppConfig } from '../../config/app.config';
 import { IAppConfig } from '../../config/iapp.config';
-import { FormBuilder } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
@@ -13,10 +12,9 @@ export class MainFaqComponent implements OnInit, AfterViewInit {
 
   private fragment: string;
 
-  constructor(@Inject(APP_CONFIG) public appConfig: IAppConfig,
-    private router: Router,
-    private route: ActivatedRoute,
-    private formBuilder: FormBuilder) {
+  constructor(@Inject(APP_CONFIG) public readonly appConfig: IAppConfig,
+    private readonly router: Router,
+    private readonly route: ActivatedRoute) {
   }
 
   ngOnInit() {
@@ -54,7 +52,7 @@ export class MainFaqComponent implements OnInit, AfterViewInit {
      matTooltipPosition="above">
     <mat-icon aria-hidden="false" aria-label="Scroll To Top icon">arrow_upward</mat-icon>
   </a>
-    `
+  `
 })
 export class ScrollToTopButtonComponent implements OnInit, AfterViewInit {
 

@@ -1,8 +1,6 @@
 import { Injector, Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { MatDialog } from '@angular/material';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { AppConfig } from '../../config/app.config';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Subject } from 'rxjs/Subject';
 import { DataInfoServiceService } from '../../core/shared/data-info-service.service';
@@ -37,7 +35,7 @@ function buildPath(prefix: string, account: number, change: number, index: numbe
 export class BitcoinPipe implements PipeTransform {
   private readonly currencyPipe: CurrencyPipe;
 
-  constructor (injector: Injector) {
+  constructor (readonly injector: Injector) {
     this.currencyPipe = injector.get(CurrencyPipe);
   }
 
@@ -71,10 +69,10 @@ export class BitcoinPipe implements PipeTransform {
 })
 
 export class MainFrontComponent implements OnInit {
-  private readonly SEARCH_QUERY_PARAM_NAME = 'q';
-  private readonly PASSPHRASE_QUERY_PARAM_NAME = 'p';
-  private readonly NETWORK_QUERY_PARAM_NAME = 'n';
-  private readonly NETWORK_DEFAULT_VALUE = Bitcoin.networks.bitcoin;
+  private static readonly SEARCH_QUERY_PARAM_NAME = 'q';
+  private static readonly PASSPHRASE_QUERY_PARAM_NAME = 'p';
+  private static readonly NETWORK_QUERY_PARAM_NAME = 'n';
+  private static readonly NETWORK_DEFAULT_VALUE = Bitcoin.networks.bitcoin;
 
   // path : = m / purpose' / coin_type' / account' / change / address_index
   /*private readonly pathPrefixBip44 = `m/44'/0'/`; // addresses 1xxx
@@ -99,7 +97,7 @@ export class MainFrontComponent implements OnInit {
   mnemonicArray: Array<string>;
   searchInputValue: string;
   passphraseInputValue: string;
-  networkInputValue: Bitcoin.Network = this.NETWORK_DEFAULT_VALUE;
+  networkInputValue: Bitcoin.Network = MainFrontComponent.NETWORK_DEFAULT_VALUE;
 
   readonly networkInputSelectOptions = [{
     value: Bitcoin.networks.bitcoin,
@@ -156,27 +154,27 @@ export class MainFrontComponent implements OnInit {
     this.activatedRoute.queryParamMap.pipe(
       take(1)
     ).subscribe(p => {
-      this.passphraseInputValue = p.get(this.PASSPHRASE_QUERY_PARAM_NAME);
+      this.passphraseInputValue = p.get(MainFrontComponent.PASSPHRASE_QUERY_PARAM_NAME);
       this.networkInputValue = this.networkInputSelectOptions
-        .filter(val => val.name === p.get(this.NETWORK_QUERY_PARAM_NAME))
-        .map(val => val.value)[0] || this.NETWORK_DEFAULT_VALUE;
+        .filter(val => val.name === p.get(MainFrontComponent.NETWORK_QUERY_PARAM_NAME))
+        .map(val => val.value)[0] || MainFrontComponent.NETWORK_DEFAULT_VALUE;
 
-      const mnemonic = p.get(this.SEARCH_QUERY_PARAM_NAME);
+      const mnemonic = p.get(MainFrontComponent.SEARCH_QUERY_PARAM_NAME);
       this.searchInputChangedSubject.next(mnemonic);
     });
   }
 
   onChangeSearchInput(mnemonic: string) {
     const queryParams = {};
-    queryParams[this.SEARCH_QUERY_PARAM_NAME] = mnemonic;
-    queryParams[this.PASSPHRASE_QUERY_PARAM_NAME] = this.passphraseInputValue;
+    queryParams[MainFrontComponent.SEARCH_QUERY_PARAM_NAME] = mnemonic;
+    queryParams[MainFrontComponent.PASSPHRASE_QUERY_PARAM_NAME] = this.passphraseInputValue;
 
-    delete queryParams[this.NETWORK_QUERY_PARAM_NAME];
+    delete queryParams[MainFrontComponent.NETWORK_QUERY_PARAM_NAME];
     this.networkInputSelectOptions
         .filter(val => val.value === this.networkInputValue)
         .map(val => val.name)
         .forEach(networkName => {
-          queryParams[this.NETWORK_QUERY_PARAM_NAME] = networkName;
+          queryParams[MainFrontComponent.NETWORK_QUERY_PARAM_NAME] = networkName;
         });
     queryParams['ts'] = Date.now();
 

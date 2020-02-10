@@ -19,8 +19,8 @@ export class NavComponent implements OnInit {
   currentLang: string;
 
   constructor(@Inject(APP_CONFIG) appConfig: IAppConfig,
-    private progressBarService: ProgressBarService,
-    private translateService: TranslateService) {
+    private readonly progressBarService: ProgressBarService,
+    private readonly translateService: TranslateService) {
     this.appConfig = appConfig;
   }
 

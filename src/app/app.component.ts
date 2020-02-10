@@ -11,16 +11,15 @@ declare const Modernizr;
   selector: 'app-root',
   templateUrl: './app.component.html'
 })
-
 export class AppComponent implements OnInit {
 
   isOnline: boolean;
 
-  constructor(private translateService: TranslateService,
-              private title: Title,
-              private meta: Meta,
-              private snackBar: MatSnackBar,
-              private router: Router) {
+  constructor(private readonly translateService: TranslateService,
+              private readonly title: Title,
+              private readonly meta: Meta,
+              private readonly snackBar: MatSnackBar,
+              private readonly router: Router) {
     this.isOnline = navigator.onLine;
   }
 
@@ -28,7 +27,11 @@ export class AppComponent implements OnInit {
     this.translateService.setDefaultLang('en');
     this.translateService.use('en');
 
-    this.title.setTitle('bip39');
+    this.title.setTitle('Loading...');
+    this.translateService.get(['applicationName']).subscribe((texts) => {
+      this.title.setTitle(texts['applicationName']);
+    });
+
     this.router.events.subscribe((event: any) => {
       if (event instanceof NavigationEnd) {
         switch (event.urlAfterRedirects) {

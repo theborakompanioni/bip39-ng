@@ -10,7 +10,7 @@ import {TranslateService} from '@ngx-translate/core';
 export class FooterComponent implements OnInit {
   currentLang: string;
 
-  constructor(private translateService: TranslateService) {
+  constructor(private readonly translateService: TranslateService) {
   }
 
   ngOnInit() {

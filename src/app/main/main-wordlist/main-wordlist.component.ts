@@ -15,13 +15,13 @@ import * as Bip39 from 'bip39';
 export class MainWordlistComponent implements OnInit {
 
   private fragment: string;
-  private language: string = Bip39.getDefaultWordlist();
+  private readonly language: string = Bip39.getDefaultWordlist();
   wordlist: string[] = Bip39.wordlists[this.language];
 
-  constructor(@Inject(APP_CONFIG) public appConfig: IAppConfig,
-    private router: Router,
-    private route: ActivatedRoute,
-    private formBuilder: FormBuilder) {
+  constructor(@Inject(APP_CONFIG) public readonly appConfig: IAppConfig,
+    private readonly router: Router,
+    private readonly route: ActivatedRoute,
+    private readonly formBuilder: FormBuilder) {
   }
 
   ngOnInit() {

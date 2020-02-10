@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { ProgressBarService } from '../../core/shared/progress-bar.service';
 
 export class ProgressInterceptor implements HttpInterceptor {
-  constructor(private progressBarService: ProgressBarService) {
+  constructor(private readonly progressBarService: ProgressBarService) {
   }
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
