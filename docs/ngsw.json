@@ -1,6 +1,6 @@
 {
   "configVersion": 1,
-  "timestamp": 1581287292421,
+  "timestamp": 1581378364479,
   "index": "/bip39-ng/index.html",
   "assetGroups": [
     {
@@ -103,7 +103,7 @@
     "/bip39-ng/assets/manifest.json": "3094215711336c6e96496bd9b39b31f40d23946f",
     "/bip39-ng/assets/sitemap.xml": "379920962425a40740192c07c6d8d9246c20774d",
     "/bip39-ng/favicon.ico": "745dc3e299ded192c07fad54e2bd26504be57de2",
-    "/bip39-ng/index.html": "ff8c628e899425dd57af6e8412eef8e6f28aea68"
+    "/bip39-ng/index.html": "1c9bf9b8513086b21054404edfc3158d7176d70e"
   },
   "navigationUrls": [
     {
