@@ -381,3 +381,19 @@ function findLastIntegerInString(val: string): number | null {
   return null;
 }
 
+function buildPath(prefix: string, account: number, change: number, index: number): Bip32Path {
+  if (prefix && Number.isInteger(account) &&  Number.isInteger(change) && Number.isInteger(index)) {
+    return `${prefix}${account}'/${change}/${index}`;
+  }
+  if (prefix && Number.isInteger(account) &&  Number.isInteger(change)) {
+    return `${prefix}${account}'/${change}`;
+  }
+  if (prefix && Number.isInteger(account)) {
+    return `${prefix}${account}'`;
+  }
+  if (prefix && Number.isInteger(index)) {
+    return `${prefix}${index}`;
+  }
+  return `${prefix}`;
+}
+

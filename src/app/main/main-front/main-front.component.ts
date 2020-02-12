@@ -1,5 +1,4 @@
-import { Injector, Component, OnInit, ViewChild } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { Injector, Component, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Subject } from 'rxjs/Subject';
@@ -13,20 +12,9 @@ import { filter, map, take, throttleTime, takeLast, endWith, concatMap, flatMap 
 import { of, from} from 'rxjs';
 import { Bip32Path, NgBip32HdWalletView, NgBip32HdNodeView } from '../../wallet/core/wallet';
 
-function buildPath(prefix: string, account: number, change: number, index: number): Bip32Path {
-  if (prefix && Number.isInteger(account) &&  Number.isInteger(change) && Number.isInteger(index)) {
-    return `${prefix}${account}'/${change}/${index}`;
-  }
-  if (prefix && Number.isInteger(account) &&  Number.isInteger(change)) {
-    return `${prefix}${account}'/${change}`;
-  }
-  if (prefix && Number.isInteger(account)) {
-    return `${prefix}${account}'`;
-  }
-  if (prefix && Number.isInteger(index)) {
-    return `${prefix}${index}`;
-  }
-  return `${prefix}`;
+
+function buf2hex(buffer) { // buffer is an ArrayBuffer
+  return Array.prototype.map.call(new Uint8Array(buffer), x => ('00' + x.toString(16)).slice(-2)).join('');
 }
 
 @Pipe({
@@ -62,17 +50,25 @@ export class BitcoinPipe implements PipeTransform {
   }
 }
 
+type HashFunction = (arg0: Buffer) => Buffer;
+type StringToStringHashFunction = (arg0: string) => string;
+
+const HASH_NOP: StringToStringHashFunction = (arg0) => arg0;
+const STRING_IN_STRING_OUT_HASH_FN: (hashFunction: HashFunction) => StringToStringHashFunction =
+  (hashFunction) => (arg0) => buf2hex(hashFunction(Buffer.from(arg0)));
+
 @Component({
   selector: 'app-main-front',
   templateUrl: './main-front.component.html',
   styleUrls: ['./main-front.component.scss']
 })
-
 export class MainFrontComponent implements OnInit {
   private static readonly SEARCH_QUERY_PARAM_NAME = 'q';
   private static readonly PASSPHRASE_QUERY_PARAM_NAME = 'p';
   private static readonly NETWORK_QUERY_PARAM_NAME = 'n';
   private static readonly NETWORK_DEFAULT_VALUE = Bitcoin.networks.bitcoin;
+  private static readonly HASH_METHOD_QUERY_PARAM_NAME = 'h';
+  private static readonly HASH_METHOD_DEFAULT_VALUE = HASH_NOP;
 
   // path : = m / purpose' / coin_type' / account' / change / address_index
   /*private readonly pathPrefixBip44 = `m/44'/0'/`; // addresses 1xxx
@@ -97,6 +93,17 @@ export class MainFrontComponent implements OnInit {
   searchInputValue: string;
   passphraseInputValue: string;
   networkInputValue: Bitcoin.Network = MainFrontComponent.NETWORK_DEFAULT_VALUE;
+  hashAlgorithmInputValue = MainFrontComponent.HASH_METHOD_DEFAULT_VALUE;
+
+  treatSearchInputAsEntropy = false;
+
+  readonly bip39ModeSelectOptions = [{
+    value: false,
+    name: `mnemonic`
+  }, {
+    value: true,
+    name: `entropy`
+  }];
 
   readonly networkInputSelectOptions = [{
     value: Bitcoin.networks.bitcoin,
@@ -104,6 +111,26 @@ export class MainFrontComponent implements OnInit {
   }, {
     value: Bitcoin.networks.testnet,
     name: `testnet`
+  }];
+
+  readonly hashInputSelectOption = [{
+    value: HASH_NOP,
+    name: `none`
+  }, {
+    value: STRING_IN_STRING_OUT_HASH_FN(Bitcoin.crypto.ripemd160),
+    name: `ripemd160`
+  }, {
+    value: STRING_IN_STRING_OUT_HASH_FN(Bitcoin.crypto.sha1),
+    name: `sha1`
+  }, {
+    value: STRING_IN_STRING_OUT_HASH_FN(Bitcoin.crypto.sha256),
+    name: `sha256`
+  }, {
+    value: STRING_IN_STRING_OUT_HASH_FN(Bitcoin.crypto.hash160),
+    name: `hash160`
+  }, {
+    value: STRING_IN_STRING_OUT_HASH_FN(Bitcoin.crypto.hash256),
+    name: `hash256`
   }];
 
   mnemonicInputChangedSubject: Subject<string> = new Subject<string>();
@@ -120,7 +147,6 @@ export class MainFrontComponent implements OnInit {
   constructor(private readonly router: Router,
     private readonly _snackBar: MatSnackBar,
     private readonly activatedRoute: ActivatedRoute,
-    private readonly formBuilder: FormBuilder,
     private readonly dataInfoService: DataInfoServiceService) {
     this.searchInputValue = '';
     this.passphraseInputValue = '';
@@ -155,15 +181,18 @@ export class MainFrontComponent implements OnInit {
       this.networkInputValue = this.networkInputSelectOptions
         .filter(val => val.name === p.get(MainFrontComponent.NETWORK_QUERY_PARAM_NAME))
         .map(val => val.value)[0] || MainFrontComponent.NETWORK_DEFAULT_VALUE;
+      this.hashAlgorithmInputValue = this.hashInputSelectOption
+        .filter(val => val.name === p.get(MainFrontComponent.HASH_METHOD_QUERY_PARAM_NAME))
+        .map(val => val.value)[0] || MainFrontComponent.HASH_METHOD_DEFAULT_VALUE;
 
-      const mnemonic = p.get(MainFrontComponent.SEARCH_QUERY_PARAM_NAME);
-      this.searchInputChangedSubject.next(mnemonic);
+      const searchQuery = p.get(MainFrontComponent.SEARCH_QUERY_PARAM_NAME);
+      this.searchInputChangedSubject.next(searchQuery);
     });
   }
 
-  onChangeSearchInput(mnemonic: string) {
+  onChangeSearchInput(searchInput: string) {
     const queryParams = {};
-    queryParams[MainFrontComponent.SEARCH_QUERY_PARAM_NAME] = mnemonic;
+    queryParams[MainFrontComponent.SEARCH_QUERY_PARAM_NAME] = searchInput;
     queryParams[MainFrontComponent.PASSPHRASE_QUERY_PARAM_NAME] = this.passphraseInputValue;
 
     delete queryParams[MainFrontComponent.NETWORK_QUERY_PARAM_NAME];
@@ -172,6 +201,12 @@ export class MainFrontComponent implements OnInit {
         .map(val => val.name)
         .forEach(networkName => {
           queryParams[MainFrontComponent.NETWORK_QUERY_PARAM_NAME] = networkName;
+        });
+    this.hashInputSelectOption
+        .filter(val => val.value === this.hashAlgorithmInputValue)
+        .map(val => val.name)
+        .forEach(hashFunctionName => {
+          queryParams[MainFrontComponent.HASH_METHOD_QUERY_PARAM_NAME] = hashFunctionName;
         });
     queryParams['ts'] = Date.now();
 
@@ -183,7 +218,7 @@ export class MainFrontComponent implements OnInit {
     });
 
     // trigger search input update
-    this.searchInputChangedSubject.next(mnemonic);
+    this.searchInputChangedSubject.next(searchInput);
   }
 
   buttonSearchClicked() {
@@ -197,7 +232,7 @@ export class MainFrontComponent implements OnInit {
     this.onChangeSearchInput(mnemonic);
   }
 
-  generateResult(mnemonic: string) {
+  generateResult(searchInput: string) {
     this.loading = true;
     this.result = null;
     this.wallet = null;
@@ -206,6 +241,13 @@ export class MainFrontComponent implements OnInit {
 
     of(1).pipe(
       map(foo => {
+        const hashedInputOrUnchanged: string = this.hashAlgorithmInputValue(searchInput);
+
+        let mnemonic = hashedInputOrUnchanged;
+        if (this.treatSearchInputAsEntropy) {
+          mnemonic = Bip39.entropyToMnemonic(hashedInputOrUnchanged);
+        }
+
         const wallet = new NgBip32HdWalletView(mnemonic, this.passphraseInputValue, this.networkInputValue, this.dataInfoService);
 
         // private pathPrefixBip44 = `m/44'/0'/`; // addresses 1xxx
@@ -262,6 +304,7 @@ export class MainFrontComponent implements OnInit {
           return a.selfLatestActivity() < b.selfLatestActivity() ? 1 : -1;
         };
 
+        const mnemonic = this.wallet.mnemonic;
         const addresses = this.wallet.findAllAddresses();
         const nodesWithReceived = this.wallet.findNodesWithReceivedGreaterZero().sort(sortByLastActivity);
         const nodesWithBalance = this.wallet.findNodesWithBalanceGreaterZero().sort(sortByLastActivity);
@@ -272,7 +315,7 @@ export class MainFrontComponent implements OnInit {
           searchDurationInMs: Date.now() - now,
 
           mnemonic: this.wallet.mnemonic,
-          mneomincIsValid: Bip39.validateMnemonic(mnemonic),
+          mneomincIsValid: mneomincIsValid,
           mnemonicArray: !mneomincIsValid ? [] : mnemonic.split(' '),
 
           received: this.wallet.root.received(),
@@ -296,7 +339,7 @@ export class MainFrontComponent implements OnInit {
 
       if (this.result.received > 0) {
         this._snackBar.open(`You found a treasure..`, '', {
-          duration: 7000
+          duration: 7_000
         });
       }
     });

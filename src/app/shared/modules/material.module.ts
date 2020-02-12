@@ -20,6 +20,7 @@ import {
   MatExpansionModule,
   MatSelectModule,
   MatTabsModule,
+  MatRadioModule,
 } from '@angular/material';
 import {NgModule} from '@angular/core';
 
@@ -46,6 +47,7 @@ import {NgModule} from '@angular/core';
     MatExpansionModule,
     MatSelectModule,
     MatTabsModule,
+    MatRadioModule,
   ],
   exports: [
     MatButtonModule,
@@ -69,6 +71,7 @@ import {NgModule} from '@angular/core';
     MatExpansionModule,
     MatSelectModule,
     MatTabsModule,
+    MatRadioModule,
   ],
 })
 
