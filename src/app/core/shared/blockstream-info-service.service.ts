@@ -61,7 +61,7 @@ export class BlockstreamInfoServiceService {
   }
 
   private baseUrl(options: any = {}) {
-    return `https://blockstream.info/${(options.testnet ? 'testnet' : '')}`;
+    return `https://blockstream.info/${(options.testnet ? 'testnet/' : '')}api`;
   }
 
   public fetchReceivedByAddress(address: string, options: any = {}): Observable<number>  {
@@ -106,7 +106,7 @@ export class BlockstreamInfoServiceService {
   }
 
   public address(address: string, options: any = {}): Observable<AddressResponse> {
-    const url = `${this.baseUrl(options)}/api/address/${address}`;
+    const url = `${this.baseUrl(options)}/address/${address}`;
 
     return this.httpClient.get(url).pipe(
       map(val => <AddressResponse>val)
@@ -133,7 +133,7 @@ export class BlockstreamInfoServiceService {
   }
 
   public utxo(address: string, options: any = {}): Observable<Array<Utxo>> {
-    const url = `${this.baseUrl(options)}/api/address/${address}/utxo`;
+    const url = `${this.baseUrl(options)}/address/${address}/utxo`;
 
     return this.httpClient.get(url).pipe(
       map(val => <Array<Utxo>>val)
@@ -154,7 +154,7 @@ export class BlockstreamInfoServiceService {
   }
 
   public txs(address: string, options: any = {}): Observable<Array<Tx>> {
-    const url = `${this.baseUrl(options)}/api/address/${address}/txs`;
+    const url = `${this.baseUrl(options)}/address/${address}/txs`;
 
     return this.httpClient.get(url).pipe(
       map(val => <Array<Tx>>val)
