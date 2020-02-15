@@ -12,9 +12,22 @@ import { filter, map, take, throttleTime, takeLast, endWith, concatMap, flatMap 
 import { of, from} from 'rxjs';
 import { NgBip32SeedProvider, NgBip32HdWalletView, NgBip32HdNodeView } from '../../wallet/core/wallet';
 
-
 function buf2hex(buffer) { // buffer is an ArrayBuffer
   return Array.prototype.map.call(new Uint8Array(buffer), x => ('00' + x.toString(16)).slice(-2)).join('');
+}
+
+function firstNonEmptyArray(arr1: any[], arr2: any[]) {
+  if (arr1.length !== 0) {
+    return arr1;
+  }
+  if (arr2.length !== 0) {
+    return arr2;
+  }
+  throw new Error('One of both values must not be empty');
+}
+
+function isArraysWithSameUniqueContent(arr1: any[], arr2: any[]) {
+  return new Set([...arr1, ...arr2]).size === arr1.length;
 }
 
 type InputType = 'mnemonic' | 'entropy' | 'seed';
@@ -77,6 +90,15 @@ export class MainFrontComponent implements OnInit {
   private static readonly SCAN_DEPTH_MIN_VALUE = 1;
   private static readonly SCAN_DEPTH_MAX_VALUE = 5;
   private static readonly SCAN_DEPTH_DEFAULT_VALUE = MainFrontComponent.SCAN_DEPTH_MIN_VALUE;
+  private static readonly PATH_PREFIX_LIST_QUERY_PARAM_NAME = 'l';
+  private static readonly PATH_PREFIX_LIST_DEFAULT_VALUE = [
+    // see https://github.com/dan-da/hd-wallet-derive/blob/master/doc/wallet-bip32-path-presets.md
+    `m/44'/0'/0'/0`,
+    `m/49'/0'/0'/0`,
+    `m/84'/0'/0'/0`,
+    `m/0'/0`,
+    `m/0`
+  ];
 
   // path : = m / purpose' / coin_type' / account' / change / address_index
   /*private readonly pathPrefixBip44 = `m/44'/0'/`; // addresses 1xxx
@@ -105,6 +127,7 @@ export class MainFrontComponent implements OnInit {
 
   inputTypeInputValue: InputType = MainFrontComponent.INPUT_TYPE_DEFAULT_VALUE;
   scanDepthInputValue = MainFrontComponent.SCAN_DEPTH_DEFAULT_VALUE;
+  pathPrefixListInputValue = MainFrontComponent.PATH_PREFIX_LIST_DEFAULT_VALUE.join(`,\n`);
 
   readonly inputTypeSelectOptions = [{
     value: `mnemonic`,
@@ -184,11 +207,6 @@ export class MainFrontComponent implements OnInit {
     this.activatedRoute.queryParamMap.pipe(
       take(1)
     ).subscribe(p => {
-    });
-
-    this.activatedRoute.queryParamMap.pipe(
-      take(1)
-    ).subscribe(p => {
       this.passphraseInputValue = p.get(MainFrontComponent.PASSPHRASE_QUERY_PARAM_NAME);
       this.networkInputValue = this.networkInputSelectOptions
         .filter(val => val.name === p.get(MainFrontComponent.NETWORK_QUERY_PARAM_NAME))
@@ -205,6 +223,10 @@ export class MainFrontComponent implements OnInit {
           MainFrontComponent.SCAN_DEPTH_MAX_VALUE
         )
       );
+      this.pathPrefixListInputValue = firstNonEmptyArray(
+        p.getAll(MainFrontComponent.PATH_PREFIX_LIST_QUERY_PARAM_NAME),
+        MainFrontComponent.PATH_PREFIX_LIST_DEFAULT_VALUE
+      ).join(`,\n`);
 
       const searchQuery = p.get(MainFrontComponent.SEARCH_QUERY_PARAM_NAME);
       this.searchInputChangedSubject.next(searchQuery);
@@ -220,6 +242,7 @@ export class MainFrontComponent implements OnInit {
     delete queryParams[MainFrontComponent.NETWORK_QUERY_PARAM_NAME];
     this.networkInputSelectOptions
       .filter(val => val.value === this.networkInputValue)
+      .filter(val => val.value !==  MainFrontComponent.NETWORK_DEFAULT_VALUE)
       .map(val => val.name)
       .forEach(networkName => {
         queryParams[MainFrontComponent.NETWORK_QUERY_PARAM_NAME] = networkName;
@@ -228,6 +251,7 @@ export class MainFrontComponent implements OnInit {
     delete queryParams[MainFrontComponent.HASH_METHOD_QUERY_PARAM_NAME];
     this.hashInputSelectOption
       .filter(val => val.value === this.hashAlgorithmInputValue)
+      .filter(val => val.value !==  MainFrontComponent.HASH_METHOD_DEFAULT_VALUE)
       .map(val => val.name)
       .forEach(hashFunctionName => {
         queryParams[MainFrontComponent.HASH_METHOD_QUERY_PARAM_NAME] = hashFunctionName;
@@ -236,10 +260,20 @@ export class MainFrontComponent implements OnInit {
     delete queryParams[MainFrontComponent.INPUT_TYPE_QUERY_PARAM_NAME];
     this.inputTypeSelectOptions
       .filter(val => val.value === this.inputTypeInputValue)
+      .filter(val => val.value !==  MainFrontComponent.INPUT_TYPE_DEFAULT_VALUE)
       .map(val => val.name)
       .forEach(inputTypeName => {
         queryParams[MainFrontComponent.INPUT_TYPE_QUERY_PARAM_NAME] = inputTypeName;
       });
+
+    delete queryParams[MainFrontComponent.PATH_PREFIX_LIST_QUERY_PARAM_NAME];
+    const pathPrefixArray = this.pathPrefixListInputValue.split(`,`)
+      .map(val => val.trim())
+      .filter(val => val.length > 0);
+
+    if (!isArraysWithSameUniqueContent(pathPrefixArray, MainFrontComponent.PATH_PREFIX_LIST_DEFAULT_VALUE)) {
+      queryParams[MainFrontComponent.PATH_PREFIX_LIST_QUERY_PARAM_NAME] = pathPrefixArray;
+    }
 
     queryParams['ts'] = Date.now();
 
@@ -294,21 +328,16 @@ export class MainFrontComponent implements OnInit {
 
         const wallet = new NgBip32HdWalletView(seedProvider, this.networkInputValue, this.dataInfoService);
 
-        // private pathPrefixBip44 = `m/44'/0'/`; // addresses 1xxx
-        // private pathPrefixBip49 = `m/49'/0'/`; // addresses 3xxx
-        // private pathPrefixBip84 = `m/84'/0'/`; // addresses bc1xxx
+        const pathPrefixList = this.pathPrefixListInputValue.split(',')
+          .map(val => val.trim())
+          .filter(val => val.length > 0);
 
-        for (let i = 0; i < this.scanDepthInputValue; i++) {
-          // see https://github.com/dan-da/hd-wallet-derive/blob/master/doc/wallet-bip32-path-presets.md
-          wallet.getOrCreateNode(`m/44'/0'/0'/0`).getOrCreateNextIndex();
-          // wallet.getOrCreateNode(`m/44'/0'/0'/1`).getOrCreateNextIndex();
-          wallet.getOrCreateNode(`m/49'/0'/0'/0`).getOrCreateNextIndex();
-          // wallet.getOrCreateNode(`m/49'/0'/0'/1`).getOrCreateNextIndex();
-          wallet.getOrCreateNode(`m/84'/0'/0'/0`).getOrCreateNextIndex();
-          // wallet.getOrCreateNode(`m/84'/0'/0'/1`).getOrCreateNextIndex();
-          wallet.getOrCreateNode(`m/0'/0`).getOrCreateNextIndex();
-          wallet.getOrCreateNode(`m/0`).getOrCreateNextIndex();
-        }
+        pathPrefixList.forEach(pathPrefix => {
+          const pathRootNode = wallet.getOrCreateNode(pathPrefix);
+          for (let i = 0; i < this.scanDepthInputValue; i++) {
+            pathRootNode.getOrCreateNextIndex();
+          }
+        });
 
         return wallet;
       }),

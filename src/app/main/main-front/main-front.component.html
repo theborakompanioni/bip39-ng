@@ -75,7 +75,7 @@
 
       <div fxLayout="row wrap" fxLayoutAlign="space-between">
 
-        <div fxFlex="100%" fxFlex.gt-sm="69%" fxFlex.gt-md="69%" fxFlex.gt-md="69%">
+        <div fxFlex="100%" fxFlex.gt-sm="50%" fxFlex.gt-md="60%" fxFlex.gt-md="60%">
           <mat-form-field appearance="outline" style="width: 100%;">
             <mat-label>Network</mat-label>
             <mat-select [(ngModel)]="networkInputValue" name="network">
@@ -86,11 +86,20 @@
           </mat-form-field>
         </div>
 
-        <div fxFlex="100%" fxFlex.gt-sm="30%" fxFlex.gt-md="30%" fxFlex.gt-md="30%">
+        <div fxFlex="100%" fxFlex.gt-sm="49%" fxFlex.gt-md="39%" fxFlex.gt-md="39%">
           <mat-form-field appearance="outline" style="width: 100%;">
             <mat-label>Scan Depth</mat-label>
             <input matInput [(ngModel)]="scanDepthInputValue" type="number" step="1" min="1" max="5" />
             <mat-hint>How many addresses should be scanned per derivation path (default: 1 | max: 5)</mat-hint>
+          </mat-form-field>
+        </div>
+
+        <div style="padding: 1.5rem 0;" fxFlex="100%" fxFlex.gt-sm="100%" fxFlex.gt-md="100%" fxFlex.gt-md="100%">
+          <mat-form-field appearance="outline" style="width: 100%;">
+              <mat-label>Derivation Path Prefixes</mat-label>
+              <textarea matInput [(ngModel)]="pathPrefixListInputValue" rows="5"></textarea>
+              <mat-hint align="start">Comma separated list of path prefixes (<code>address_index</code> will be generated)</mat-hint>
+              <mat-hint align="end"><code>path := m / purpose' / coin_type' / account' / change / address_index</code></mat-hint>
           </mat-form-field>
         </div>
 

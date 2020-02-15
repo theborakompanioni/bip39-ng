@@ -1,8 +1,7 @@
 import * as Bitcoin from 'bitcoinjs-lib';
 import * as Bip32 from 'bip32';
 import * as Bip39 from 'bip39';
-import { filter, tap, map, take, defaultIfEmpty, first, last, throttleTime, takeWhile, takeLast,
-  reduce, endWith, concatMap, catchError, flatMap } from 'rxjs/operators';
+import { tap, map, last, takeWhile, endWith, concatMap} from 'rxjs/operators';
 import { Observable, concat, of, from } from 'rxjs';
 
 type Timestamp = number;
@@ -217,7 +216,7 @@ export class NgBip32SeedProvider {
     return NgBip32SeedProvider.fromMnemonic(mnemonic, passphrase);
   }
 
-  public static fromMnemonic(mnemonic: string, passphrase?: string): NgBip32SeedProvider {
+  public static fromMnemonic(mnemonic: Mnemonic, passphrase?: string): NgBip32SeedProvider {
     const seed = Bip39.mnemonicToSeedSync(mnemonic, passphrase);
     return new NgBip32SeedProvider(seed, mnemonic, passphrase);
   }
@@ -226,7 +225,7 @@ export class NgBip32SeedProvider {
   }
 
   private constructor(public readonly seed: Buffer,
-    public readonly mnemonic?: string,
+    public readonly mnemonic?: Mnemonic,
     public readonly passphrase?: string) {
 
   }
