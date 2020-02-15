@@ -334,6 +334,7 @@ export class MainFrontComponent implements OnInit {
           error: null,
           searchDurationInMs: Date.now() - now,
 
+          searchInput: searchInput,
           mnemonic: mnemonic,
           mneomincIsValid: mneomincIsValid,
           mnemonicArray: !mneomincIsValid ? [] : mnemonic.split(' '),
@@ -348,7 +349,7 @@ export class MainFrontComponent implements OnInit {
           nodesWithBalance: nodesWithBalance,
 
           addresses: addresses,
-          seedHex: this.wallet.seedProvider.seedHex(),
+          seedHex: '0x' + this.wallet.seedProvider.seedHex(),
           wif: this.wallet.root._node.wif,
           xpriv: this.wallet.root._node.xpriv,
           xpub: this.wallet.root._node.xpub,

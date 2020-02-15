@@ -214,10 +214,15 @@
   <div *ngIf="result && !result.error" [hidden]="loading">
     <mat-card style="margin: 1em;">
       <h3>Search</h3>
+      <div>
+        <span class="bold">Results for search term:</span> 
+        <pre>{{result.searchInput || '(empty)'}}</pre>
+      </div>
 
-      <span class="bold">Results for search term:</span> 
-      <pre>{{result.mnemonic || '(empty)'}}</pre>
-      
+      <div [hidden]="!result.mnemonic || result.searchInput === result.mnemonic">
+        <span class="bold">Mnemonic:</span> 
+        <pre>{{ result.mnemonic }}</pre>
+      </div>
       <p>
         <span class="bold">Total Balance:</span> 
         {{ result.balance | bitcoin}}

@@ -52,8 +52,6 @@ interface NgBip32HdNode {
     readonly _self: Bip32.BIP32Interface;
 
     readonly path: Bip32Path;
-    readonly publicKey: HexString;
-    readonly privateKey: HexString;
     readonly xpriv: string;
     readonly xpub: string;
     readonly wif: string;
@@ -88,8 +86,6 @@ function _newNodeInternalWithAddressGenerationStrategy(node: Bip32.BIP32Interfac
   return {
     _self: node,
     path: path,
-    publicKey: '0x' + buf2hex(node.publicKey),
-    privateKey: '0x' + buf2hex(node.privateKey),
     xpriv: node.toBase58(),
     xpub: node.neutered().toBase58(),
     wif: node.toWIF(),
@@ -240,7 +236,7 @@ export class NgBip32SeedProvider {
   }
 
   seedHex(): HexString {
-    return  '0x' + buf2hex(this.seed);
+    return this.seed.toString('hex');
   }
 }
 
@@ -355,10 +351,6 @@ export class NgBip32HdWalletView {
       last()
     );
   }
-}
-
-function buf2hex(buffer) { // buffer is an ArrayBuffer
-  return Array.prototype.map.call(new Uint8Array(buffer), x => ('00' + x.toString(16)).slice(-2)).join('');
 }
 
 function p2pkhAddress(node: any, network?: any): BitcoinAddress {
