@@ -379,6 +379,7 @@ export class MainFrontComponent implements OnInit {
 
         const mnemonic = this.wallet.seedProvider.mnemonic;
         const addresses = this.wallet.findAllAddresses();
+        const scannedAddresses = this.wallet.findAllAddresses().filter(address => address.lastCheckTimestamp > 0);
         const nodesWithReceived = this.wallet.findNodesWithReceivedGreaterZero().sort(sortByLastActivity);
         const nodesWithBalance = this.wallet.findNodesWithBalanceGreaterZero().sort(sortByLastActivity);
 
@@ -396,7 +397,7 @@ export class MainFrontComponent implements OnInit {
           balance: this.wallet.root.balance(),
 
           latestActivityTimestamp: Math.max(this.wallet.findLatestActivity() || 0, 0),
-          numberOfAddressesScanned: addresses.length,
+          numberOfAddressesScanned: scannedAddresses.length,
           numberOfNodes: this.wallet.findAllNodes().length,
           nodesWithReceived: nodesWithReceived,
           nodesWithBalance: nodesWithBalance,
@@ -406,6 +407,8 @@ export class MainFrontComponent implements OnInit {
           wif: this.wallet.root._node.wif,
           xpriv: this.wallet.root._node.xpriv,
           xpub: this.wallet.root._node.xpub,
+
+          displayNodes: [...this.wallet.root.childNodes]
         };
       }
 

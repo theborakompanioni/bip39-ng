@@ -336,8 +336,8 @@ export class NgBip32HdWalletView {
             }, error => addressView.error = error,
             () => addressView.lastCheckTimestamp = new Date().getTime()
           ),
-          tap(received => {
-            console.log(`${node._node.path} and address ${addressView._address.address} received ${received}`);
+          tap(info => {
+            console.log(`${node._node.path} and address ${addressView._address.address} received`, info);
           }, error => console.log(`error while scanning ${node._node.path}: ${error}`)),
         )),
         map(addressView => node),

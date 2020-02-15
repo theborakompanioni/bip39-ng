@@ -271,7 +271,7 @@
     </mat-card>
   </div>
 
-  <div *ngIf="wallet" [hidden]="loading">
+  <div *ngIf="result && !result.error" [hidden]="loading">
     <mat-card style="margin: 1em;">
       <h3>Wallet Information</h3>
       <div>
@@ -434,7 +434,7 @@
 
 
     
-  <div *ngIf="wallet">
+  <div *ngIf="result && result.displayNodes">
 
     <!-- p>
       <span class="bold">Path (BIP44):</span> {{result.path}}
@@ -448,7 +448,7 @@
     </p-->
 
     <mat-tab-group mat-stretch-tabs>
-      <mat-tab *ngFor="let node of wallet.root.childNodes">
+      <mat-tab *ngFor="let node of result.displayNodes">
         <ng-template mat-tab-label>
           <mat-icon>account_tree</mat-icon>&nbsp;&nbsp;
           {{ node._node.path }} 
