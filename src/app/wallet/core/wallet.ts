@@ -63,8 +63,8 @@ interface NgBip32HdNode {
 function _newNodeInternal(node: Bip32.BIP32Interface, path: Bip32Path): NgBip32HdNode {
   const defaultAddressGenerationFun = (n, network) => [
     p2pkhAddress(n, network),
-    segwitAdddress(n, network),
-    p2wpkhAddress(n, network)
+    // segwitAdddress(n, network), <--- only include if you want to generate more address types per "unknown" path
+    // p2wpkhAddress(n, network) <--- only include if you want to generate more address types per "unknown" path
   ];
 
   return _newNodeInternalWithAddressGenerationStrategy(node, path, (n, p) => {
