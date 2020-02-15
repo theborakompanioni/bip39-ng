@@ -17,6 +17,8 @@ function buf2hex(buffer) { // buffer is an ArrayBuffer
   return Array.prototype.map.call(new Uint8Array(buffer), x => ('00' + x.toString(16)).slice(-2)).join('');
 }
 
+type InputType = 'mnemonic' | 'entropy' | 'seed';
+
 @Pipe({
     name: 'bitcoin'
 })
@@ -70,7 +72,7 @@ export class MainFrontComponent implements OnInit {
   private static readonly HASH_METHOD_QUERY_PARAM_NAME = 'h';
   private static readonly HASH_METHOD_DEFAULT_VALUE = HASH_NOP;
   private static readonly INPUT_TYPE_QUERY_PARAM_NAME = 'i';
-  private static readonly INPUT_TYPE_DEFAULT_VALUE = `mnemonic`;
+  private static readonly INPUT_TYPE_DEFAULT_VALUE: InputType = `mnemonic`;
   private static readonly SCAN_DEPTH_QUERY_PARAM_NAME = 'd';
   private static readonly SCAN_DEPTH_MIN_VALUE = 1;
   private static readonly SCAN_DEPTH_MAX_VALUE = 5;
@@ -101,7 +103,7 @@ export class MainFrontComponent implements OnInit {
   networkInputValue: Bitcoin.Network = MainFrontComponent.NETWORK_DEFAULT_VALUE;
   hashAlgorithmInputValue = MainFrontComponent.HASH_METHOD_DEFAULT_VALUE;
 
-  inputTypeInputValue = MainFrontComponent.INPUT_TYPE_DEFAULT_VALUE;
+  inputTypeInputValue: InputType = MainFrontComponent.INPUT_TYPE_DEFAULT_VALUE;
   scanDepthInputValue = MainFrontComponent.SCAN_DEPTH_DEFAULT_VALUE;
 
   readonly inputTypeSelectOptions = [{
@@ -196,7 +198,7 @@ export class MainFrontComponent implements OnInit {
         .map(val => val.value)[0] || MainFrontComponent.HASH_METHOD_DEFAULT_VALUE;
       this.inputTypeInputValue = this.inputTypeSelectOptions
         .filter(val => val.name === p.get(MainFrontComponent.INPUT_TYPE_QUERY_PARAM_NAME))
-        .map(val => val.value)[0] || MainFrontComponent.INPUT_TYPE_DEFAULT_VALUE;
+        .map(val => val.value as InputType)[0] || MainFrontComponent.INPUT_TYPE_DEFAULT_VALUE;
       this.scanDepthInputValue = Math.max(
         MainFrontComponent.SCAN_DEPTH_MIN_VALUE, Math.min(
           Number.parseInt(p.get(MainFrontComponent.SCAN_DEPTH_QUERY_PARAM_NAME), 10) || MainFrontComponent.SCAN_DEPTH_DEFAULT_VALUE,
@@ -263,6 +265,20 @@ export class MainFrontComponent implements OnInit {
     this.onChangeSearchInput(mnemonic);
   }
 
+  private createSeedProviderFromInput(inputType: InputType, input: string, passphrase?: string): NgBip32SeedProvider {
+    if (inputType === 'entropy') {
+      return NgBip32SeedProvider.fromEntropy(input, passphrase);
+    }
+    if (inputType === 'mnemonic') {
+      return NgBip32SeedProvider.fromMnemonic(input, passphrase);
+    }
+    if (inputType === 'seed') {
+      return NgBip32SeedProvider.fromSeed(Buffer.from(input, 'hex'));
+    }
+
+    throw new Error(`Unknown input type: ${inputType}`);
+  }
+
   generateResult(searchInput: string) {
     this.loading = true;
     this.result = null;
@@ -274,16 +290,7 @@ export class MainFrontComponent implements OnInit {
       map(foo => {
         const hashedInputOrUnchanged: string = this.hashAlgorithmInputValue(searchInput);
 
-        let seedProvider: NgBip32SeedProvider;
-        if (this.inputTypeInputValue === 'entropy') {
-          seedProvider = NgBip32SeedProvider.fromEntropy(hashedInputOrUnchanged, this.passphraseInputValue);
-        }
-        if (this.inputTypeInputValue === 'mnemonic') {
-          seedProvider = NgBip32SeedProvider.fromMnemonic(hashedInputOrUnchanged, this.passphraseInputValue);
-        }
-        if (this.inputTypeInputValue === 'seed') {
-          seedProvider = NgBip32SeedProvider.fromSeed(Buffer.from(hashedInputOrUnchanged, 'hex'));
-        }
+        const seedProvider = this.createSeedProviderFromInput(this.inputTypeInputValue, hashedInputOrUnchanged, this.passphraseInputValue);
 
         const wallet = new NgBip32HdWalletView(seedProvider, this.networkInputValue, this.dataInfoService);
 
