@@ -215,25 +215,43 @@ export class NgBip32HdNodeView {
 
 }
 
-export class NgBip32HdWalletView {
-  public readonly root: NgBip32HdNodeView;
-  private readonly seed: Buffer;
+export class NgBip32SeedProvider {
+  public static fromEntropy(entropy: string, passphrase?: string): NgBip32SeedProvider {
+    const mnemonic = Bip39.entropyToMnemonic(entropy);
+    return NgBip32SeedProvider.fromMnemonic(mnemonic, passphrase);
+  }
 
-  constructor(public readonly mnemonic: Mnemonic, passphrase?,
-              private readonly network: Bitcoin.Network = Bitcoin.networks.bitcoin,
-              private readonly dataInfoService?: DataInfoService) {
-    this.seed = Bip39.mnemonicToSeedSync(mnemonic, passphrase);
+  public static fromMnemonic(mnemonic: string, passphrase?: string): NgBip32SeedProvider {
+    const seed = Bip39.mnemonicToSeedSync(mnemonic, passphrase);
+    return new NgBip32SeedProvider(seed, mnemonic, passphrase);
+  }
+  public static fromSeed(seed: Buffer): NgBip32SeedProvider {
+    return new NgBip32SeedProvider(seed);
+  }
 
-    const rootNode = Bip32.fromSeed(this.seed, this.network);
-    this.root = new NgBip32HdNodeView(rootNode, _newNodeInternal(rootNode, 'm'));
+  private constructor(public readonly seed: Buffer,
+    public readonly mnemonic?: string,
+    public readonly passphrase?: string) {
+
+  }
+
+  hasValidMnemonic(): boolean {
+    return Bip39.validateMnemonic(this.mnemonic);
   }
 
   seedHex(): HexString {
     return  '0x' + buf2hex(this.seed);
   }
+}
 
-  hasValidMnemonic(): boolean {
-    return Bip39.validateMnemonic(this.mnemonic);
+export class NgBip32HdWalletView {
+  public readonly root: NgBip32HdNodeView;
+
+  constructor(public readonly seedProvider: NgBip32SeedProvider,
+              private readonly network: Bitcoin.Network = Bitcoin.networks.bitcoin,
+              private readonly dataInfoService?: DataInfoService) {
+    const rootNode = Bip32.fromSeed(seedProvider.seed, this.network);
+    this.root = new NgBip32HdNodeView(rootNode, _newNodeInternal(rootNode, 'm'));
   }
 
   getOrCreateNode(path: Bip32Path): NgBip32HdNodeView {

@@ -10,7 +10,7 @@ import * as Bitcoin from 'bitcoinjs-lib';
 import * as Bip39 from 'bip39';
 import { filter, map, take, throttleTime, takeLast, endWith, concatMap, flatMap } from 'rxjs/operators';
 import { of, from} from 'rxjs';
-import { Bip32Path, NgBip32HdWalletView, NgBip32HdNodeView } from '../../wallet/core/wallet';
+import { NgBip32SeedProvider, NgBip32HdWalletView, NgBip32HdNodeView } from '../../wallet/core/wallet';
 
 
 function buf2hex(buffer) { // buffer is an ArrayBuffer
@@ -69,6 +69,8 @@ export class MainFrontComponent implements OnInit {
   private static readonly NETWORK_DEFAULT_VALUE = Bitcoin.networks.bitcoin;
   private static readonly HASH_METHOD_QUERY_PARAM_NAME = 'h';
   private static readonly HASH_METHOD_DEFAULT_VALUE = HASH_NOP;
+  private static readonly INPUT_TYPE_QUERY_PARAM_NAME = 'i';
+  private static readonly INPUT_TYPE_DEFAULT_VALUE = `mnemonic`;
 
   // path : = m / purpose' / coin_type' / account' / change / address_index
   /*private readonly pathPrefixBip44 = `m/44'/0'/`; // addresses 1xxx
@@ -95,14 +97,17 @@ export class MainFrontComponent implements OnInit {
   networkInputValue: Bitcoin.Network = MainFrontComponent.NETWORK_DEFAULT_VALUE;
   hashAlgorithmInputValue = MainFrontComponent.HASH_METHOD_DEFAULT_VALUE;
 
-  treatSearchInputAsEntropy = false;
+  inputTypeInputValue = MainFrontComponent.INPUT_TYPE_DEFAULT_VALUE;
 
-  readonly bip39ModeSelectOptions = [{
-    value: false,
+  readonly inputTypeSelectOptions = [{
+    value: `mnemonic`,
     name: `mnemonic`
   }, {
-    value: true,
+    value: `entropy`,
     name: `entropy`
+  }, {
+    value: `seed`,
+    name: `seed`
   }];
 
   readonly networkInputSelectOptions = [{
@@ -184,6 +189,9 @@ export class MainFrontComponent implements OnInit {
       this.hashAlgorithmInputValue = this.hashInputSelectOption
         .filter(val => val.name === p.get(MainFrontComponent.HASH_METHOD_QUERY_PARAM_NAME))
         .map(val => val.value)[0] || MainFrontComponent.HASH_METHOD_DEFAULT_VALUE;
+      this.inputTypeInputValue = this.inputTypeSelectOptions
+        .filter(val => val.name === p.get(MainFrontComponent.INPUT_TYPE_QUERY_PARAM_NAME))
+        .map(val => val.value)[0] || MainFrontComponent.INPUT_TYPE_DEFAULT_VALUE;
 
       const searchQuery = p.get(MainFrontComponent.SEARCH_QUERY_PARAM_NAME);
       this.searchInputChangedSubject.next(searchQuery);
@@ -197,17 +205,23 @@ export class MainFrontComponent implements OnInit {
 
     delete queryParams[MainFrontComponent.NETWORK_QUERY_PARAM_NAME];
     this.networkInputSelectOptions
-        .filter(val => val.value === this.networkInputValue)
-        .map(val => val.name)
-        .forEach(networkName => {
-          queryParams[MainFrontComponent.NETWORK_QUERY_PARAM_NAME] = networkName;
-        });
+      .filter(val => val.value === this.networkInputValue)
+      .map(val => val.name)
+      .forEach(networkName => {
+        queryParams[MainFrontComponent.NETWORK_QUERY_PARAM_NAME] = networkName;
+      });
     this.hashInputSelectOption
-        .filter(val => val.value === this.hashAlgorithmInputValue)
-        .map(val => val.name)
-        .forEach(hashFunctionName => {
-          queryParams[MainFrontComponent.HASH_METHOD_QUERY_PARAM_NAME] = hashFunctionName;
-        });
+      .filter(val => val.value === this.hashAlgorithmInputValue)
+      .map(val => val.name)
+      .forEach(hashFunctionName => {
+        queryParams[MainFrontComponent.HASH_METHOD_QUERY_PARAM_NAME] = hashFunctionName;
+      });
+    this.inputTypeSelectOptions
+      .filter(val => val.value === this.inputTypeInputValue)
+      .map(val => val.name)
+      .forEach(inputTypeName => {
+        queryParams[MainFrontComponent.INPUT_TYPE_QUERY_PARAM_NAME] = inputTypeName;
+      });
     queryParams['ts'] = Date.now();
 
     // add query params but do not reload page (default if same page)
@@ -243,12 +257,18 @@ export class MainFrontComponent implements OnInit {
       map(foo => {
         const hashedInputOrUnchanged: string = this.hashAlgorithmInputValue(searchInput);
 
-        let mnemonic = hashedInputOrUnchanged;
-        if (this.treatSearchInputAsEntropy) {
-          mnemonic = Bip39.entropyToMnemonic(hashedInputOrUnchanged);
+        let seedProvider: NgBip32SeedProvider;
+        if (this.inputTypeInputValue === 'entropy') {
+          seedProvider = NgBip32SeedProvider.fromEntropy(hashedInputOrUnchanged, this.passphraseInputValue);
+        }
+        if (this.inputTypeInputValue === 'mnemonic') {
+          seedProvider = NgBip32SeedProvider.fromMnemonic(hashedInputOrUnchanged, this.passphraseInputValue);
+        }
+        if (this.inputTypeInputValue === 'seed') {
+          seedProvider = NgBip32SeedProvider.fromSeed(Buffer.from(hashedInputOrUnchanged, 'hex'));
         }
 
-        const wallet = new NgBip32HdWalletView(mnemonic, this.passphraseInputValue, this.networkInputValue, this.dataInfoService);
+        const wallet = new NgBip32HdWalletView(seedProvider, this.networkInputValue, this.dataInfoService);
 
         // private pathPrefixBip44 = `m/44'/0'/`; // addresses 1xxx
         // private pathPrefixBip49 = `m/49'/0'/`; // addresses 3xxx
@@ -304,17 +324,17 @@ export class MainFrontComponent implements OnInit {
           return a.selfLatestActivity() < b.selfLatestActivity() ? 1 : -1;
         };
 
-        const mnemonic = this.wallet.mnemonic;
+        const mnemonic = this.wallet.seedProvider.mnemonic;
         const addresses = this.wallet.findAllAddresses();
         const nodesWithReceived = this.wallet.findNodesWithReceivedGreaterZero().sort(sortByLastActivity);
         const nodesWithBalance = this.wallet.findNodesWithBalanceGreaterZero().sort(sortByLastActivity);
 
-        const mneomincIsValid = Bip39.validateMnemonic(mnemonic);
+        const mneomincIsValid = this.wallet.seedProvider.hasValidMnemonic();
         this.result = {
           error: null,
           searchDurationInMs: Date.now() - now,
 
-          mnemonic: this.wallet.mnemonic,
+          mnemonic: mnemonic,
           mneomincIsValid: mneomincIsValid,
           mnemonicArray: !mneomincIsValid ? [] : mnemonic.split(' '),
 
@@ -328,7 +348,7 @@ export class MainFrontComponent implements OnInit {
           nodesWithBalance: nodesWithBalance,
 
           addresses: addresses,
-          seedHex: this.wallet.seedHex(),
+          seedHex: this.wallet.seedProvider.seedHex(),
           wif: this.wallet.root._node.wif,
           xpriv: this.wallet.root._node.xpriv,
           xpub: this.wallet.root._node.xpub,

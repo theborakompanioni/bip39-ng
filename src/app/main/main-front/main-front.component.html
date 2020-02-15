@@ -106,8 +106,8 @@
         <div fxFlex="100%" fxFlex.gt-sm="30%" fxFlex.gt-md="30%" fxFlex.gt-md="30%">
           <mat-form-field appearance="outline" style="width: 100%;">
             <mat-label>Input Type</mat-label>
-            <mat-select [(ngModel)]="treatSearchInputAsEntropy" name="hash">
-              <mat-option *ngFor="let option of bip39ModeSelectOptions" [value]="option.value">
+            <mat-select [(ngModel)]="inputTypeInputValue" name="hash">
+              <mat-option *ngFor="let option of inputTypeSelectOptions" [value]="option.value">
                 {{option.name}}
               </mat-option>
             </mat-select>
