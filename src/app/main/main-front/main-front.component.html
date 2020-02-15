@@ -67,23 +67,38 @@
 
   <div *ngIf="displayDetailedSettings" fxLayout="row wrap" fxLayoutAlign="space-between">
 
-    <mat-card fxFlex="100%" fxFlex.gt-sm="30%" style="margin-bottom: 10px">
+    <mat-card fxFlex="100%" fxFlex.gt-sm="100%" style="margin-bottom: 10px">
       <mat-card-header>
-        <mat-card-title>Network settings</mat-card-title>
+        <mat-card-title>Scan settings</mat-card-title>
         <mat-card-subtitle></mat-card-subtitle>
       </mat-card-header>
 
-      <mat-form-field appearance="outline" style="width: 100%;">
-        <mat-label>Network</mat-label>
-        <mat-select [(ngModel)]="networkInputValue" name="network">
-          <mat-option *ngFor="let network of networkInputSelectOptions" [value]="network.value">
-            {{network.name}}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
+      <div fxLayout="row wrap" fxLayoutAlign="space-between">
+
+        <div fxFlex="100%" fxFlex.gt-sm="69%" fxFlex.gt-md="69%" fxFlex.gt-md="69%">
+          <mat-form-field appearance="outline" style="width: 100%;">
+            <mat-label>Network</mat-label>
+            <mat-select [(ngModel)]="networkInputValue" name="network">
+              <mat-option *ngFor="let network of networkInputSelectOptions" [value]="network.value">
+                {{network.name}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div fxFlex="100%" fxFlex.gt-sm="30%" fxFlex.gt-md="30%" fxFlex.gt-md="30%">
+          <mat-form-field appearance="outline" style="width: 100%;">
+            <mat-label>Scan Depth</mat-label>
+            <input matInput [(ngModel)]="scanDepthInputValue" type="number" step="1" min="1" max="5" />
+            <mat-hint>How many addresses should be scanned per derivation path (default: 1 | max: 5)</mat-hint>
+          </mat-form-field>
+        </div>
+
+      </div>
+      
     </mat-card>
     
-    <mat-card fxFlex="100%" fxFlex.gt-sm="69%" style="margin-bottom: 10px">
+    <mat-card fxFlex="100%" fxFlex.gt-sm="100%" style="margin-bottom: 10px">
       <mat-card-header>
         <mat-card-title>Passphrase settings</mat-card-title>
         <mat-card-subtitle></mat-card-subtitle>

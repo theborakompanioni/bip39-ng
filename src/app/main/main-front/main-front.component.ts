@@ -71,6 +71,10 @@ export class MainFrontComponent implements OnInit {
   private static readonly HASH_METHOD_DEFAULT_VALUE = HASH_NOP;
   private static readonly INPUT_TYPE_QUERY_PARAM_NAME = 'i';
   private static readonly INPUT_TYPE_DEFAULT_VALUE = `mnemonic`;
+  private static readonly SCAN_DEPTH_QUERY_PARAM_NAME = 'd';
+  private static readonly SCAN_DEPTH_MIN_VALUE = 1;
+  private static readonly SCAN_DEPTH_MAX_VALUE = 5;
+  private static readonly SCAN_DEPTH_DEFAULT_VALUE = MainFrontComponent.SCAN_DEPTH_MIN_VALUE;
 
   // path : = m / purpose' / coin_type' / account' / change / address_index
   /*private readonly pathPrefixBip44 = `m/44'/0'/`; // addresses 1xxx
@@ -98,6 +102,7 @@ export class MainFrontComponent implements OnInit {
   hashAlgorithmInputValue = MainFrontComponent.HASH_METHOD_DEFAULT_VALUE;
 
   inputTypeInputValue = MainFrontComponent.INPUT_TYPE_DEFAULT_VALUE;
+  scanDepthInputValue = MainFrontComponent.SCAN_DEPTH_DEFAULT_VALUE;
 
   readonly inputTypeSelectOptions = [{
     value: `mnemonic`,
@@ -192,6 +197,12 @@ export class MainFrontComponent implements OnInit {
       this.inputTypeInputValue = this.inputTypeSelectOptions
         .filter(val => val.name === p.get(MainFrontComponent.INPUT_TYPE_QUERY_PARAM_NAME))
         .map(val => val.value)[0] || MainFrontComponent.INPUT_TYPE_DEFAULT_VALUE;
+      this.scanDepthInputValue = Math.max(
+        MainFrontComponent.SCAN_DEPTH_MIN_VALUE, Math.min(
+          Number.parseInt(p.get(MainFrontComponent.SCAN_DEPTH_QUERY_PARAM_NAME), 10) || MainFrontComponent.SCAN_DEPTH_DEFAULT_VALUE,
+          MainFrontComponent.SCAN_DEPTH_MAX_VALUE
+        )
+      );
 
       const searchQuery = p.get(MainFrontComponent.SEARCH_QUERY_PARAM_NAME);
       this.searchInputChangedSubject.next(searchQuery);
@@ -202,6 +213,7 @@ export class MainFrontComponent implements OnInit {
     const queryParams = {};
     queryParams[MainFrontComponent.SEARCH_QUERY_PARAM_NAME] = searchInput;
     queryParams[MainFrontComponent.PASSPHRASE_QUERY_PARAM_NAME] = this.passphraseInputValue;
+    queryParams[MainFrontComponent.SCAN_DEPTH_QUERY_PARAM_NAME] = this.scanDepthInputValue;
 
     delete queryParams[MainFrontComponent.NETWORK_QUERY_PARAM_NAME];
     this.networkInputSelectOptions
@@ -210,18 +222,23 @@ export class MainFrontComponent implements OnInit {
       .forEach(networkName => {
         queryParams[MainFrontComponent.NETWORK_QUERY_PARAM_NAME] = networkName;
       });
+
+    delete queryParams[MainFrontComponent.HASH_METHOD_QUERY_PARAM_NAME];
     this.hashInputSelectOption
       .filter(val => val.value === this.hashAlgorithmInputValue)
       .map(val => val.name)
       .forEach(hashFunctionName => {
         queryParams[MainFrontComponent.HASH_METHOD_QUERY_PARAM_NAME] = hashFunctionName;
       });
+
+    delete queryParams[MainFrontComponent.INPUT_TYPE_QUERY_PARAM_NAME];
     this.inputTypeSelectOptions
       .filter(val => val.value === this.inputTypeInputValue)
       .map(val => val.name)
       .forEach(inputTypeName => {
         queryParams[MainFrontComponent.INPUT_TYPE_QUERY_PARAM_NAME] = inputTypeName;
       });
+
     queryParams['ts'] = Date.now();
 
     // add query params but do not reload page (default if same page)
@@ -274,7 +291,7 @@ export class MainFrontComponent implements OnInit {
         // private pathPrefixBip49 = `m/49'/0'/`; // addresses 3xxx
         // private pathPrefixBip84 = `m/84'/0'/`; // addresses bc1xxx
 
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < this.scanDepthInputValue; i++) {
           // see https://github.com/dan-da/hd-wallet-derive/blob/master/doc/wallet-bip32-path-presets.md
           wallet.getOrCreateNode(`m/44'/0'/0'/0`).getOrCreateNextIndex();
           // wallet.getOrCreateNode(`m/44'/0'/0'/1`).getOrCreateNextIndex();
