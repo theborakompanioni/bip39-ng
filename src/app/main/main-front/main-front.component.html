@@ -294,7 +294,7 @@
 
   <div *ngIf="result && !result.error" [hidden]="loading || result.mnemonic === undefined">
     <mat-card style="margin: 1em;">
-      <h3>Private Key Mnemonic</h3>
+      <h3>Mnemonic Seed</h3>
       <div class="word-input-container" fxLayout="row wrap" *ngIf="!result.mneomincIsValid">
         Input is not a valid BIP39 mnemonic seed.
       </div>

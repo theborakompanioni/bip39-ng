@@ -101,11 +101,13 @@
           [queryParams]="{q: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon'}">
           <code>"abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon"</code>
         </a></li>
-        <li><a [routerLink]="['/']"
-          [queryParams]="{q: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'}">
-          <code>"abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"</code>
-        </a>
-        (a mnemonic used in test vectors)</li>
+        <li>
+          <a [routerLink]="['/']"
+            [queryParams]="{q: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'}">
+            <code>"abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"</code>
+          </a>
+          (a mnemonic used in <a href="https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki#Test_vectors">test vectors in BIP39</a>)
+        </li>
         <!--li><a [routerLink]="['/']"
           [queryParams]="{q: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art'}">
           <code>"abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art"</code>
@@ -160,17 +162,26 @@
           [queryParams]="{q: 'zero zero zero zero zero zero zero zero zero zero zero zero'}">
           <code>"zero zero zero zero zero zero zero zero zero zero zero zero"</code>
         </a></li>
-        <li><a [routerLink]="['/']"
-          [queryParams]="{q: 'zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong'}">
-          <code>"zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong"</code>
-        </a>
-        (a mnemonic used in test vectors)</li>
+        <li>
+          <a [routerLink]="['/']"
+            [queryParams]="{q: 'zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong'}">
+            <code>"zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong"</code>
+          </a>
+          (a mnemonic used in <a href="https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki#Test_vectors">test vectors in BIP39</a>)
+        </li>
         <li>
           <a [routerLink]="['/']"
             [queryParams]="{q: 'army van defense carry jealous true garbage claim echo media make crunch'}">
             <code>"army van defense carry jealous true garbage claim echo media make crunch"</code>
           </a>
           (a mnemonic printed in the book <em>Mastering Bitcoin</em> by <i>Andreas Antonopoulos</i>)
+        </li>
+        <li>
+          <a [routerLink]="['/']"
+            [queryParams]="{q: '000102030405060708090a0b0c0d0e0f', i: 'seed' }">
+            <code>"000102030405060708090a0b0c0d0e0f"</code>
+          </a>
+          (a seed used in <a href="https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki#Test_vectors">test vectors in BIP32</a>)
         </li>
         
         
