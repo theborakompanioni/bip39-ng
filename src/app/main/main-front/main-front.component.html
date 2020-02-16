@@ -38,7 +38,7 @@
           <input matInput [(ngModel)]="searchInputValue" (keyup.enter)="onChangeSearchInput($event.target.value)"
             style="font-family: monospace, monospace;" />
           <mat-spinner matSuffix *ngIf="loading" diameter="15" style="margin: auto 10px 4px 10px;"></mat-spinner>
-          <mat-hint align="end" [hidden]="inputTypeInputValue !== 'seed'">Input Length: {{searchInputValue.length}}</mat-hint>
+          <mat-hint align="end" [hidden]="!(inputTypeInputValue !== 'mnemonic' && hashAlgorithmInputValue === 'none')">Input Length: {{searchInputValue.length}}</mat-hint>
         </mat-form-field>
     </div>
   </div>

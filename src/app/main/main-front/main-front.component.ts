@@ -70,7 +70,7 @@ type StringToStringHashFunction = (arg0: string) => string;
 
 const HASH_NOP: StringToStringHashFunction = (arg0) => arg0;
 const STRING_IN_STRING_OUT_HASH_FN: (hashFunction: HashFunction) => StringToStringHashFunction =
-  (hashFunction) => (arg0) => buf2hex(hashFunction(Buffer.from(arg0)));
+  (hashFunction) => (arg0) => hashFunction(Buffer.from(arg0)).toString('hex');
 
 @Component({
   selector: 'app-main-front',
@@ -83,7 +83,7 @@ export class MainFrontComponent implements OnInit {
   private static readonly NETWORK_QUERY_PARAM_NAME = 'n';
   private static readonly NETWORK_DEFAULT_VALUE = Bitcoin.networks.bitcoin;
   private static readonly HASH_METHOD_QUERY_PARAM_NAME = 'h';
-  private static readonly HASH_METHOD_DEFAULT_VALUE = HASH_NOP;
+  private static readonly HASH_METHOD_DEFAULT_VALUE = `none`;
   private static readonly INPUT_TYPE_QUERY_PARAM_NAME = 'i';
   private static readonly INPUT_TYPE_DEFAULT_VALUE: InputType = `mnemonic`;
   private static readonly SCAN_DEPTH_QUERY_PARAM_NAME = 'd';
@@ -149,24 +149,33 @@ export class MainFrontComponent implements OnInit {
   }];
 
   readonly hashInputSelectOption = [{
-    value: HASH_NOP,
+    value: `none`,
     name: `none`
   }, {
-    value: STRING_IN_STRING_OUT_HASH_FN(Bitcoin.crypto.ripemd160),
+    value: `ripemd160`,
     name: `ripemd160`
   }, {
-    value: STRING_IN_STRING_OUT_HASH_FN(Bitcoin.crypto.sha1),
+    value: `sha1`,
     name: `sha1`
   }, {
-    value: STRING_IN_STRING_OUT_HASH_FN(Bitcoin.crypto.sha256),
+    value: `sha256`,
     name: `sha256`
   }, {
-    value: STRING_IN_STRING_OUT_HASH_FN(Bitcoin.crypto.hash160),
+    value: `hash160`,
     name: `hash160`
   }, {
-    value: STRING_IN_STRING_OUT_HASH_FN(Bitcoin.crypto.hash256),
+    value: `hash256`,
     name: `hash256`
   }];
+
+  readonly hashInputToFunction = {
+    'none': HASH_NOP,
+    'ripemd160': STRING_IN_STRING_OUT_HASH_FN(Bitcoin.crypto.ripemd160),
+    'sha1': STRING_IN_STRING_OUT_HASH_FN(Bitcoin.crypto.sha1),
+    'sha256': STRING_IN_STRING_OUT_HASH_FN(Bitcoin.crypto.sha256),
+    'hash160': STRING_IN_STRING_OUT_HASH_FN(Bitcoin.crypto.hash160),
+    'hash256': STRING_IN_STRING_OUT_HASH_FN(Bitcoin.crypto.hash256)
+  };
 
   mnemonicInputChangedSubject: Subject<string> = new Subject<string>();
   searchInputChangedSubject: Subject<string> = new Subject<string>();
@@ -322,7 +331,8 @@ export class MainFrontComponent implements OnInit {
 
     of(1).pipe(
       map(foo => {
-        const hashedInputOrUnchanged: string = this.hashAlgorithmInputValue(searchInput);
+        const inputTransformFunction = this.hashInputToFunction[this.hashAlgorithmInputValue];
+        const hashedInputOrUnchanged: string = inputTransformFunction(searchInput);
 
         const seedProvider = this.createSeedProviderFromInput(this.inputTypeInputValue, hashedInputOrUnchanged, this.passphraseInputValue);
 
