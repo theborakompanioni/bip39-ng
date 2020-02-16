@@ -5,6 +5,7 @@ import { Subject } from 'rxjs/Subject';
 import { DataInfoServiceService } from '../../core/shared/data-info-service.service';
 import { Pipe, PipeTransform } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
+import { randomBytes } from 'crypto';
 
 import * as Bitcoin from 'bitcoinjs-lib';
 import * as Bip39 from 'bip39';
@@ -304,8 +305,19 @@ export class MainFrontComponent implements OnInit {
   buttonIamFeelingLuckyClicked() {
     this.feelingLuckyCounterClicked++;
 
-    const mnemonic = Bip39.generateMnemonic();
-    this.onChangeSearchInput(mnemonic);
+    const randomSearchInput = this.createRandomSearchInput(this.inputTypeInputValue, this.hashAlgorithmInputValue);
+    this.onChangeSearchInput(randomSearchInput);
+  }
+
+  private createRandomSearchInput(inputType, transformFunctionName): string {
+    if (inputType === 'entropy' && transformFunctionName === 'none') {
+      return randomBytes(16).toString('hex');
+    }
+    if (inputType === 'seed' && transformFunctionName === 'none') {
+      return randomBytes(16).toString('hex');
+    }
+
+    return Bip39.generateMnemonic();
   }
 
   private createSeedProviderFromInput(inputType: InputType, input: string, passphrase?: string): NgBip32SeedProvider {
