@@ -6,7 +6,7 @@
 }
 
 code {
-  font-family: monospace;
+  font-family: monospace, monospace;
 }
 
 ul {
@@ -67,7 +67,7 @@ pre {
   border-left: 3px solid $primary--color;
   color: $primary--color;
   page-break-inside: avoid;
-  font-family: monospace;
+  font-family: monospace, monospace;
   font-size: calculateRem(15px);
   line-height: 1.6;
   margin-bottom: 1.6rem;
