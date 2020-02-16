@@ -13,9 +13,6 @@ import { filter, map, take, throttleTime, takeLast, endWith, concatMap, flatMap 
 import { of, from} from 'rxjs';
 import { NgBip32SeedProvider, NgBip32HdWalletView, NgBip32HdNodeView } from '../../wallet/core/wallet';
 
-function buf2hex(buffer) { // buffer is an ArrayBuffer
-  return Array.prototype.map.call(new Uint8Array(buffer), x => ('00' + x.toString(16)).slice(-2)).join('');
-}
 
 function firstNonEmptyArray(arr1: any[], arr2: any[]) {
   if (arr1.length !== 0) {
@@ -32,6 +29,7 @@ function isArraysWithSameUniqueContent(arr1: any[], arr2: any[]) {
 }
 
 type InputType = 'mnemonic' | 'entropy' | 'seed';
+type TransformFunctionName = 'none' | 'ripemd160' | 'sha1' | 'sha256' | 'hash160' | 'hash256';
 
 @Pipe({
     name: 'bitcoin'
@@ -81,10 +79,11 @@ const STRING_IN_STRING_OUT_HASH_FN: (hashFunction: HashFunction) => StringToStri
 export class MainFrontComponent implements OnInit {
   private static readonly SEARCH_QUERY_PARAM_NAME = 'q';
   private static readonly PASSPHRASE_QUERY_PARAM_NAME = 'p';
+  private static readonly PASSPHRASE_DEFAULT_VALUE = '';
   private static readonly NETWORK_QUERY_PARAM_NAME = 'n';
   private static readonly NETWORK_DEFAULT_VALUE = Bitcoin.networks.bitcoin;
   private static readonly HASH_METHOD_QUERY_PARAM_NAME = 'h';
-  private static readonly HASH_METHOD_DEFAULT_VALUE = `none`;
+  private static readonly HASH_METHOD_DEFAULT_VALUE: TransformFunctionName = `none`;
   private static readonly INPUT_TYPE_QUERY_PARAM_NAME = 'i';
   private static readonly INPUT_TYPE_DEFAULT_VALUE: InputType = `mnemonic`;
   private static readonly SCAN_DEPTH_QUERY_PARAM_NAME = 'd';
@@ -101,30 +100,13 @@ export class MainFrontComponent implements OnInit {
     `m/0`
   ];
 
-  // path : = m / purpose' / coin_type' / account' / change / address_index
-  /*private readonly pathPrefixBip44 = `m/44'/0'/`; // addresses 1xxx
-  private readonly pathPrefixBip49 = `m/49'/0'/`; // addresses 3xxx
-  private readonly pathPrefixBip84 = `m/84'/0'/`; // addresses bc1xxx
-
-  readonly pathPrefixInputAutocompleteOptions = [{
-      value: this.pathPrefixBip44,
-      name: this.pathPrefixBip44 + ' (BIP44)'
-    }, {
-      value: this.pathPrefixBip49,
-      name: this.pathPrefixBip49 + ' (BIP49)'
-    }, {
-      value: this.pathPrefixBip84,
-      name: this.pathPrefixBip84 + ' (BIP84)'
-    }
-  ];*/
-
   result: any;
   wallet: NgBip32HdWalletView;
 
   searchInputValue: string;
-  passphraseInputValue: string;
+  passphraseInputValue: string = MainFrontComponent.PASSPHRASE_DEFAULT_VALUE;
   networkInputValue: Bitcoin.Network = MainFrontComponent.NETWORK_DEFAULT_VALUE;
-  hashAlgorithmInputValue = MainFrontComponent.HASH_METHOD_DEFAULT_VALUE;
+  hashAlgorithmInputValue: TransformFunctionName = MainFrontComponent.HASH_METHOD_DEFAULT_VALUE;
 
   inputTypeInputValue: InputType = MainFrontComponent.INPUT_TYPE_DEFAULT_VALUE;
   scanDepthInputValue = MainFrontComponent.SCAN_DEPTH_DEFAULT_VALUE;
@@ -223,7 +205,7 @@ export class MainFrontComponent implements OnInit {
         .map(val => val.value)[0] || MainFrontComponent.NETWORK_DEFAULT_VALUE;
       this.hashAlgorithmInputValue = this.hashInputSelectOption
         .filter(val => val.name === p.get(MainFrontComponent.HASH_METHOD_QUERY_PARAM_NAME))
-        .map(val => val.value)[0] || MainFrontComponent.HASH_METHOD_DEFAULT_VALUE;
+        .map(val => val.value as TransformFunctionName)[0] || MainFrontComponent.HASH_METHOD_DEFAULT_VALUE;
       this.inputTypeInputValue = this.inputTypeSelectOptions
         .filter(val => val.name === p.get(MainFrontComponent.INPUT_TYPE_QUERY_PARAM_NAME))
         .map(val => val.value as InputType)[0] || MainFrontComponent.INPUT_TYPE_DEFAULT_VALUE;
@@ -246,10 +228,15 @@ export class MainFrontComponent implements OnInit {
   onChangeSearchInput(searchInput: string) {
     const queryParams = {};
     queryParams[MainFrontComponent.SEARCH_QUERY_PARAM_NAME] = searchInput;
-    queryParams[MainFrontComponent.PASSPHRASE_QUERY_PARAM_NAME] = this.passphraseInputValue;
-    queryParams[MainFrontComponent.SCAN_DEPTH_QUERY_PARAM_NAME] = this.scanDepthInputValue;
 
-    delete queryParams[MainFrontComponent.NETWORK_QUERY_PARAM_NAME];
+    if (this.passphraseInputValue !== MainFrontComponent.PASSPHRASE_DEFAULT_VALUE) {
+      queryParams[MainFrontComponent.PASSPHRASE_QUERY_PARAM_NAME] = this.passphraseInputValue;
+    }
+
+    if (this.scanDepthInputValue !== MainFrontComponent.SCAN_DEPTH_DEFAULT_VALUE) {
+      queryParams[MainFrontComponent.SCAN_DEPTH_QUERY_PARAM_NAME] = this.scanDepthInputValue;
+    }
+
     this.networkInputSelectOptions
       .filter(val => val.value === this.networkInputValue)
       .filter(val => val.value !==  MainFrontComponent.NETWORK_DEFAULT_VALUE)
@@ -258,7 +245,6 @@ export class MainFrontComponent implements OnInit {
         queryParams[MainFrontComponent.NETWORK_QUERY_PARAM_NAME] = networkName;
       });
 
-    delete queryParams[MainFrontComponent.HASH_METHOD_QUERY_PARAM_NAME];
     this.hashInputSelectOption
       .filter(val => val.value === this.hashAlgorithmInputValue)
       .filter(val => val.value !==  MainFrontComponent.HASH_METHOD_DEFAULT_VALUE)
@@ -267,7 +253,6 @@ export class MainFrontComponent implements OnInit {
         queryParams[MainFrontComponent.HASH_METHOD_QUERY_PARAM_NAME] = hashFunctionName;
       });
 
-    delete queryParams[MainFrontComponent.INPUT_TYPE_QUERY_PARAM_NAME];
     this.inputTypeSelectOptions
       .filter(val => val.value === this.inputTypeInputValue)
       .filter(val => val.value !==  MainFrontComponent.INPUT_TYPE_DEFAULT_VALUE)
@@ -276,7 +261,6 @@ export class MainFrontComponent implements OnInit {
         queryParams[MainFrontComponent.INPUT_TYPE_QUERY_PARAM_NAME] = inputTypeName;
       });
 
-    delete queryParams[MainFrontComponent.PATH_PREFIX_LIST_QUERY_PARAM_NAME];
     const pathPrefixArray = this.pathPrefixListInputValue.split(`,`)
       .map(val => val.trim())
       .filter(val => val.length > 0);
@@ -290,7 +274,7 @@ export class MainFrontComponent implements OnInit {
     // add query params but do not reload page (default if same page)
     this.router.navigate([''], {
       queryParams: queryParams,
-      queryParamsHandling: 'merge',
+      queryParamsHandling: null,
       relativeTo: this.activatedRoute,
     });
 
@@ -309,7 +293,7 @@ export class MainFrontComponent implements OnInit {
     this.onChangeSearchInput(randomSearchInput);
   }
 
-  private createRandomSearchInput(inputType, transformFunctionName): string {
+  private createRandomSearchInput(inputType: InputType, transformFunctionName): string {
     if (inputType === 'entropy' && transformFunctionName === 'none') {
       return randomBytes(16).toString('hex');
     }
