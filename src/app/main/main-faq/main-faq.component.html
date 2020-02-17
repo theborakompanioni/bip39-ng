@@ -97,6 +97,13 @@
           [queryParams]="{q: '1qaz2wsx3edc'}">
           <code>"1qaz2wsx3edc"</code>
         </a></li>
+        <li>
+          <a [routerLink]="['/']"
+            [queryParams]="{q: 'entropy', h: 'sha256', i: 'entropy'}">
+            <code>"entropy"</code>
+          </a> (sha256 hash of word "entropy" as entropy)
+        </li>
+        
         <li><a [routerLink]="['/']"
           [queryParams]="{q: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon'}">
           <code>"abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon"</code>
