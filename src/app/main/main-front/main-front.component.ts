@@ -29,7 +29,7 @@ function isArraysWithSameUniqueContent(arr1: any[], arr2: any[]) {
 }
 
 type InputType = 'mnemonic' | 'entropy' | 'seed';
-type TransformFunctionName = 'none' | 'ripemd160' | 'sha1' | 'sha256' | 'hash160' | 'hash256';
+type TransformFunctionName = 'none' | 'ripemd160' | 'sha1' | 'sha256' | 'double-sha256' | 'hash160' | 'hash256';
 
 @Pipe({
     name: 'bitcoin'
@@ -144,6 +144,9 @@ export class MainFrontComponent implements OnInit {
     value: `sha256`,
     name: `sha256`
   }, {
+    value: `double_sha256`,
+    name: `double-sha256`
+  }, {
     value: `hash160`,
     name: `hash160`
   }, {
@@ -157,7 +160,8 @@ export class MainFrontComponent implements OnInit {
     'sha1': STRING_IN_STRING_OUT_HASH_FN(Bitcoin.crypto.sha1),
     'sha256': STRING_IN_STRING_OUT_HASH_FN(Bitcoin.crypto.sha256),
     'hash160': STRING_IN_STRING_OUT_HASH_FN(Bitcoin.crypto.hash160),
-    'hash256': STRING_IN_STRING_OUT_HASH_FN(Bitcoin.crypto.hash256)
+    'hash256': STRING_IN_STRING_OUT_HASH_FN(Bitcoin.crypto.hash256),
+    'double_sha256': STRING_IN_STRING_OUT_HASH_FN((buf: Buffer) => Bitcoin.crypto.sha256(Bitcoin.crypto.sha256(buf)))
   };
 
   mnemonicInputChangedSubject: Subject<string> = new Subject<string>();
@@ -293,7 +297,7 @@ export class MainFrontComponent implements OnInit {
     this.onChangeSearchInput(randomSearchInput);
   }
 
-  private createRandomSearchInput(inputType: InputType, transformFunctionName): string {
+  private createRandomSearchInput(inputType: InputType, transformFunctionName: TransformFunctionName): string {
     if (inputType === 'entropy' && transformFunctionName === 'none') {
       return randomBytes(16).toString('hex');
     }
