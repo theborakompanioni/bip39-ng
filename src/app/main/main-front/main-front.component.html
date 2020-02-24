@@ -212,7 +212,7 @@
         <pre>{{ result.mnemonic }}</pre>
       </div>
       <p>
-        <span class="bold">Total Balance:</span> 
+        <span class="bold">Current Balance:</span> 
         {{ result.balance | bitcoin}}
       </p>
       <p>
@@ -290,16 +290,19 @@
         <div fxFlex="100%" fxFlex.gt-sm="100%" fxFlex.gt-md="100%" fxFlex.gt-md="100%" *ngFor="let node of result.nodesWithBalance">
           <ng-container *ngFor="let addressView of node.addresses">
             <div *ngIf="addressView.balance > 0">
-              Balance: {{ addressView.balance | bitcoin}}<br />
-              Received:{{ addressView.received | bitcoin}} 
+              Current Balance: {{ addressView.balance | bitcoin}}<br />
+              Total Received:{{ addressView.received | bitcoin}} 
               <mat-form-field class="full-width" appearance="fill" style="text-align: center;">
-                <mat-label>Address</mat-label>
+                <mat-label>Address ({{node._node.path}})</mat-label>
                 <input style="font-size: 150%" matInput type="text" placeholder="" [value]="addressView._address.address" disabled/>
                 <a href="https://www.blockchain.com/btc/address/{{addressView._address.address}}" target="_blank">view on block explorer</a>
                 <br />
                 <br />
-                <span>wif: {{node._node.wif}}</span><br />
-                <span>path: {{node._node.path}}</span>
+                <span>WIF: <code>{{node._node.wif}}</code></span>
+                <span *ngIf="addressView.info && addressView.info.latest_tx_block_time">
+                  <br />
+                  Activity: {{ addressView.info.latest_tx_block_time * 1000 | amTimeAgo }} ({{ addressView.info.latest_tx_block_time * 1000 | date}})
+                </span>
               </mat-form-field>
             </div>
           </ng-container>
@@ -316,87 +319,27 @@
         <div fxFlex="100%" fxFlex.gt-sm="100%" fxFlex.gt-md="100%" fxFlex.gt-md="100%" *ngFor="let node of result.nodesWithReceived">
             <ng-container *ngFor="let addressView of node.addresses">
               <div *ngIf="addressView.received > 0">
-                Balance: {{ addressView.balance | bitcoin}}<br />
-                Received:{{ addressView.received | bitcoin}} 
+                Current Balance: {{ addressView.balance | bitcoin}}<br />
+                Total Received:{{ addressView.received | bitcoin}} 
                 <mat-form-field class="full-width" appearance="fill" style="text-align: center;">
-                  <mat-label>Address</mat-label>
+                  <mat-label>Address ({{node._node.path}})</mat-label>
                   <input style="font-size: 150%" matInput type="text" placeholder="" [value]="addressView._address.address" disabled/>
                   <a href="https://www.blockchain.com/btc/address/{{addressView._address.address}}" target="_blank">view on block explorer</a>
-                  <br />
-                  <br />
-                  <span>wif: {{node._node.wif}}</span><br />
-                  <span *ngIf="addressView.info && addressView.info.latest_tx_block_time">
-                    activity: {{ addressView.info.latest_tx_block_time * 1000 | amTimeAgo }} ({{ addressView.info.latest_tx_block_time * 1000 | date}})
-                  </span><br />
-                  <span>path: {{node._node.path}}</span>
+                  <mat-hint align="end" *ngIf="addressView.info && addressView.info.latest_tx_block_time">
+                    Activity: {{ addressView.info.latest_tx_block_time * 1000 | amTimeAgo }} ({{ addressView.info.latest_tx_block_time * 1000 | date}})
+                  </mat-hint>
                 </mat-form-field>
+                <mat-form-field class="full-width" appearance="fill" style="text-align: center;">
+                  <mat-label>WIF</mat-label>
+                  <input style="font-size: 100%" matInput type="text" placeholder="" [value]="node._node.wif" disabled/>
+              </mat-form-field>
               </div>
             </ng-container>
         </div>
       </div>
     </mat-card>
   </div>
-  
-  <!--div *ngIf="result" [hidden]="loading || result.addresses === undefined" class="more-addresses-container">
-    <mat-card style="margin: 1em;">
-      <h3>More Addresses</h3>
-      <div *ngIf="result.addresses && result.addresses.length > 0">
-        <table mat-table [dataSource]="result.addresses" class="full-width">
-          <ng-container matColumnDef="info">
-            <th mat-header-cell *matHeaderCellDef> info </th>
-            <td mat-cell *matCellDef="let address"> 
-              path: {{address.path}}
-              <br />
-              address: <a href="https://www.blockchain.com/btc/address/{{address.address}}" target="_blank">{{address.address}}</a>
-              <br />
-              wif: {{address.wif}}
-              <br /> 
-              lastCheckTimestamp: {{address.lastCheckTimestamp | date: 'yyyy-mm-ddThh:mm:ss'}}<br />
-            </td>
-            <td mat-footer-cell *matFooterCellDef></td>
-          </ng-container>
-          <ng-container matColumnDef="path">
-            <th mat-header-cell *matHeaderCellDef> path </th>
-            <td mat-cell *matCellDef="let address"> {{address.path}} </td>
-            <td mat-footer-cell *matFooterCellDef></td>
-          </ng-container>
-          <ng-container matColumnDef="address">
-            <th mat-header-cell *matHeaderCellDef> address </th>
-            <td mat-cell *matCellDef="let address"> {{address.address}} </td>
-            <td mat-footer-cell *matFooterCellDef></td>
-          </ng-container>
-          <ng-container matColumnDef="wif">
-            <th mat-header-cell *matHeaderCellDef> wif </th>
-            <td mat-cell *matCellDef="let address"> {{address.wif}} </td>
-            <td mat-footer-cell *matFooterCellDef></td>
-          </ng-container>
-          <ng-container matColumnDef="received">
-            <th mat-header-cell *matHeaderCellDef> received </th>
-            <td mat-cell *matCellDef="let address"> {{address.received}} </td>
-            <td mat-footer-cell *matFooterCellDef> <strong>total received</strong><br />{{result.received}}</td>
-          </ng-container>
-          <ng-container matColumnDef="balance">
-            <th mat-header-cell *matHeaderCellDef> balance </th>
-            <td mat-cell *matCellDef="let address"> {{address.balance}} </td>
-            <td mat-footer-cell *matFooterCellDef> <strong>total balance</strong><br/>{{result.balance}}</td>
-          </ng-container>
-          <ng-container matColumnDef="lastCheckedTimestamp">
-            <th mat-header-cell *matHeaderCellDef> lastCheckedTimestamp </th>
-            <td mat-cell *matCellDef="let address"> {{address.lastCheckedTimestamp | date: 'yyyy-mm-ddThh:mm:ss'}} </td>
-            <td mat-footer-cell *matFooterCellDef></td>
-          </ng-container>
 
-          <tr mat-header-row *matHeaderRowDef="addressesDisplayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: addressesDisplayedColumns;"></tr>
-          <tr mat-footer-row *matFooterRowDef="addressesDisplayedColumns; sticky: true"></tr>
-        </table>
-      </div>
-    </mat-card>
-
-  </div-->
-
-
-    
   <div *ngIf="result && result.displayNodes">
 
     <!-- p>
@@ -420,21 +363,29 @@
         <mat-card style="margin: 1em;">
 
           <ul>
-              <li>Total Balance: {{ node.balance() | bitcoin}}</li>
+              <li>Current Balance: {{ node.balance() | bitcoin}}</li>
               <li>Total Received: {{ node.received() | bitcoin}}</li>
               <li>Child Node Count: {{ node.childNodes.length | number}}</li>
           </ul>
 
+          <hr />
+
           <div *ngFor="let child of node.childNodes">
-            WIF: {{ child._node.wif }}<br />
             <div *ngFor="let addressView of child.addresses">
-              Balance: {{ addressView.balance | bitcoin}}<br />
-              Received:{{ addressView.received | bitcoin}} 
+              <span>Balance: {{ addressView.balance | bitcoin}}</span><br />
+              <span>Received: {{ addressView.received | bitcoin}}</span>
               <mat-form-field class="full-width" appearance="fill" style="text-align: center;">
                 <mat-label>Address ({{ child._node.path }}) </mat-label>
                 <input style="font-size: 100%" matInput type="text" placeholder="" [value]="addressView._address.address" disabled/>
                 <a href="https://www.blockchain.com/btc/address/{{addressView._address.address}}" target="_blank">view on block explorer</a>
+                <mat-hint align="end" *ngIf="addressView.info && addressView.info.latest_tx_block_time">
+                  Activity: {{ addressView.info.latest_tx_block_time * 1000 | amTimeAgo }} ({{ addressView.info.latest_tx_block_time * 1000 | date}})
+                </mat-hint>
               </mat-form-field>
+              <mat-form-field class="full-width" appearance="fill" style="text-align: center;">
+                <mat-label>WIF</mat-label>
+                <input style="font-size: 100%" matInput type="text" placeholder="" [value]="node._node.wif" disabled/>
+            </mat-form-field>
             </div>
           </div>
       
