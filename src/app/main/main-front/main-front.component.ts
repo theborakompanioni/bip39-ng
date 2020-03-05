@@ -172,6 +172,7 @@ export class MainFrontComponent implements OnInit {
   loading = false;
 
   displayDetailedSettings = false;
+  displayDetailedSearchResults = false;
   // readonly addressesDisplayedColumns = ['info', 'received', 'balance'];
   // ['path', 'address', 'wif', 'received', 'balance', 'lastCheckedTimestamp'];
 
@@ -323,6 +324,7 @@ export class MainFrontComponent implements OnInit {
   }
 
   generateResult(searchInput: string) {
+    this.displayDetailedSearchResults = false;
     this.loading = true;
     this.result = null;
     this.wallet = null;
