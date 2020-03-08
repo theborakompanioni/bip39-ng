@@ -35,7 +35,7 @@ export class MainMnemonicsComponent implements OnInit {
 
   private static readonly MAX_PAGE_NUMBER = MainMnemonicsComponent.MAX_24_WORD_MNEMONIC_PAGE_NUMBER;
 
-  private pageNumber: BigInt.BigInteger;
+  pageNumber: BigInt.BigInteger;
   readonly maxPageNumber = MainMnemonicsComponent.MAX_PAGE_NUMBER;
   readonly minPageNumber = BigInt.zero;
 
