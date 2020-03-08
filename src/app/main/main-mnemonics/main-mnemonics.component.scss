@@ -1,1 +1,5 @@
 @import "mixins";
+
+.container .mat-input-element:disabled {
+    color: inherit;
+  }

@@ -9,21 +9,28 @@ import * as Bip39 from 'bip39';
 import { ArrayDataSource } from '@angular/cdk/collections';
 import * as BigInt from 'big-integer';
 
+
+const createMaxPageNumberForEntropyLength = (length: number) =>
+  BigInt(parseInt(Array.from(Array(length), _ => 'f').join(''), 16)).minus(BigInt.one)
+
 @Component({
   selector: 'app-main-mnemonics',
   templateUrl: './main-mnemonics.component.html',
   styleUrls: ['./main-mnemonics.component.scss']
 })
 export class MainMnemonicsComponent implements OnInit {
+  private static readonly MAX_12_WORD_MNEMONIC_PAGE_NUMBER = createMaxPageNumberForEntropyLength(32);
+  private static readonly MAX_24_WORD_MNEMONIC_PAGE_NUMBER = createMaxPageNumberForEntropyLength(64);
+
+  private static readonly MAX_PAGE_NUMBER = MainMnemonicsComponent.MAX_24_WORD_MNEMONIC_PAGE_NUMBER;
 
   private pageNumber: BigInt.BigInteger;
-  private maxPageNumber = BigInt(parseInt(Array.from(Array(64), _ => 'f').join(''), 16)).minus(BigInt.one);
-  private minPageNumber = BigInt.zero;
-  private nextPageNumberAdd = BigInt.one;
-  private previousPageNumberSub = BigInt.one;
+  readonly maxPageNumber = MainMnemonicsComponent.MAX_PAGE_NUMBER;
+  readonly minPageNumber = BigInt.zero;
 
   entropy: string;
   mnemonic: string;
+  mnemonicArray: string[] = [];
 
 
   constructor(@Inject(APP_CONFIG) public readonly appConfig: IAppConfig,
@@ -41,32 +48,46 @@ export class MainMnemonicsComponent implements OnInit {
       this.pageNumber = val;
       this.entropy = this.asFixedHexStringFromBigInteger(this.pageNumber);
       this.mnemonic = Bip39.entropyToMnemonic(this.entropy);
+      this.mnemonicArray = this.mnemonic.split(' ');
     });
   }
 
   public gotoFirstPage() {
-    this.gotoPage(this.minPageNumber);
+    return this.gotoPage(this.minPageNumber);
   }
 
   public gotoPreviousPage() {
-    this.gotoPage(this.pageNumber.prev());
+    return this.gotoPage(this.pageNumber.prev());
   }
 
   public gotoNextPage() {
-    this.gotoPage(this.pageNumber.next());
+    return this.gotoPage(this.pageNumber.next());
   }
 
   public gotoLastPage() {
-    this.gotoPage(this.maxPageNumber);
+    return this.gotoPage(this.maxPageNumber);
   }
 
   public gotoRandomPage() {
-    this.gotoPage(BigInt.randBetween(this.minPageNumber, this.maxPageNumber));
+    const randomPageNumberFor12WordMnemonic = BigInt.randBetween(
+      this.minPageNumber,
+      MainMnemonicsComponent.MAX_12_WORD_MNEMONIC_PAGE_NUMBER
+    );
+    const randomPageNumberFor24WordMnemonic = BigInt.randBetween(
+      MainMnemonicsComponent.MAX_12_WORD_MNEMONIC_PAGE_NUMBER,
+      this.maxPageNumber
+    );
+    const randomBoolean = Math.random() < 0.5;
+    const randomPageNumber = randomBoolean ?
+      randomPageNumberFor12WordMnemonic :
+      randomPageNumberFor24WordMnemonic;
+
+    return this.gotoPage(randomPageNumber);
   }
 
-  public gotoPage(pageNumber: BigInt.BigInteger) {
+  public gotoPage(pageNumber: BigInt.BigInteger): Promise<boolean> {
     const validPageNumber = this.asPageNumberBetweenBoundaries(pageNumber);
-    this.router.navigate(['../' + validPageNumber.toString(10)], {
+    return this.router.navigate(['../' + validPageNumber.toString(10)], {
       relativeTo: this.route
     });
   }
@@ -82,10 +103,9 @@ export class MainMnemonicsComponent implements OnInit {
   }
 
   private asFixedHexStringFromHexString(valAsHex: string, length: number) {
-    if (length < valAsHex.length) {
+    if (length < 0 || length < valAsHex.length) {
       throw new Error('`val` as hex in greater than given `length`. Consider bigger `length` param');
     }
-    // "000000".substr(0, 6 - hex.length)
     const zeros = Array.from(Array(length), _ => '0').join('');
     return zeros.substr(0, zeros.length - valAsHex.length) + valAsHex;
   }
