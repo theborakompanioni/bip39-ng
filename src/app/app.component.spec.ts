@@ -39,11 +39,6 @@ describe('AppComponent', () => {
     expect(component).toBeTruthy();
   }));
 
-  it('should change title meta tag in root path', async(() => {
-    fixture.detectChanges();
-    expect(component.title.getTitle()).toBe('bip39');
-  }));
-
   it('should check browser features', (() => {
     expect(component.checkBrowserFeatures()).toBeTruthy();
   }));
