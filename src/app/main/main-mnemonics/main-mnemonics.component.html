@@ -1,15 +1,16 @@
 <div class="container mat-typography">
   <mat-card>
-    <div fxLayout="row wrap" fxLayoutAlign="center center" style="text-align: center">
+    <div fxLayout="row wrap" fxLayoutAlign="center center">
       <div fxFlex="100%" fxFlex.gt-sm="100%" fxFlex.gt-md="100%" fxFlex.gt-md="100%"
-        style="word-break: break-word;">
+        style="word-break: break-word; text-align: center">
         Bitcoin mnemonics page<br />
         {{ pageNumber }}<br />
         of<br />
         {{ maxPageNumber }}
       </div>
 
-      <div fxFlex="100%" fxFlex.gt-sm="100%" fxFlex.gt-md="100%" fxFlex.gt-md="100%">
+      <div fxFlex="100%" fxFlex.gt-sm="100%" fxFlex.gt-md="100%" fxFlex.gt-md="100%"
+        style="text-align: center">
         <button mat-button (click)="gotoFirstPage()">
           <i class="material-icons">first_page</i>
         </button>
@@ -31,11 +32,46 @@
         style="margin: 2rem 0 1rem 0;">
         <pre style="font-size: 0.7rem;">{{ mnemonic }}</pre>
       </div>
+ 
+      <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
+
 
       <div fxFlex="100%" fxFlex.gt-sm="100%" fxFlex.gt-md="100%" fxFlex.gt-md="100%"
-        style="margin: 2rem 0 1rem 0;">
+        style="margin: 1rem 0 1rem 0; text-align: center; line-height: normal;" 
+        *ngIf="result && !result.error && wallet">
+        <p style="font-size: 1.5rem; margin: 1rem 0;">
+          <span *ngIf="result.received === 0">Addresses never received anything.</span>
+          <span *ngIf="result.received > 0">Found addresses with
+            <code>received > 0</code> (<code>{{ result.received | bitcoin}}</code>)
+          </span>
+        </p>
+        <p *ngIf="result.latestActivityTimestamp > 0" style="font-size: 1rem; margin: 0.25rem 0;">
+          Most recent activity was {{ result.latestActivityTimestamp * 1000 | amTimeAgo }} ({{ result.latestActivityTimestamp * 1000 | date}})
+        </p>
+
+        <p style="font-size: 2.5rem; margin: 1rem 0;">
+          <span *ngIf="result.balance === 0">
+            Balance is <code>{{0 | bitcoin}}</code><br />
+            ¯\_(ツ)_/¯
+          </span>
+          <span *ngIf="result.balance > 0">₿alance is <br />
+            <code>{{result.balance | bitcoin}}</code>
+          </span>
+        </p>
+        <p style="font-size: 1rem; margin: 1rem 0;">
+          Scanned {{ result.numberOfAddressesScanned | number}} addresses in {{result.searchDurationInMs / 1000 | number:'1.2-2'}} seconds
+        </p>
+      </div>
+
+      <div fxFlex="100%" fxFlex.gt-sm="100%" fxFlex.gt-md="100%" fxFlex.gt-md="100%"
+        style="margin: 2rem 0 1rem 0;" *ngIf="result && !result.error && wallet">
         
-        <div id="section-result-mnemonic">
+        <app-wallet [wallet]="wallet"></app-wallet>
+      </div>
+
+      <div fxFlex="100%" fxFlex.gt-sm="100%" fxFlex.gt-md="100%" fxFlex.gt-md="100%"
+        id="section-result-mnemonic-array"
+        style="margin: 2rem 0 1rem 0;">
           <div class="word-input-container" fxLayout="row wrap">
             <div fxFlex="100%" fxFlex.gt-sm="32%" fxFlex.gt-md="24%" fxFlex.gt-md="16.5%" *ngFor="let word of mnemonicArray; index as i">
               <mat-form-field class="example-form-field-{{i}}" appearance="fill">
@@ -43,11 +79,11 @@
                 <input matInput type="text" placeholder="Word {{i+1}}" [value]="word" disabled/>
               </mat-form-field>
             </div>
-          </div>
         </div>
       </div>
 
-      <div fxFlex="100%" fxFlex.gt-sm="100%" fxFlex.gt-md="100%" fxFlex.gt-md="100%">
+      <div fxFlex="100%" fxFlex.gt-sm="100%" fxFlex.gt-md="100%" fxFlex.gt-md="100%"
+        style="text-align: center; margin-top: 2rem">
         <button mat-button (click)="gotoPreviousPage()">
           <i class="material-icons">chevron_left</i>
         </button>

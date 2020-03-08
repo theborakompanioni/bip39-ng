@@ -1,10 +1,8 @@
-import { Injector, Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Subject } from 'rxjs/Subject';
 import { DataInfoServiceService } from '../../core/shared/data-info-service.service';
-import { Pipe, PipeTransform } from '@angular/core';
-import { CurrencyPipe } from '@angular/common';
 import { randomBytes } from 'crypto';
 
 import * as Bitcoin from 'bitcoinjs-lib';
@@ -30,39 +28,6 @@ function isArraysWithSameUniqueContent(arr1: any[], arr2: any[]) {
 
 type InputType = 'mnemonic' | 'entropy' | 'seed';
 type TransformFunctionName = 'none' | 'ripemd160' | 'sha1' | 'sha256' | 'double-sha256' | 'hash160' | 'hash256';
-
-@Pipe({
-    name: 'bitcoin'
-})
-export class BitcoinPipe implements PipeTransform {
-  private readonly currencyPipe: CurrencyPipe;
-
-  constructor (readonly injector: Injector) {
-    this.currencyPipe = injector.get(CurrencyPipe);
-  }
-
-  transform(value: number, valueType?: string, displayType?: string): string {
-    const _valueType = valueType && valueType === 'btc' ? 'btc' : 'sat';
-    const _displayType = displayType && displayType === 'sat' ? 'sat' : 'btc';
-
-    const displayBitcoin = _displayType === 'btc';
-
-    const isSatToBtc = _valueType === 'sat' && _displayType === 'btc';
-    const isBtcToSat = _valueType === 'btc' && _displayType === 'sat';
-
-    let _value = value;
-    if (isSatToBtc) {
-      _value = value / 100_000_000;
-    }
-    if (isBtcToSat) {
-      _value = value / 100_000_000;
-    }
-
-    const symbol = displayBitcoin ? '₿' : 'sat';
-    const digitInfo = displayBitcoin ? '1.0-8' : '1.0-0';
-    return this.currencyPipe.transform(_value, 'XBT', symbol, digitInfo);
-  }
-}
 
 type HashFunction = (arg0: Buffer) => Buffer;
 type StringToStringHashFunction = (arg0: string) => string;
@@ -418,9 +383,7 @@ export class MainFrontComponent implements OnInit {
           seedHex: '0x' + this.wallet.seedProvider.seedHex(),
           wif: this.wallet.root._node.wif,
           xpriv: this.wallet.root._node.xpriv,
-          xpub: this.wallet.root._node.xpub,
-
-          displayNodes: [...this.wallet.root.childNodes]
+          xpub: this.wallet.root._node.xpub
         };
       }
 

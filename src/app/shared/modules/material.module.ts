@@ -74,6 +74,5 @@ import {NgModule} from '@angular/core';
     MatRadioModule,
   ],
 })
-
 export class MaterialModule {
 }

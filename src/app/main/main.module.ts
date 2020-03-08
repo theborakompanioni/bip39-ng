@@ -1,11 +1,13 @@
 import {NgModule} from '@angular/core';
-import {CommonModule, CurrencyPipe} from '@angular/common';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 
 import {MainRoutingModule} from './main-routing.module';
 import {SharedModule} from '../shared/modules/shared.module';
+import {WalletModule} from '..//wallet/wallet.module';
 
-import {MainFrontComponent, BitcoinPipe} from './main-front/main-front.component';
+import {MainFrontComponent } from './main-front/main-front.component';
 import {MainFaqComponent, ScrollToTopButtonComponent} from './main-faq/main-faq.component';
 import {MainWordlistComponent} from './main-wordlist/main-wordlist.component';
 import { MainMnemonicsComponent } from './main-mnemonics/main-mnemonics.component';
@@ -15,14 +17,15 @@ import {MainComponent} from './main.component';
   imports: [
     CommonModule,
     FormsModule,
+    RouterModule,
+    ReactiveFormsModule,
     SharedModule,
+    WalletModule,
     MainRoutingModule,
-    ReactiveFormsModule
   ],
   declarations: [
     MainComponent,
     MainFrontComponent,
-    BitcoinPipe,
     MainFaqComponent,
     ScrollToTopButtonComponent,
     MainWordlistComponent,
@@ -30,7 +33,7 @@ import {MainComponent} from './main.component';
   ],
   entryComponents: [
   ],
-  providers: [CurrencyPipe],
+  providers: [],
 })
 
 export class MainModule {

@@ -4,18 +4,24 @@ import {TranslateModule} from '@ngx-translate/core';
 import {FlexLayoutModule} from '@angular/flex-layout';
 import {MomentModule} from 'ngx-moment';
 
+import { BitcoinPipe } from '../pipes/bitcoin.pipe';
+
 @NgModule({
   imports: [
     MaterialModule,
     FlexLayoutModule,
     TranslateModule,
-    MomentModule,
+    MomentModule
   ],
   exports: [
     MaterialModule,
     FlexLayoutModule,
     TranslateModule,
     MomentModule,
+    BitcoinPipe
+  ],
+  declarations: [
+    BitcoinPipe
   ]
 })
 
