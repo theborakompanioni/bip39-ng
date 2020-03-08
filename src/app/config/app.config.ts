@@ -8,6 +8,7 @@ export const AppConfig: IAppConfig = {
   routes: {
     home: '',
     faq: 'faq',
+    mnemonics: 'mnemonics',
     wordlist: 'wordlist',
     error404: '404'
   },

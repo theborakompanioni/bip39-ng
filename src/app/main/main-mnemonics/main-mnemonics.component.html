@@ -1,0 +1,65 @@
+<div class="container mat-typography">
+  <mat-card>
+    <div fxLayout="row wrap" fxLayoutAlign="center center" style="text-align: center">
+      <div fxFlex="100%" fxFlex.gt-sm="100%" fxFlex.gt-md="100%" fxFlex.gt-md="100%"
+        style="word-break: break-word;">
+        Bitcoin mnemonics page<br />
+        {{ pageNumber }}<br />
+        of<br />
+        {{ maxPageNumber }}
+      </div>
+
+      <div fxFlex="100%" fxFlex.gt-sm="100%" fxFlex.gt-md="100%" fxFlex.gt-md="100%">
+        <button mat-button (click)="gotoFirstPage()">
+          <i class="material-icons">
+            first_page
+          </i>
+        </button>
+        <button mat-button (click)="gotoPreviousPage()">
+          <i class="material-icons">
+            chevron_left
+          </i>
+        </button>
+        <button mat-button (click)="gotoRandomPage()">
+          <i class="material-icons">
+            casino
+          </i>
+        </button>
+        <button mat-button (click)="gotoNextPage()">
+          <i class="material-icons">
+            chevron_right
+          </i>
+        </button>
+        <button mat-button (click)="gotoLastPage()">
+          <i class="material-icons">
+            last_page
+          </i>
+        </button>
+      </div>
+
+      <div fxFlex="100%" fxFlex.gt-sm="100%" fxFlex.gt-md="100%" fxFlex.gt-md="100%"
+        style="margin: 2rem 0 1rem 0;">
+        <pre style="font-size: 0.7rem;">{{ mnemonic }}</pre>
+      </div>
+
+      <div fxFlex="100%" fxFlex.gt-sm="100%" fxFlex.gt-md="100%" fxFlex.gt-md="100%">
+        <button mat-button (click)="gotoPreviousPage()">
+          <i class="material-icons">
+            chevron_left
+          </i>
+        </button>
+        <button mat-button (click)="gotoRandomPage()">
+          <i class="material-icons">
+            casino
+          </i>
+        </button>
+        <button mat-button (click)="gotoNextPage()">
+          <i class="material-icons">
+            chevron_right
+          </i>
+        </button>
+      </div>
+    </div>
+  </mat-card>
+</div>
+<div class="clear"></div>

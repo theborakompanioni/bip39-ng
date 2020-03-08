@@ -41,18 +41,16 @@ export class NavComponent implements OnInit {
   }
 
   private loadMenus(): void {
-    const defaultMenuItems = [
-      { link: '/' + AppConfig.routes.home, name: 'home' },
-      { link: '/' + AppConfig.routes.wordlist, name: 'wordlist' },
-      { link: '/' + AppConfig.routes.faq, name: 'faq' },
-    ];
+    const pages = ['home', 'mnemonics', 'wordlist', 'faq'];
 
-    this.translateService.get(['home', 'faq', 'wordlist'], {}).subscribe((texts: any) => {
-      this.menuItems = [
-        { link: '/' + AppConfig.routes.home, name: texts['home'] },
-        { link: '/' + AppConfig.routes.wordlist, name: texts['wordlist'] },
-        { link: '/' + AppConfig.routes.faq, name: texts['faq'] },
-      ];
+    const defaultMenuItems = pages.map(name => {
+      return { link: '/' + AppConfig.routes[name], name: 'name' };
+    });
+
+    this.translateService.get(['home', 'faq', 'wordlist', 'mnemonics'], {}).subscribe((texts: any) => {
+      this.menuItems = pages.map(name => {
+        return { link: '/' + AppConfig.routes[name], name: texts[name] };
+      });
     }, error => {
       this.menuItems = defaultMenuItems;
     }, () => {

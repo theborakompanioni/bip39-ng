@@ -40,6 +40,7 @@
     "@angular/platform-browser-dynamic": "8.2.14",
     "@angular/pwa": "^0.803.25",
     "@angular/router": "8.2.14",
+    "big-integer": "^1.6.48",
     "bip32": "^2.0.5",
     "bip39": "^3.0.2",
     "bitcoinjs-lib": "^5.1.7",
