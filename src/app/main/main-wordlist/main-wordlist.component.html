@@ -1,10 +1,10 @@
 <div class="container mat-typography">
   <h1>Wordlist</h1>
 
-  <mat-card style="margin: 1em;">
+  <mat-card>
     <h3>English</h3>
     <div class="word-input-container" fxLayout="row wrap" *ngIf="wordlist">
-      <div fxFlex="100%" fxFlex.gt-sm="32%" fxFlex.gt-md="24%" fxFlex.gt-md="16.5%" *ngFor="let word of wordlist; let i = index" [attr.data-index]="i">
+      <div fxFlex="50%" fxFlex.gt-sm="32%" fxFlex.gt-md="24%" fxFlex.gt-md="16.5%" *ngFor="let word of wordlist; let i = index" [attr.data-index]="i">
         {{word}}
       </div>
     </div>
