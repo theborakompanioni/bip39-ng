@@ -1,5 +1,10 @@
 @import "mixins";
 
+.mat-raised-button.scan-button {
+  font-size: 1rem;
+  margin: 1rem 1rem 2rem 1rem !important;
+}
+
 .container .mat-input-element:disabled {
     color: inherit;
 }

@@ -65,9 +65,12 @@ export class MainMnemonicsComponent implements OnInit {
       this.entropy = this.asFixedHexStringFromBigInteger(this.pageNumber);
       this.mnemonic = Bip39.entropyToMnemonic(this.entropy);
       this.mnemonicArray = this.mnemonic.split(' ');
-
-      this.loadWalletFromEntropy(this.entropy);
     });
+  }
+
+  private reset() {
+    this.result = null;
+    this.wallet = null;
   }
 
   public gotoFirstPage() {
@@ -104,6 +107,8 @@ export class MainMnemonicsComponent implements OnInit {
   }
 
   public gotoPage(pageNumber: BigInt.BigInteger): Promise<boolean> {
+    this.reset();
+
     const validPageNumber = this.asPageNumberBetweenBoundaries(pageNumber);
     return this.router.navigate(['../' + validPageNumber.toString(10)], {
       relativeTo: this.route
@@ -128,13 +133,65 @@ export class MainMnemonicsComponent implements OnInit {
     return zeros.substr(0, zeros.length - valAsHex.length) + valAsHex;
   }
 
-  private loadWalletFromEntropy(entropyHexString: string) {
+  public async scan() {
     this.loading = true;
     const now = Date.now();
     this.wallet = null;
     this.result = null;
 
-    of(1).pipe(
+    try {
+      const wallet = await this.loadWalletFromEntropy(this.entropy).toPromise();
+
+      console.log('wallet created');
+      this.wallet = wallet;
+    } catch (e) {
+      this.loading = false;
+
+      this.result = {
+        error: e
+      };
+
+      console.error(e);
+      return;
+    }
+
+    const sortByLastActivity = (a: NgBip32HdNodeView, b: NgBip32HdNodeView) => {
+      return a.selfLatestActivity() < b.selfLatestActivity() ? 1 : -1;
+    };
+
+    const mnemonic = this.wallet.seedProvider.mnemonic;
+    const addresses = this.wallet.findAllAddresses();
+    const scannedAddresses = this.wallet.findAllAddresses().filter(address => address.lastCheckTimestamp > 0);
+    const nodesWithReceived = this.wallet.findNodesWithReceivedGreaterZero().sort(sortByLastActivity);
+    const nodesWithBalance = this.wallet.findNodesWithBalanceGreaterZero().sort(sortByLastActivity);
+
+    this.result = {
+      error: null,
+      searchDurationInMs: Date.now() - now,
+      mnemonic: mnemonic,
+
+      received: this.wallet.root.received(),
+      balance: this.wallet.root.balance(),
+
+      latestActivityTimestamp: Math.max(this.wallet.findLatestActivity() || 0, 0),
+      numberOfAddressesScanned: scannedAddresses.length,
+      numberOfNodes: this.wallet.findAllNodes().length,
+      nodesWithReceived: nodesWithReceived,
+      nodesWithBalance: nodesWithBalance,
+
+      addresses: addresses,
+      seedHex: '0x' + this.wallet.seedProvider.seedHex(),
+      wif: this.wallet.root._node.wif,
+      xpriv: this.wallet.root._node.xpriv,
+      xpub: this.wallet.root._node.xpub
+    };
+
+    console.log('wallet finished');
+    this.loading = false;
+  }
+
+  private loadWalletFromEntropy(entropyHexString: string) {
+    return of(1).pipe(
       map(foo => {
         const seedProvider = NgBip32SeedProvider.fromEntropy(entropyHexString);
 
@@ -169,55 +226,6 @@ export class MainMnemonicsComponent implements OnInit {
         endWith(wallet),
         takeLast(1),
       ))
-    ).subscribe(wallet => {
-      console.log('wallet created');
-      this.wallet = wallet;
-    }, error => {
-      this.loading = false;
-
-      this.result = {
-        error: error
-      };
-
-      console.error(error);
-    }, () => {
-      console.log('wallet finished');
-      this.loading = false;
-
-      if (this.wallet) {
-        const sortByLastActivity = (a: NgBip32HdNodeView, b: NgBip32HdNodeView) => {
-          return a.selfLatestActivity() < b.selfLatestActivity() ? 1 : -1;
-        };
-
-        const mnemonic = this.wallet.seedProvider.mnemonic;
-        const addresses = this.wallet.findAllAddresses();
-        const scannedAddresses = this.wallet.findAllAddresses().filter(address => address.lastCheckTimestamp > 0);
-        const nodesWithReceived = this.wallet.findNodesWithReceivedGreaterZero().sort(sortByLastActivity);
-        const nodesWithBalance = this.wallet.findNodesWithBalanceGreaterZero().sort(sortByLastActivity);
-
-        this.result = {
-          error: null,
-          searchDurationInMs: Date.now() - now,
-          mnemonic: mnemonic,
-
-          received: this.wallet.root.received(),
-          balance: this.wallet.root.balance(),
-
-          latestActivityTimestamp: Math.max(this.wallet.findLatestActivity() || 0, 0),
-          numberOfAddressesScanned: scannedAddresses.length,
-          numberOfNodes: this.wallet.findAllNodes().length,
-          nodesWithReceived: nodesWithReceived,
-          nodesWithBalance: nodesWithBalance,
-
-          addresses: addresses,
-          seedHex: '0x' + this.wallet.seedProvider.seedHex(),
-          wif: this.wallet.root._node.wif,
-          xpriv: this.wallet.root._node.xpriv,
-          xpub: this.wallet.root._node.xpub
-        };
-      }
-
-      this.result = (this.result || {});
-    });
+    );
   }
 }

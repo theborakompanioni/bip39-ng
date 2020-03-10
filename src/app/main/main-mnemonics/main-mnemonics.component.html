@@ -32,7 +32,12 @@
         style="margin: 2rem 0 1rem 0;">
         <pre style="font-size: 0.7rem;">{{ mnemonic }}</pre>
       </div>
- 
+
+      <button  mat-raised-button color="primary" (click)="!loading && scan()" [disabled]="loading" class="scan-button">
+        <i *ngIf="!loading" class="material-icons">search</i>
+        <mat-spinner *ngIf="loading" diameter="15" style="margin: auto 10px 4px 10px; display: inline-block;"></mat-spinner>
+        Scan 
+      </button>
       <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
 
 
