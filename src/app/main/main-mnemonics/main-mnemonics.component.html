@@ -14,26 +14,63 @@
         <button mat-button (click)="gotoFirstPage()">
           <i class="material-icons">first_page</i>
         </button>
+        <button mat-button (click)="gotoPreviousPage(1000000000000000)" class="hidden-lg">
+          <i class="material-icons">arrow_back</i>
+          -{{ 1000000000000000 | number}}
+        </button>
+        <button mat-button (click)="gotoPreviousPage(1000000000)" class="hidden-md">
+          <i class="material-icons">arrow_back</i>
+          -{{ 1000000000 | number}}
+        </button>
+        <button mat-button (click)="gotoPreviousPage(1000)" class="hidden-sm">
+          <i class="material-icons">arrow_back</i>
+          -{{ 1000 | number}}
+        </button>
         <button mat-button (click)="gotoPreviousPage()">
           <i class="material-icons">chevron_left</i>
+          -1
         </button>
         <button mat-button (click)="gotoRandomPage()">
           <i class="material-icons">casino</i>
         </button>
         <button mat-button (click)="gotoNextPage()">
+          +1
           <i class="material-icons">chevron_right</i>
+        </button>
+        <button mat-button (click)="gotoNextPage(1000)" class="hidden-sm">
+          +{{ 1000 | number}}
+          <i class="material-icons">arrow_forward</i>
+        </button>
+        <button mat-button (click)="gotoNextPage(1000000000)" class="hidden-md">
+          +{{ 1000000000 | number}}
+          <i class="material-icons">arrow_forward</i>
+        </button>
+        <button mat-button (click)="gotoNextPage(1000000000000000)" class="hidden-lg">
+          +{{ 1000000000000000 | number}}
+          <i class="material-icons">arrow_forward</i>
         </button>
         <button mat-button (click)="gotoLastPage()">
           <i class="material-icons">last_page</i>
         </button>
       </div>
 
-      <div fxFlex="100%" fxFlex.gt-sm="100%" fxFlex.gt-md="100%" fxFlex.gt-md="100%"
-        style="margin: 2rem 0 1rem 0;">
+
+      <div fxFlex="100%" fxFlex.gt-sm="100%" fxFlex.gt-md="100%" fxFlex.gt-md="100%" class="hidden-lg" style="margin: 2rem 0 1rem 0;">
+          <div class="word-input-container" fxLayout="row wrap">
+            <div fxFlex="100%" fxFlex.gt-sm="32%" fxFlex.gt-md="24%" fxFlex.gt-md="16.5%" *ngFor="let word of mnemonicArray; index as i">
+              <mat-form-field class="example-form-field-{{i}}" appearance="fill">
+                <mat-label>Word {{i+1}} <ng-container *ngIf="i === mnemonicArray.length - 1">(Checksum Word)</ng-container></mat-label>
+                <input matInput type="text" placeholder="Word {{i+1}}" [value]="word" disabled/>
+              </mat-form-field>
+            </div>
+        </div>
+      </div>
+
+      <div fxFlex="100%" fxFlex.gt-sm="100%" fxFlex.gt-md="100%" fxFlex.gt-md="100%" style="margin: 1rem 0 0 0;">
         <pre style="font-size: 0.7rem;">{{ mnemonic }}</pre>
       </div>
 
-      <button  mat-raised-button color="primary" (click)="!loading && scan()" [disabled]="loading" class="scan-button">
+      <button mat-raised-button color="primary" (click)="!loading && scan()" [disabled]="loading" class="scan-button">
         <i *ngIf="!loading" class="material-icons">search</i>
         <mat-spinner *ngIf="loading" diameter="15" style="margin: auto 10px 4px 10px; display: inline-block;"></mat-spinner>
         Scan 
@@ -75,19 +112,6 @@
       </div>
 
       <div fxFlex="100%" fxFlex.gt-sm="100%" fxFlex.gt-md="100%" fxFlex.gt-md="100%"
-        id="section-result-mnemonic-array"
-        style="margin: 2rem 0 1rem 0;">
-          <div class="word-input-container" fxLayout="row wrap">
-            <div fxFlex="100%" fxFlex.gt-sm="32%" fxFlex.gt-md="24%" fxFlex.gt-md="16.5%" *ngFor="let word of mnemonicArray; index as i">
-              <mat-form-field class="example-form-field-{{i}}" appearance="fill">
-                <mat-label>Word {{i+1}} <ng-container *ngIf="i === mnemonicArray.length - 1">(Checksum Word)</ng-container></mat-label>
-                <input matInput type="text" placeholder="Word {{i+1}}" [value]="word" disabled/>
-              </mat-form-field>
-            </div>
-        </div>
-      </div>
-
-      <div fxFlex="100%" fxFlex.gt-sm="100%" fxFlex.gt-md="100%" fxFlex.gt-md="100%"
         style="text-align: center; margin-top: 2rem">
         <button mat-button (click)="gotoPreviousPage()">
           <i class="material-icons">chevron_left</i>
@@ -98,6 +122,11 @@
         <button mat-button (click)="gotoNextPage()">
           <i class="material-icons">chevron_right</i>
         </button>
+      </div>
+
+      <div fxFlex="100%" fxFlex.gt-sm="100%" fxFlex.gt-md="100%" fxFlex.gt-md="100%"
+        style="text-align: center; margin-top: 2rem">
+        <code>entropy: {{ entropy }}</code>
       </div>
     </div>
   </mat-card>

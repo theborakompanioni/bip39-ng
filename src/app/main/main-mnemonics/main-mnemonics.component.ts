@@ -77,12 +77,12 @@ export class MainMnemonicsComponent implements OnInit {
     return this.gotoPage(this.minPageNumber);
   }
 
-  public gotoPreviousPage() {
-    return this.gotoPage(this.pageNumber.prev());
+  public gotoPreviousPage(step = 1) {
+    return this.gotoPage(this.pageNumber.subtract(step));
   }
 
-  public gotoNextPage() {
-    return this.gotoPage(this.pageNumber.next());
+  public gotoNextPage(step = 1) {
+    return this.gotoPage(this.pageNumber.add(step));
   }
 
   public gotoLastPage() {
