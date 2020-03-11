@@ -14,9 +14,9 @@
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      padding: calculateRem(8px) calculateRem(16px);
       color: $secondary--color;
       height: 4rem;
+      padding: 0 calculateRem(8px);
       background: $primary--color;
 
       .mat-raised-button {
@@ -60,6 +60,11 @@
       nav {
         height: 4rem;
         display: flex;
+
+        .mat-raised-button {
+          margin-right: 0.5rem;
+          font-size: x-small;
+        }
       }
     }
   }
@@ -70,9 +75,13 @@
     padding-bottom: 0;
 
     header {
+
       nav {
-        app-search-bar {
-          width: 75%;
+        .mat-raised-button {
+          margin-right: 0.25rem;
+          padding: 0 8px;
+          font-size: x-small;
+          min-width: auto;
         }
       }
     }
