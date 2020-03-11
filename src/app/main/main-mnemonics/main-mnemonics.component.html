@@ -67,7 +67,7 @@
       </div>
 
       <div fxFlex="100%" fxFlex.gt-sm="100%" fxFlex.gt-md="100%" fxFlex.gt-md="100%" style="margin: 1rem 0 0 0;">
-        <pre style="font-size: 0.7rem;">{{ mnemonic }}</pre>
+        <pre style="font-size: x-small;">{{ mnemonic }}</pre>
       </div>
 
       <button mat-raised-button color="primary" (click)="!loading && scan()" [disabled]="loading" class="scan-button">
@@ -126,7 +126,7 @@
 
       <div fxFlex="100%" fxFlex.gt-sm="100%" fxFlex.gt-md="100%" fxFlex.gt-md="100%"
         style="text-align: center; margin-top: 2rem">
-        <code>entropy: {{ entropy }}</code>
+        <pre style="font-size: xx-small;">{{ entropy }}</pre>
       </div>
     </div>
   </mat-card>
