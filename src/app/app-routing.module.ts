@@ -16,7 +16,8 @@ const routes: Routes = [
   imports: [
     RouterModule.forRoot(routes, {
       // onSameUrlNavigation: 'reload'
-      enableTracing: false
+      enableTracing: false,
+      useHash: true // html5 style not supported by github pages
     })
   ],
   exports: [
