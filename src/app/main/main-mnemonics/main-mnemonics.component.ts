@@ -56,11 +56,15 @@ export class MainMnemonicsComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.reset();
+
     this.route.paramMap.pipe(
       map((params: ParamMap) => params.get('pageNumber')),
       map(val =>  BigInt(val, 10)),
       map(val => this.asPageNumberBetweenBoundaries(val))
     ).subscribe(async val => {
+      this.reset();
+
       this.pageNumber = val;
       this.entropy = this.asFixedHexStringFromBigInteger(this.pageNumber);
       this.mnemonic = Bip39.entropyToMnemonic(this.entropy);
