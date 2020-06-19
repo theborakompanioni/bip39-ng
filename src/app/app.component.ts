@@ -3,7 +3,7 @@ import {TranslateService} from '@ngx-translate/core';
 import {Meta, Title} from '@angular/platform-browser';
 import {NavigationEnd, Router} from '@angular/router';
 import {AppConfig} from './config/app.config';
-import {MatSnackBar} from '@angular/material';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 declare const Modernizr;
 

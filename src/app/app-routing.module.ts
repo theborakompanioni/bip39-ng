@@ -5,7 +5,7 @@ import {AppConfig} from './config/app.config';
 import {Error404Component} from './core/error404/error-404.component';
 
 const routes: Routes = [
-  {path: '', loadChildren: './main/main.module#MainModule'},
+  {path: '', loadChildren: () => import('./main/main.module').then(m => m.MainModule)},
   {path: AppConfig.routes.error404, component: Error404Component},
 
   // otherwise redirect to 404

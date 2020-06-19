@@ -2,14 +2,16 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "outDir": "../out-tsc/app",
-    "module": "esnext",
     "types": ["node"],
     "paths": {
       "stream": ["./node_modules/readable-stream/readable-browser.js"]
     }
   },
-  "exclude": [
-    "src/test.ts",
-    "**/*.spec.ts"
+  "files": [
+    "main.ts",
+    "polyfills.ts"
+  ],
+  "include": [
+    "**/*.d.ts"
   ]
 }
