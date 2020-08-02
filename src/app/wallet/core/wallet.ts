@@ -1,6 +1,7 @@
 import * as Bitcoin from 'bitcoinjs-lib';
 import * as Bip32 from 'bip32';
 import * as Bip39 from 'bip39';
+import * as Bip84 from 'bip84';
 import { tap, map, last, takeWhile, endWith, concatMap} from 'rxjs/operators';
 import { Observable, concat, of, from } from 'rxjs';
 
@@ -63,7 +64,7 @@ interface NgBip32HdNode {
 function _newNodeInternal(node: Bip32.BIP32Interface, path: Bip32Path): NgBip32HdNode {
   const defaultAddressGenerationFun = (n, network) => [
     p2pkhAddress(n, network),
-    // segwitAdddress(n, network), <--- only include if you want to generate more address types per "unknown" path
+    // segwitAddress(n, network), <--- only include if you want to generate more address types per "unknown" path
     // p2wpkhAddress(n, network) <--- only include if you want to generate more address types per "unknown" path
   ];
 
@@ -78,10 +79,12 @@ function _newNodeInternal(node: Bip32.BIP32Interface, path: Bip32Path): NgBip32H
   });
 }
 
-function _newNodeInternalWithAddressGenerationStrategy(node: Bip32.BIP32Interface,
+function _newNodeInternalWithAddressGenerationStrategy(
+   node: Bip32.BIP32Interface,
    path: Bip32Path,
    addressGen: AddressGenerationStrategy): NgBip32HdNode {
   console.log('create new node with path ' + path);
+
   return {
     _self: node,
     path: path,
@@ -97,9 +100,13 @@ export class NgBip32HdNodeView {
   public readonly addresses: NgBip32HdAddressView[];
   public childNodes: NgBip32HdNodeView[];
 
-  constructor(private readonly _root: Bip32.BIP32Interface, public readonly _node: NgBip32HdNode) {
+  private _accountExtendedPrivateKeyCache: string;
+  private _accountExtendedPublicKeyCache: string;
+
+  constructor(private readonly _wallet: NgBip32HdWalletView,
+    private readonly _root: Bip32.BIP32Interface, public readonly _node: NgBip32HdNode) {
     this.addresses = _node.addresses.map(it => new NgBip32HdAddressView(it));
-    this.childNodes = _node.childNodes.map(it => new NgBip32HdNodeView(_root, it));
+    this.childNodes = _node.childNodes.map(it => new NgBip32HdNodeView(_wallet, _root, it));
   }
 
   nodesLatestActivity(): number {
@@ -145,6 +152,46 @@ export class NgBip32HdNodeView {
     return this.selfBalance() + this.nodesBalance();
   }
 
+  accountExtendedPrivateKey(): string {
+    if (this._accountExtendedPrivateKeyCache) {
+      return this._accountExtendedPrivateKeyCache;
+    }
+
+    if (this._node.path.startsWith('m/84')) {
+      this._accountExtendedPrivateKeyCache = this._deriveAccountBip84().getAccountPrivateKey();
+    } else {
+      this._accountExtendedPrivateKeyCache = this._node.xpriv;
+    }
+    return this._accountExtendedPrivateKeyCache;
+  }
+
+  accountExtendedPublicKey(): string {
+    if (this._accountExtendedPublicKeyCache) {
+      return this._accountExtendedPublicKeyCache;
+    }
+
+    if (this._node.path.startsWith('m/84')) {
+      this._accountExtendedPublicKeyCache = this._deriveAccountBip84().getAccountPublicKey();
+    } else {
+      this._accountExtendedPublicKeyCache = this._node.xpub;
+    }
+
+    return this._accountExtendedPublicKeyCache;
+  }
+
+  _deriveAccountBip84(): Bip84.fromZPrv {
+    const rootBip84 = new Bip84.fromSeed('');
+    // replace seed, as Bip84 lib currently expects a mnemonic
+    // as param to Bip84#fromSeed method (which is not always available)
+    rootBip84.seed = this._wallet.seedProvider.seed;
+
+    const childBip84 = rootBip84.deriveAccount(this._node._self.index);
+
+    const accountChildBip84 = new Bip84.fromZPrv(childBip84);
+
+    return accountChildBip84;
+  }
+
   selfReceived() {
     return this.addresses
       .map(it => it.received)
@@ -183,7 +230,7 @@ export class NgBip32HdNodeView {
     const newNode = _newNodeInternal(child, fullpath);
 
     this._node.childNodes.push(newNode);
-    this.childNodes.push(new NgBip32HdNodeView(this._root, newNode));
+    this.childNodes.push(new NgBip32HdNodeView(this._wallet, this._root, newNode));
 
     return this.findNodeByPath(fullpath);
   }
@@ -220,6 +267,7 @@ export class NgBip32SeedProvider {
     const seed = Bip39.mnemonicToSeedSync(mnemonic, passphrase);
     return new NgBip32SeedProvider(seed, mnemonic, passphrase);
   }
+
   public static fromSeed(seed: Buffer): NgBip32SeedProvider {
     return new NgBip32SeedProvider(seed);
   }
@@ -246,7 +294,7 @@ export class NgBip32HdWalletView {
               private readonly network: Bitcoin.Network = Bitcoin.networks.bitcoin,
               private readonly dataInfoService?: DataInfoService) {
     const rootNode = Bip32.fromSeed(seedProvider.seed, this.network);
-    this.root = new NgBip32HdNodeView(rootNode, _newNodeInternal(rootNode, 'm'));
+    this.root = new NgBip32HdNodeView(this, rootNode, _newNodeInternal(rootNode, 'm'));
   }
 
   getOrCreateNode(path: Bip32Path): NgBip32HdNodeView {
@@ -356,7 +404,7 @@ function p2pkhAddress(node: any, network?: any): BitcoinAddress {
   return Bitcoin.payments.p2pkh({ pubkey: node.publicKey, network: network }).address!;
 }
 
-function segwitAdddress(node: any, network?: any): BitcoinAddress {
+function segwitAddress(node: any, network?: any): BitcoinAddress {
   return Bitcoin.payments.p2sh({
     redeem: Bitcoin.payments.p2wpkh({ pubkey: node.publicKey, network: network }),
     network: network
@@ -372,7 +420,7 @@ function generateAddressArrayFn(path: string, defaultFn?: (node, network?) => Bi
     return (node, network?) => [p2pkhAddress(node, network)];
   }
   if (path.substr(0, `m/49'/`.length) === `m/49'/`) {
-    return (node, network?) => [segwitAdddress(node, network)];
+    return (node, network?) => [segwitAddress(node, network)];
   }
 
   if (path.substr(0, `m/84'/`.length) === `m/84'/`) {

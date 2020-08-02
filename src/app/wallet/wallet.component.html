@@ -14,6 +14,12 @@
                 <li>Current Balance: {{ node.balance() | bitcoin}}</li>
                 <li>Total Received: {{ node.received() | bitcoin}}</li>
                 <li>Child Node Count: {{ node.childNodes.length | number}}</li>
+                <li>
+                    Account Extended Private Key: {{ node.accountExtendedPrivateKey() }} 
+                </li>
+                <li>
+                    Account Extended Public Key: {{ node.accountExtendedPublicKey() }} 
+                </li>
             </ul>
 
             <hr />
@@ -22,7 +28,7 @@
                 <div *ngFor="let addressView of child.addresses">
                     <span>Balance: {{ addressView.balance | bitcoin}}</span><br />
                     <span>Received: {{ addressView.received | bitcoin}}</span>
-                    
+
                     <mat-form-field class="full-width" appearance="fill" style="text-align: center;">
                         <mat-label>Address ({{ child._node.path }}) </mat-label>
                         <input style="font-size: 100%" matInput type="text" placeholder="" [value]="addressView._address.address" disabled/>
