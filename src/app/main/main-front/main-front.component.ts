@@ -326,7 +326,7 @@ export class MainFrontComponent implements OnInit {
       // add all "change" accounts if "default node"s received is > 0
       concatMap(wallet => from(wallet.root.childNodes).pipe(
         filter(node => node.received() > 0),
-        filter(node => node._node.path.match(/(\/0)$/).length > 0),
+        filter(node => node._node.path.match(/(\/0)$/) !== null),
         map(node => node._node.path.replace(/(\/0)$/, '/1')),
         map(path => wallet.getOrCreateNode(path).getOrCreateNextIndex()),
         flatMap(changeNode => wallet.scanBalanceOfNode(changeNode)),
