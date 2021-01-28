@@ -71,7 +71,7 @@
     "angular-cli-ghpages": "0.6.1",
     "codelyzer": "^5.1.2",
     "coveralls": "3.0.9",
-    "electron": "^7.1.10",
+    "electron": "^9.4.0",
     "hammerjs": "2.0.8",
     "html2canvas": "1.0.0-rc.5",
     "http-server": "^0.12.3",
