@@ -3,7 +3,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Subject } from 'rxjs/Subject';
 import { DataInfoServiceService } from '../../core/shared/data-info-service.service';
-import { randomBytes } from 'crypto';
+import { randomBytes } from 'crypto-browserify';
 
 import * as Bitcoin from 'bitcoinjs-lib';
 import * as Bip39 from 'bip39';

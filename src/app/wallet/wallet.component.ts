@@ -5,7 +5,7 @@ import { Subject } from 'rxjs/Subject';
 import { DataInfoServiceService } from '../core/shared/data-info-service.service';
 import { Pipe, PipeTransform } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
-import { randomBytes } from 'crypto';
+import { randomBytes } from 'crypto-browserify';
 
 import * as Bitcoin from 'bitcoinjs-lib';
 import * as Bip39 from 'bip39';

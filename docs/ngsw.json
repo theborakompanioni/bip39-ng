@@ -1,12 +1,15 @@
 {
   "configVersion": 1,
-  "timestamp": 1602975535150,
+  "timestamp": 1615752821124,
   "index": "/bip39-ng/index.html",
   "assetGroups": [
     {
       "name": "app",
       "installMode": "prefetch",
       "updateMode": "prefetch",
+      "cacheQueryOptions": {
+        "ignoreVary": true
+      },
       "urls": [
         "/bip39-ng/favicon.ico",
         "/bip39-ng/index.html"
@@ -17,6 +20,9 @@
       "name": "assets",
       "installMode": "lazy",
       "updateMode": "prefetch",
+      "cacheQueryOptions": {
+        "ignoreVary": true
+      },
       "urls": [
         "/bip39-ng/assets/css/loading.css",
         "/bip39-ng/assets/css/reset.css",
@@ -103,7 +109,7 @@
     "/bip39-ng/assets/manifest.json": "3094215711336c6e96496bd9b39b31f40d23946f",
     "/bip39-ng/assets/sitemap.xml": "379920962425a40740192c07c6d8d9246c20774d",
     "/bip39-ng/favicon.ico": "745dc3e299ded192c07fad54e2bd26504be57de2",
-    "/bip39-ng/index.html": "1b3c8b16d2d51d3d85faf15a30c78d009f7e6205"
+    "/bip39-ng/index.html": "4163a8be6e1bedda81af24ef1c0b26691a3c5d7f"
   },
   "navigationUrls": [
     {
@@ -122,5 +128,6 @@
       "positive": false,
       "regex": "^\\/(?:.+\\/)?[^/]*__[^/]*\\/.*$"
     }
-  ]
+  ],
+  "navigationRequestStrategy": "performance"
 }
