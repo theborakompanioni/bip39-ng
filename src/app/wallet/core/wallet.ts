@@ -50,6 +50,7 @@ class NgBip32HdAddressView {
 
 interface NgBip32HdNode {
     readonly _self: Bip32.BIP32Interface;
+    readonly _parent?: Bip32.BIP32Interface;
 
     readonly path: Bip32Path;
     readonly xpriv: string;
@@ -61,7 +62,7 @@ interface NgBip32HdNode {
     readonly childNodes: NgBip32HdNode[];
 }
 
-function _newNodeInternal(node: Bip32.BIP32Interface, path: Bip32Path): NgBip32HdNode {
+function _newNodeInternal(node: Bip32.BIP32Interface, path: Bip32Path, parent?:  Bip32.BIP32Interface): NgBip32HdNode {
   const defaultAddressGenerationFun = (n, network) => [
     p2pkhAddress(n, network),
     // segwitAddress(n, network), <--- only include if you want to generate more address types per "unknown" path
@@ -76,17 +77,19 @@ function _newNodeInternal(node: Bip32.BIP32Interface, path: Bip32Path): NgBip32H
         address: val
       };
     });
-  });
+  }, parent);
 }
 
 function _newNodeInternalWithAddressGenerationStrategy(
    node: Bip32.BIP32Interface,
    path: Bip32Path,
-   addressGen: AddressGenerationStrategy): NgBip32HdNode {
+   addressGen: AddressGenerationStrategy,
+   parent?:  Bip32.BIP32Interface): NgBip32HdNode {
   console.log('create new node with path ' + path);
 
   return {
     _self: node,
+    _parent: parent,
     path: path,
     xpriv: node.toBase58(),
     xpub: node.neutered().toBase58(),
@@ -160,7 +163,7 @@ export class NgBip32HdNodeView {
     if (this._node.path.startsWith('m/84')) {
       this._accountExtendedPrivateKeyCache = this._deriveAccountBip84().getAccountPrivateKey();
     } else {
-      this._accountExtendedPrivateKeyCache = this._node.xpriv;
+      this._accountExtendedPrivateKeyCache = this._node._parent ? this._node._parent.toBase58() : this._node.xpriv;
     }
     return this._accountExtendedPrivateKeyCache;
   }
@@ -173,7 +176,7 @@ export class NgBip32HdNodeView {
     if (this._node.path.startsWith('m/84')) {
       this._accountExtendedPublicKeyCache = this._deriveAccountBip84().getAccountPublicKey();
     } else {
-      this._accountExtendedPublicKeyCache = this._node.xpub;
+      this._accountExtendedPublicKeyCache = this._node._parent ? this._node._parent.neutered().toBase58() : this._node.xpub;
     }
 
     return this._accountExtendedPublicKeyCache;
@@ -226,8 +229,12 @@ export class NgBip32HdNodeView {
       return this.findNodeByPath(fullpath);
     }
 
+    const parentFullpath = fullpath.substr(0, fullpath.lastIndexOf('/'));
+    const hasParentNode = isValidBip32Path(parentFullpath);
+
+    const parent: Bip32.BIP32Interface = hasParentNode ? this._root.derivePath(parentFullpath) : null;
     const child: Bip32.BIP32Interface = this._root.derivePath(fullpath);
-    const newNode = _newNodeInternal(child, fullpath);
+    const newNode = _newNodeInternal(child, fullpath, parent);
 
     this._node.childNodes.push(newNode);
     this.childNodes.push(new NgBip32HdNodeView(this._wallet, this._root, newNode));

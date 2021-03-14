@@ -11,7 +11,6 @@ import { filter, map, take, throttleTime, takeLast, endWith, concatMap, flatMap 
 import { of, from} from 'rxjs';
 import { NgBip32SeedProvider, NgBip32HdWalletView, NgBip32HdNodeView } from '../../wallet/core/wallet';
 
-
 function firstNonEmptyArray(arr1: any[], arr2: any[]) {
   if (arr1.length !== 0) {
     return arr1;
