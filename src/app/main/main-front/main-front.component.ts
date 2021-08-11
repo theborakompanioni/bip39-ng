@@ -1,14 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router, ActivatedRoute } from '@angular/router';
-import { Subject } from 'rxjs/Subject';
 import { DataInfoServiceService } from '../../core/shared/data-info-service.service';
-import { randomBytes } from 'crypto-browserify';
+import { randomBytes } from 'randombytes';
 
 import * as Bitcoin from 'bitcoinjs-lib';
 import * as Bip39 from 'bip39';
 import { filter, map, take, throttleTime, takeLast, endWith, concatMap, flatMap } from 'rxjs/operators';
-import { of, from} from 'rxjs';
+import { Subject, of, from} from 'rxjs';
 import { NgBip32SeedProvider, NgBip32HdWalletView, NgBip32HdNodeView } from '../../wallet/core/wallet';
 
 function firstNonEmptyArray(arr1: any[], arr2: any[]) {
